@@ -2,6 +2,7 @@
 const ClaudeAPIService = require('./claude-api/client');
 const toolRegistry = require('./tools/registry');
 const TokensWordsCounter = require('./tools/tokens-words-counter');
+const ConsistencyChecker = require('./tools/consistency-checker');
 const path = require('path');
 
 /**
@@ -27,12 +28,10 @@ async function initializeToolSystem(settings, database) {
   console.log(`Found ${dbTools.length} tools in database`);
   
   // Register available tool implementations
-  // For now, only register the tokens_words_counter tool
-  // We'll add more tools as we implement them
   dbTools.forEach(toolInfo => {
     console.log(`Checking tool: ${toolInfo.name}`);
     
-    // For tokens_words_counter.js (the first tool we're implementing)
+    // For tokens_words_counter.js
     if (toolInfo.name === 'tokens_words_counter') {
       const toolConfig = database.getToolByName(toolInfo.name);
       console.log('Tool config:', toolConfig);
@@ -42,6 +41,23 @@ async function initializeToolSystem(settings, database) {
         toolRegistry.registerTool(
           toolInfo.name, // Use ID as the registry key
           new TokensWordsCounter(claudeService, {
+            ...toolConfig,
+            ...settings
+          })
+        );
+        console.log(`Successfully registered tool: ${toolInfo.name}`);
+      }
+    }
+    // For consistency_checker.js
+    else if (toolInfo.name === 'consistency_checker') {
+      const toolConfig = database.getToolByName(toolInfo.name);
+      console.log('Consistency Checker tool config:', toolConfig);
+      
+      if (toolConfig) {
+        // Register the tool
+        toolRegistry.registerTool(
+          toolInfo.name,
+          new ConsistencyChecker(claudeService, {
             ...toolConfig,
             ...settings
           })
