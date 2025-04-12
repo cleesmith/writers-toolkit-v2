@@ -1,0 +1,52 @@
+{
+  "name": "writers-toolkit",
+  "version": "1.0.0",
+  "description": "A toolkit for writers with AI assistance and a text editor",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "start-editor": "electron editor-main.js",
+    "build": "electron-builder",
+    "tokens-counter": "node tools/tokens_words_counter.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0",
+    "argparse": "^2.0.1",
+    "electron-store": "^8.1.0",
+    "uuid": "^11.1.0"
+  },
+  "devDependencies": {
+    "electron": "^26.0.0",
+    "electron-builder": "^24.6.3"
+  },
+  "build": {
+    "appId": "com.yourdomain.writerstoolkit",
+    "productName": "Writer's Toolkit",
+    "files": [
+      "**/*",
+      "!**/node_modules/*/{CHANGELOG.md,README.md,README,readme.md,readme}",
+      "!**/node_modules/*/{test,__tests__,tests,powered-test,example,examples}",
+      "!**/node_modules/.bin",
+      "!**/*.{iml,o,hprof,orig,pyc,pyo,rbc,swp,csproj,sln,xproj}",
+      "!.editorconfig",
+      "!**/._*",
+      "!**/{.DS_Store,.git,.hg,.svn,CVS,RCS,SCCS,__pycache__,thumbs.db,.gitignore,.gitattributes}",
+      "!**/{appveyor.yml,.travis.yml,circle.yml}",
+      "!**/{npm-debug.log,yarn.lock,.yarn-integrity,.yarn-metadata.json}"
+    ],
+    "directories": {
+      "buildResources": "resources"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "mac": {
+      "target": "dmg"
+    },
+    "linux": {
+      "target": "AppImage"
+    }
+  }
+}
