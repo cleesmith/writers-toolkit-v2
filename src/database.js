@@ -1,7 +1,4 @@
-// src/database.js (ESM import fix)
-// In Electron 22+, electron-store is an ESM module, 
-// so we must use dynamic import.
-
+// src/database.js (Updated for new database structure)
 const path = require('path');
 const os = require('os');
 
@@ -29,20 +26,19 @@ class Database {
         defaults: {
           tools: {},
           settings: {
-            '1': {
-              default_save_dir: path.join(os.homedir(), 'writing'),
-              tools_config_json_dir: '.',
-              current_project: null,
-              current_project_path: null,
-              claude_api_configuration: {
-                max_retries: 1,
-                request_timeout: 300,
-                context_window: 200000,
-                thinking_budget_tokens: 32000,
-                betas_max_tokens: 128000,
-                desired_output_tokens: 12000
-              }
-            }
+            claude_api: {
+              max_retries: 1,
+              request_timeout: 300,
+              context_window: 200000,
+              thinking_budget_tokens: 32000,
+              betas_max_tokens: 128000,
+              desired_output_tokens: 12000
+            },
+            projects: {
+              current: null,
+              paths: {}
+            },
+            default_save_dir: path.join(os.homedir(), 'writing')
           }
         }
       });
@@ -62,10 +58,10 @@ class Database {
     const toolsList = [];
 
     // Convert from the object format to an array of tools
-    Object.values(tools).forEach(tool => {
+    Object.entries(tools).forEach(([id, tool]) => {
       if (tool.name && !tool.name.startsWith('_')) {
         toolsList.push({
-          name: tool.name,
+          name: id, // Use the ID as the name
           title: tool.title || tool.name,
           description: tool.description || 'No description available'
         });
@@ -83,40 +79,32 @@ class Database {
 
     const tools = this.store.get('tools', {});
 
-    // Search for the matching tool
-    for (const toolId in tools) {
-      if (tools[toolId].name === toolName) {
-        return tools[toolId];
+    // Direct lookup by ID
+    if (tools[toolName]) {
+      return tools[toolName];
+    }
+
+    // If not found by ID, search by name property
+    for (const id in tools) {
+      if (tools[id].name === toolName) {
+        return tools[id];
       }
     }
 
     return null;
   }
 
-  // Example addOrUpdateTool method
+  // Add or update a tool
   async addOrUpdateTool(tool) {
     if (!this.isInitialized || !this.store) {
       throw new Error('Store not initialized. Call init() first.');
     }
 
     const tools = this.store.get('tools', {});
-
-    // Find if the tool already exists
-    let toolId = null;
-    for (const id in tools) {
-      if (tools[id].name === tool.name) {
-        toolId = id;
-        break;
-      }
-    }
-
-    // If no existing tool, create a new ID
-    if (!toolId) {
-      const ids = Object.keys(tools).map(id => parseInt(id, 10));
-      const maxId = ids.length > 0 ? Math.max(...ids) : 0;
-      toolId = (maxId + 1).toString();
-    }
-
+    
+    // Use tool.id as the key if available, otherwise use tool.name
+    const toolId = tool.id || tool.name.replace(/\.(js|py)$/, '');
+    
     // Update tools object
     tools[toolId] = tool;
 
@@ -125,7 +113,7 @@ class Database {
     return true;
   }
 
-  // Example deleteTool method
+  // Delete a tool
   async deleteTool(toolName) {
     if (!this.isInitialized || !this.store) {
       throw new Error('Store not initialized. Call init() first.');
@@ -133,30 +121,42 @@ class Database {
 
     const tools = this.store.get('tools', {});
 
-    // Find the tool ID
-    let toolId = null;
-    for (const id in tools) {
-      if (tools[id].name === toolName) {
-        toolId = id;
-        break;
-      }
-    }
-
-    if (toolId) {
-      delete tools[toolId];
+    // Remove by ID
+    if (tools[toolName]) {
+      delete tools[toolName];
       this.store.set('tools', tools);
       return true;
+    }
+
+    // Find by name and remove
+    for (const id in tools) {
+      if (tools[id].name === toolName) {
+        delete tools[id];
+        this.store.set('tools', tools);
+        return true;
+      }
     }
 
     return false;
   }
 
-  // Retrieve global settings from 'settings.1'
+  // Retrieve global settings
   getGlobalSettings() {
     if (!this.isInitialized || !this.store) {
       throw new Error('Store not initialized. Call init() first.');
     }
-    return this.store.get('settings.1', {});
+    
+    // Get current project and path
+    const currentProject = this.store.get('settings.projects.current', null);
+    const projectPaths = this.store.get('settings.projects.paths', {});
+    const currentProjectPath = currentProject ? (projectPaths[currentProject] || null) : null;
+    
+    return {
+      claude_api_configuration: this.store.get('settings.claude_api', {}),
+      current_project: currentProject,
+      current_project_path: currentProjectPath,
+      default_save_dir: this.store.get('settings.default_save_dir', path.join(os.homedir(), 'writing'))
+    };
   }
 
   // Update global settings
@@ -165,20 +165,38 @@ class Database {
       throw new Error('Store not initialized. Call init() first.');
     }
 
-    const currentSettings = this.store.get('settings.1', {});
-    this.store.set('settings.1', {
-      ...currentSettings,
-      ...settings
-    });
+    // Update Claude API settings
+    if (settings.claude_api_configuration) {
+      this.store.set('settings.claude_api', settings.claude_api_configuration);
+    }
+
+    // Update current project
+    if (settings.current_project) {
+      this.store.set('settings.projects.current', settings.current_project);
+      
+      // Update project path if provided
+      if (settings.current_project_path) {
+        const paths = this.store.get('settings.projects.paths', {});
+        paths[settings.current_project] = settings.current_project_path;
+        this.store.set('settings.projects.paths', paths);
+      }
+    }
+
+    // Update default save directory
+    if (settings.default_save_dir) {
+      this.store.set('settings.default_save_dir', settings.default_save_dir);
+    }
+
     return true;
+  }
+
+  // Get Claude API settings
+  getClaudeApiSettings() {
+    return this.store.get('settings.claude_api', {});
   }
 
   // Return the schema for Claude API settings
   getClaudeApiSettingsSchema() {
-    if (!this.isInitialized || !this.store) {
-      throw new Error('Store not initialized. Call init() first.');
-    }
-
     return [
       {
         name: 'max_retries',

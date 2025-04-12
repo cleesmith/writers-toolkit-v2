@@ -1,3 +1,4 @@
+// main.js - Writer's Toolkit main process
 const { spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs');
@@ -5,6 +6,8 @@ const os = require('os');
 const { app, BrowserWindow, Menu, ipcMain, dialog, screen } = require('electron');
 const { v4: uuidv4 } = require('uuid');
 const appState = require('./src/state.js');
+const database = require('./src/database.js');
+const toolSystem = require('./src/tool-system');
 
 // Store references to windows
 let mainWindow = null;
@@ -369,37 +372,45 @@ function launchEditor() {
 
 // Setup handlers for tool operations
 function setupToolHandlers() {
-  // This local `database` reference is initially null, so we lazy-load it.
-  let database = null;
-  let toolRunner = null;
-
+  // Get list of tools
   ipcMain.handle('get-tools', async () => {
     try {
-      // Lazy load the database module if not already loaded
-      if (!database) {
-        database = require('./src/database.js');
-
-        // IMPORTANT: Initialize the database store
-        await database.init();
+      // Get registered tools from tool system
+      const registeredTools = toolSystem.toolRegistry.getAllToolIds().map(id => {
+        const tool = toolSystem.toolRegistry.getTool(id);
+        return {
+          name: id,
+          title: tool.config.title || id,
+          description: tool.config.description || ''
+        };
+      });
+      
+      console.log('Registered tools:', registeredTools);
+      
+      // If no tools are registered yet, fallback to database
+      if (registeredTools.length === 0) {
+        return database.getTools();
       }
-
-      // Now the store is initialized, so we can call getTools()
-      return database.getTools();
-
+      
+      return registeredTools;
     } catch (error) {
       console.error('Error getting tools:', error);
-      return [];
+      return database.getTools(); // Fallback to database
     }
   });
 
+  // Get tool options
   ipcMain.handle('get-tool-options', async (event, toolName) => {
     try {
-      if (!database) {
-        database = require('./src/database.js');
-        await database.init();
+      // Try to get options from registered tool
+      const tool = toolSystem.toolRegistry.getTool(toolName);
+      if (tool && tool.config.options) {
+        return tool.config.options;
       }
-      const tool = database.getToolByName(toolName);
-      return tool ? tool.options || [] : [];
+      
+      // Fallback to database
+      const toolConfig = database.getToolByName(toolName);
+      return toolConfig ? toolConfig.options || [] : [];
     } catch (error) {
       console.error('Error getting tool options:', error);
       return [];
@@ -411,12 +422,11 @@ function setupToolHandlers() {
     showToolSetupRunDialog(toolName);
   });
   
-  // Handle tool dialog closing - MODIFIED: now destroys the window
+  // Handle tool dialog closing
   ipcMain.on('close-tool-dialog', (event, action, data) => {
     console.log('Tool dialog close action:', action);
     
     if (toolSetupRunWindow && !toolSetupRunWindow.isDestroyed()) {
-      // Destroy the window instead of hiding it
       toolSetupRunWindow.destroy();
       toolSetupRunWindow = null;
     }
@@ -425,13 +435,26 @@ function setupToolHandlers() {
   // Get current tool
   ipcMain.handle('get-current-tool', () => {
     try {
-      if (!database) {
-        database = require('./src/database.js');
-        database.init();
-      }
-      
       if (currentTool) {
-        return database.getToolByName(currentTool);
+        // Try to get from registry first
+        const tool = toolSystem.toolRegistry.getTool(currentTool);
+        if (tool) {
+          return {
+            name: currentTool,
+            title: tool.config.title || currentTool,
+            description: tool.config.description || ''
+          };
+        }
+        
+        // Fallback to database
+        const toolConfig = database.getToolByName(currentTool);
+        if (toolConfig) {
+          return {
+            name: currentTool,
+            title: toolConfig.title || currentTool,
+            description: toolConfig.description || ''
+          };
+        }
       }
       return null;
     } catch (error) {
@@ -440,57 +463,63 @@ function setupToolHandlers() {
     }
   });
   
-  // Run tool
+  // Run tool - UPDATED to use module-based approach instead of spawning processes
   ipcMain.handle('start-tool-run', async (event, toolName, optionValues) => {
     try {
-      // Lazy load the tool runner if not already loaded
-      if (!toolRunner) {
-        toolRunner = require('./src/tool-runner.js');
-      }
-      
-      // Start the tool and get the run ID
+      // Generate a unique run ID
       const runId = uuidv4();
       
-      // Run the tool and handle output
-      toolRunner.runTool(toolName, optionValues, (output) => {
-        // Send output to renderer
+      // Set up output function
+      const sendOutput = (text) => {
         if (toolSetupRunWindow && !toolSetupRunWindow.isDestroyed()) {
-          toolSetupRunWindow.webContents.send('tool-output', { runId, text: output });
-        }
-      })
-      .then(result => {
-        // Send completion notification
-        if (toolSetupRunWindow && !toolSetupRunWindow.isDestroyed()) {
-          toolSetupRunWindow.webContents.send('tool-finished', { runId, ...result });
-        }
-      })
-      .catch(error => {
-        console.error(`Error running tool ${toolName}:`, error);
-        if (toolSetupRunWindow && !toolSetupRunWindow.isDestroyed()) {
-          toolSetupRunWindow.webContents.send('tool-error', { 
+          toolSetupRunWindow.webContents.send('tool-output', { 
             runId, 
-            error: error.message 
+            text 
           });
         }
-      });
+      };
+      
+      // Execute the tool in the background
+      (async () => {
+        try {
+          // Send initial output notification
+          sendOutput(`Starting ${toolName}...\n\n`);
+          
+          // Get the tool
+          const tool = toolSystem.toolRegistry.getTool(toolName);
+          
+          if (!tool) {
+            throw new Error(`Tool not found: ${toolName}`);
+          }
+          
+          // Add output function to the tool
+          tool.emitOutput = sendOutput;
+          
+          // Execute the tool
+          const result = await toolSystem.executeToolById(toolName, optionValues);
+          
+          // Send completion notification
+          if (toolSetupRunWindow && !toolSetupRunWindow.isDestroyed()) {
+            toolSetupRunWindow.webContents.send('tool-finished', { 
+              runId, 
+              code: 0, 
+              createdFiles: result.outputFiles 
+            });
+          }
+        } catch (error) {
+          console.error(`Error running tool ${toolName}:`, error);
+          if (toolSetupRunWindow && !toolSetupRunWindow.isDestroyed()) {
+            toolSetupRunWindow.webContents.send('tool-error', { 
+              runId, 
+              error: error.message 
+            });
+          }
+        }
+      })();
       
       return runId;
     } catch (error) {
       console.error('Error starting tool run:', error);
-      throw error;
-    }
-  });
-  
-  // Stop tool execution
-  ipcMain.handle('stop-tool', async (event, runId) => {
-    try {
-      if (!toolRunner) {
-        toolRunner = require('./src/tool-runner.js');
-      }
-      
-      return toolRunner.stopTool(runId);
-    } catch (error) {
-      console.error('Error stopping tool:', error);
       throw error;
     }
   });
@@ -576,21 +605,13 @@ function showApiSettingsDialog() {
 
 // Set up API settings handlers
 function setupApiSettingsHandlers() {
-  // Lazy load the database module to avoid circular dependencies
-  let database = null;
-  
   // Get Claude API settings
   ipcMain.handle('get-claude-api-settings', async () => {
     try {
-      // Load the database module if not already loaded
-      if (!database) {
-        database = require('./src/database.js');
-      }
-      
       // Return the schema and current values
       return {
         schema: database.getClaudeApiSettingsSchema(),
-        values: appState.settings_claude_api_configuration
+        values: database.getClaudeApiSettings()
       };
     } catch (error) {
       console.error('Error getting Claude API settings:', error);
@@ -610,10 +631,10 @@ function setupApiSettingsHandlers() {
         ...settings
       };
       
-      // Save to electron-store
-      if (appState.store) {
-        appState.store.set('claude_api_configuration', appState.settings_claude_api_configuration);
-      }
+      // Save to database
+      await database.updateGlobalSettings({
+        claude_api_configuration: appState.settings_claude_api_configuration
+      });
       
       return {
         success: true
@@ -703,7 +724,7 @@ function setupIPCHandlers() {
       ];
       
       // For tokens_words_counter.js, only allow .txt files
-      if (currentTool === 'tokens_words_counter.js') {
+      if (currentTool === 'tokens_words_counter') {
         // Only use text files filter for this tool
         options.filters = [{ name: 'Text Files', extensions: ['txt', 'md'] }];
       }
@@ -809,7 +830,6 @@ function setupIPCHandlers() {
   
   // Handle project dialog closing
   ipcMain.on('close-project-dialog', (event, action, data) => {
-
     if (projectDialogWindow && !projectDialogWindow.isDestroyed()) {
       if (action === 'cancelled') {
         // For Cancel, disable auto-showing and destroy the window
@@ -838,6 +858,15 @@ async function main() {
   try {
     // Initialize AppState before using it
     await appState.initialize();
+    
+    // Initialize database
+    await database.init();
+    
+    // Initialize tool system with Claude API settings
+    await toolSystem.initializeToolSystem(
+      database.getClaudeApiSettings(),
+      database
+    );
     
     // Set up IPC handlers
     setupIPCHandlers();
