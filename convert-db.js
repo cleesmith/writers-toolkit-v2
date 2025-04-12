@@ -1,11 +1,11 @@
 /**
- * create-new-db.js
+ * improved-convert-db.js
  * 
  * This script creates a new writers-toolkit-db.json file with a clean structure
- * optimized for our module-based architecture, while referencing data from
- * the old_writers-toolkit-db.json file.
+ * optimized for our module-based architecture, while properly standardizing
+ * all tool options formats.
  * 
- * Usage: node create-new-db.js
+ * Usage: node improved-convert-db.js
  */
 
 const fs = require('fs');
@@ -34,6 +34,95 @@ const newDb = {
   }
 };
 
+// Process option objects to standardize format
+function processOption(option) {
+  // Create a new standardized option object
+  const newOption = {
+    name: option.name,
+    label: option.label || option.arg_name || option.name,
+    type: getOptionType(option),
+    description: option.description || '',
+    required: option.required === true,
+    default: option.default
+  };
+
+  // Remove -- prefix from name if present
+  if (newOption.name && newOption.name.startsWith('--')) {
+    newOption.name = newOption.name.substring(2);
+  }
+
+  // Convert arg_name to label if no label is provided
+  if (option.arg_name && !option.label) {
+    newOption.label = option.arg_name;
+  }
+
+  // Add min, max, step for number types
+  if (newOption.type === 'number') {
+    if (option.min !== undefined) newOption.min = option.min;
+    if (option.max !== undefined) newOption.max = option.max;
+    if (option.step !== undefined) newOption.step = option.step;
+  }
+
+  // Add choices for select types
+  if (option.choices) {
+    newOption.choices = option.choices;
+  }
+
+  // Add filters for file types
+  if (option.filters) {
+    newOption.filters = option.filters;
+  }
+
+  // Set group if provided
+  if (option.group) {
+    newOption.group = option.group;
+  }
+
+  return newOption;
+}
+
+// Determine the option type from the old format
+function getOptionType(option) {
+  // If type is explicitly provided and valid, use it
+  if (option.type) {
+    const type = option.type.toLowerCase();
+    
+    // Map old types to new standardized types
+    switch (type) {
+      case 'str':
+        return 'text';
+      case 'int':
+      case 'float':
+        return 'number';
+      case 'bool':
+        return 'boolean';
+      case 'file':
+      case 'directory':
+      case 'select':
+      case 'textarea':
+        return type;
+      default:
+        return 'text'; // Default to text for unknown types
+    }
+  }
+  
+  // Otherwise try to infer type from other attributes
+  if (option.choices) {
+    return 'select';
+  }
+  
+  if (option.default === true || option.default === false) {
+    return 'boolean';
+  }
+  
+  if (typeof option.default === 'number' || option.min !== undefined || option.max !== undefined) {
+    return 'number';
+  }
+  
+  // Default to text type
+  return 'text';
+}
+
 // Extract tools from the old database
 console.log('Converting tools...');
 Object.entries(oldDb.tools).forEach(([id, tool]) => {
@@ -48,6 +137,11 @@ Object.entries(oldDb.tools).forEach(([id, tool]) => {
   // Use the name without extension as the key
   const baseName = toolName.replace(/\.(js|py)$/, '');
   
+  // Process all options to standardize format
+  const processedOptions = Array.isArray(tool.options) 
+    ? tool.options.map(processOption) 
+    : [];
+  
   // Convert the tool
   newDb.tools[baseName] = {
     id: baseName,
@@ -56,7 +150,7 @@ Object.entries(oldDb.tools).forEach(([id, tool]) => {
     description: tool.description || '',
     help_text: tool.help_text || '',
     category: getToolCategory(tool),
-    options: tool.options || []
+    options: processedOptions
   };
 });
 
