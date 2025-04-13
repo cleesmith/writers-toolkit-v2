@@ -63,13 +63,13 @@ class TokensWordsCounter extends BaseTool {
     const inputFile = options.input_file;
     const outputFiles = [];
 
-    // Add a gentle delay that won't freeze the UI
-    this.emitOutput("Starting a 15-second delay for testing...\n");
-    // Use our gentler approach
-    await gentleDelay(15, (message) => {
-      this.emitOutput(message);
-    });
-    this.emitOutput("Delay complete!\n\n");
+    // // cls: testing: add a gentle delay that won't freeze the UI
+    // this.emitOutput("Starting a 15-second delay for testing...\n");
+    // // Use our gentler approach
+    // await gentleDelay(15, (message) => {
+    //   this.emitOutput(message);
+    // });
+    // this.emitOutput("Delay complete!\n\n");
 
     const saveDir = options.save_dir || appState.CURRENT_PROJECT_PATH;
     if (!saveDir) {
