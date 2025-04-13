@@ -33,6 +33,7 @@ let timerInterval = null;
 let currentRunId = null;
 let setupCompleted = false;
 let currentOptionValues = {};
+let canClose = true; // Flag to control whether the window can be closed
 
 // Initialize when the window loads
 window.addEventListener('DOMContentLoaded', async () => {
@@ -68,6 +69,12 @@ window.addEventListener('DOMContentLoaded', async () => {
 
 // Close button handler
 closeBtn.addEventListener('click', () => {
+  // Check if we're allowed to close while tool is running
+  if (!canClose && isRunning) {
+    outputElement.textContent += '\nCannot close while tool is running. Use Force Quit if necessary.\n';
+    return;
+  }
+
   // Before closing, stop any running tool
   if (isRunning && currentRunId) {
     window.electronAPI.stopTool(currentRunId)
@@ -157,11 +164,30 @@ runBtn.addEventListener('click', async () => {
   // Start timing
   startTime = Date.now();
   isRunning = true;
+  canClose = false; // Prevent closing the window while tool is running
   startTimer();
   
-  // Update UI
+  // Update UI - disable ALL buttons except Force Quit
   runBtn.disabled = true;
   setupBtn.disabled = true;
+  clearBtn.disabled = true;
+  closeBtn.disabled = true; // Disable the X close button
+  
+  // Remove any existing Edit button and select dropdown
+  const existingEditButton = document.getElementById('edit-button');
+  if (existingEditButton) {
+    existingEditButton.remove();
+  }
+  
+  const existingFileSelect = document.getElementById('output-file-select');
+  if (existingFileSelect) {
+    const container = existingFileSelect.closest('.compact-file-selector');
+    if (container) {
+      container.remove(); // Remove the entire container
+    } else {
+      existingFileSelect.remove();
+    }
+  }
   
   // Clear output and show starting message - clear all previous output
   outputElement.textContent = `Starting ${toolData.title || toolData.name}...\n\n`;
@@ -194,11 +220,14 @@ runBtn.addEventListener('click', async () => {
       if (result.runId === currentRunId) {
         console.log('Tool finished:', result);
         isRunning = false;
+        canClose = true; // Allow closing the window again
         stopTimer();
         
-        // Update UI
+        // Re-enable buttons
         runBtn.disabled = false;
         setupBtn.disabled = false;
+        clearBtn.disabled = false;
+        closeBtn.disabled = false;
         
         // Add completion message to output area
         outputElement.textContent += `\n\nTool finished with exit code: ${result.code}`;
@@ -223,10 +252,11 @@ runBtn.addEventListener('click', async () => {
           compactSelector.style.display = 'flex';
           compactSelector.style.alignItems = 'center';
           compactSelector.style.gap = '8px';
-          compactSelector.style.marginLeft = '5px';
+          compactSelector.style.marginLeft = '20px'; // More space from elapsed time
           
           // Create Edit button
           const editButton = document.createElement('button');
+          editButton.id = 'edit-button';
           editButton.textContent = 'Edit';
           editButton.className = 'action-button';
           editButton.style.padding = '4px 10px';
@@ -255,14 +285,22 @@ runBtn.addEventListener('click', async () => {
           editButton.addEventListener('click', () => {
             const selectedFile = select.value;
             if (selectedFile) {
+              console.log('Opening file in editor:', selectedFile);
+              
+              // Show a notification that we're opening the file
+              const tempOutput = outputElement.textContent;
+              outputElement.textContent += '\nOpening file in editor: ' + selectedFile;
+              
               window.electronAPI.openFileInEditor(selectedFile)
                 .then(result => {
                   if (!result.success) {
-                    alert(`Error opening file: ${result.error || 'Unknown error'}`);
+                    outputElement.textContent = tempOutput + '\nError opening file: ' + 
+                      (result.error || 'Unknown error');
                   }
                 })
                 .catch(error => {
                   console.error('Error opening file in editor:', error);
+                  outputElement.textContent = tempOutput + '\nError opening file: ' + error.message;
                 });
             }
           });
@@ -297,11 +335,15 @@ runBtn.addEventListener('click', async () => {
         console.error('Tool error:', error);
         outputElement.textContent += `\n\nError: ${error.error}`;
         isRunning = false;
+        canClose = true; // Allow closing the window again
         stopTimer();
         
-        // Update UI
+        // Re-enable buttons
         runBtn.disabled = false;
         setupBtn.disabled = false;
+        clearBtn.disabled = false;
+        closeBtn.disabled = false;
+        
         currentRunId = null;
       }
     });
@@ -310,11 +352,14 @@ runBtn.addEventListener('click', async () => {
     console.error('Error running tool:', error);
     outputElement.textContent += `\nError running tool: ${error.message}`;
     isRunning = false;
+    canClose = true; // Allow closing the window again
     stopTimer();
     
-    // Update UI
+    // Re-enable buttons
     runBtn.disabled = false;
     setupBtn.disabled = false;
+    clearBtn.disabled = false;
+    closeBtn.disabled = false;
   }
 });
 
@@ -331,6 +376,22 @@ clearBtn.addEventListener('click', () => {
   if (timerInterval) {
     clearInterval(timerInterval);
     timerInterval = null;
+  }
+  
+  // Remove any existing Edit button and file select dropdown
+  const existingEditButton = document.getElementById('edit-button');
+  if (existingEditButton) {
+    existingEditButton.remove();
+  }
+  
+  const existingFileSelect = document.getElementById('output-file-select');
+  if (existingFileSelect) {
+    const container = existingFileSelect.closest('.compact-file-selector');
+    if (container) {
+      container.remove(); // Remove the entire container
+    } else {
+      existingFileSelect.remove();
+    }
   }
   
   // Disable Run button until setup is completed again
@@ -564,6 +625,25 @@ function generateOptionsForm(options) {
         input.value = option.default || '';
         formGroup.appendChild(input);
         break;
+    }
+    
+    // Special handling for save_dir option
+    if (option.name === 'save_dir') {
+      // Get current project path from main process
+      window.electronAPI.getProjectInfo()
+        .then(info => {
+          if (info && info.current_project_path) {
+            // Set the input value to the project path
+            input.value = info.current_project_path;
+            console.log('Set save_dir default to:', info.current_project_path);
+            
+            // Also update our stored options
+            if (currentOptionValues) {
+              currentOptionValues[option.name] = info.current_project_path;
+            }
+          }
+        })
+        .catch(error => console.error('Error fetching project info:', error));
     }
     
     // Add error message container
