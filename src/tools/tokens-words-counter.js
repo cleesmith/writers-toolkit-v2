@@ -5,6 +5,31 @@ const util = require('util');
 const fileCache = require('../cache/file-cache');
 const appState = require('../../src/state.js');
 
+/**
+ * Creates a delay that won't completely freeze the UI
+ * @param {number} seconds - Total seconds to delay
+ * @param {function} progressCallback - Function to call with progress updates
+ */
+function gentleDelay(seconds, progressCallback) {
+  return new Promise(resolve => {
+    let secondsElapsed = 0;
+    
+    // Use setInterval for regular UI updates
+    const interval = setInterval(() => {
+      secondsElapsed++;
+      
+      if (progressCallback) {
+        progressCallback(`Delay: ${secondsElapsed} seconds elapsed\n`);
+      }
+      
+      if (secondsElapsed >= seconds) {
+        clearInterval(interval);
+        resolve();
+      }
+    }, 1000); // Update every second
+  });
+}
+
 class TokensWordsCounter extends BaseTool {
   constructor(claudeService, config = {}) {
     super('tokens_words_counter', config);
@@ -37,6 +62,14 @@ class TokensWordsCounter extends BaseTool {
     // Extract options
     const inputFile = options.input_file;
     const outputFiles = [];
+
+    // Add a gentle delay that won't freeze the UI
+    this.emitOutput("Starting a 15-second delay for testing...\n");
+    // Use our gentler approach
+    await gentleDelay(15, (message) => {
+      this.emitOutput(message);
+    });
+    this.emitOutput("Delay complete!\n\n");
 
     const saveDir = options.save_dir || appState.CURRENT_PROJECT_PATH;
     if (!saveDir) {
