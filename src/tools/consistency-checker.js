@@ -1,8 +1,10 @@
 // src/tools/consistency-checker.js
 const BaseTool = require('./base-tool');
 const path = require('path');
-const fs = require('fs/promises');
 const util = require('util');
+const fileCache = require('../cache/file-cache');
+const appState = require('../../src/state.js');
+const fs = require('fs/promises');
 
 /**
  * Consistency Checker Tool
@@ -31,9 +33,9 @@ class ConsistencyChecker extends BaseTool {
     console.log('Executing ConsistencyChecker with options:', options);
     
     // Extract options
-    const manuscriptFile = options.manuscript_file;
-    const worldFile = options.world_file;
-    const outlineFile = options.outline_file;
+    let manuscriptFile = options.manuscript_file;
+    let worldFile = options.world_file;
+    let outlineFile = options.outline_file;
     const checkType = options.check_type || 'world';
     const skipThinking = options.skip_thinking || false;
     const checkDescription = options.check_description || '';
@@ -45,18 +47,30 @@ class ConsistencyChecker extends BaseTool {
       throw new Error('No save directory available');
     }
 
+    // Ensure file paths are absolute by prepending the project path if needed
+    manuscriptFile = this.ensureAbsolutePath(manuscriptFile, saveDir);
+    worldFile = this.ensureAbsolutePath(worldFile, saveDir);
+    if (outlineFile) {
+      outlineFile = this.ensureAbsolutePath(outlineFile, saveDir);
+    }
+    
+    // Log the full paths for debugging
+    console.log('Using full paths:');
+    console.log(`Manuscript: ${manuscriptFile}`);
+    console.log(`World: ${worldFile}`);
+    if (outlineFile) {
+      console.log(`Outline: ${outlineFile}`);
+    }
+
     const outputFiles = [];
     
     try {
       // Read the input files
       this.emitOutput(`Reading files...\n`);
-      
-      // Read the world file
-      this.emitOutput(`Reading world file: ${worldFile}\n`);
-      const worldContent = await this.readInputFile(worldFile);
-      
+
       // Read the manuscript file
       this.emitOutput(`Reading manuscript file: ${manuscriptFile}\n`);
+      console.log(`*** Reading manuscript file: ${manuscriptFile}`);
       const manuscriptContent = await this.readInputFile(manuscriptFile);
       
       // Read the outline file if provided
@@ -65,6 +79,10 @@ class ConsistencyChecker extends BaseTool {
         this.emitOutput(`Reading outline file: ${outlineFile}\n`);
         outlineContent = await this.readInputFile(outlineFile);
       }
+      
+      // Read the world file
+      this.emitOutput(`Reading world file: ${worldFile}\n`);
+      const worldContent = await this.readInputFile(worldFile);
       
       // Prepare check types to run
       const checkTypes = checkType === 'all' 
@@ -192,6 +210,24 @@ class ConsistencyChecker extends BaseTool {
       this.emitOutput(`\nError: ${error.message}\n`);
       throw error;
     }
+  }
+  
+  /**
+   * Ensure file path is absolute
+   * @param {string} filePath - File path (may be relative or absolute)
+   * @param {string} basePath - Base path to prepend for relative paths
+   * @returns {string} - Absolute file path
+   */
+  ensureAbsolutePath(filePath, basePath) {
+    if (!filePath) return filePath;
+    
+    // Check if the path is already absolute
+    if (path.isAbsolute(filePath)) {
+      return filePath;
+    }
+    
+    // Make the path absolute by joining with the base path
+    return path.join(basePath, filePath);
   }
   
   /**

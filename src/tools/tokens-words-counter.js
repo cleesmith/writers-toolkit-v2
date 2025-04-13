@@ -82,6 +82,7 @@ class TokensWordsCounter extends BaseTool {
     try {
       // Read the input file
       console.log(`Reading file: ${inputFile}`);
+
       const text = await this.readInputFile(inputFile);
       console.log(`File read successfully, length: ${text.length} characters`);
       
