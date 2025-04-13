@@ -35,10 +35,16 @@ class ConsistencyChecker extends BaseTool {
     const worldFile = options.world_file;
     const outlineFile = options.outline_file;
     const checkType = options.check_type || 'world';
-    const saveDir = options.save_dir || '.';
     const skipThinking = options.skip_thinking || false;
     const checkDescription = options.check_description || '';
-    
+    const saveDir = options.save_dir || appState.CURRENT_PROJECT_PATH;
+    if (!saveDir) {
+      const errorMsg = 'Error: No save directory specified and no current project selected.\n' +
+                      'Please select a project or specify a save directory.';
+      this.emitOutput(errorMsg);
+      throw new Error('No save directory available');
+    }
+
     const outputFiles = [];
     
     try {

@@ -15,6 +15,21 @@ class ToolRunner {
   }
   
   async runTool(toolName, optionValues, logCallback) {
+    // Check and fix save_dir before doing anything else
+    if ((!optionValues.save_dir || optionValues.save_dir === '.') && appState.CURRENT_PROJECT_PATH) {
+      optionValues.save_dir = appState.CURRENT_PROJECT_PATH;
+      if (logCallback) {
+        logCallback(`Setting output directory to current project: ${appState.CURRENT_PROJECT_PATH}\n`);
+      }
+    } else if (!optionValues.save_dir || optionValues.save_dir === '.') {
+      // No project is selected and no save_dir is specified
+      if (logCallback) {
+        logCallback('ERROR: No save directory specified and no current project selected.\n' +
+                   'Please select a project first or specify a valid save directory.\n');
+      }
+      return Promise.reject(new Error('No valid save directory'));
+    }
+
     // Generate unique ID for this tool run
     const runId = uuidv4();
     

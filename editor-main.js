@@ -134,7 +134,7 @@ async function openFile() {
     title: 'Open File',
     defaultPath: WRITING_DIR,
     filters: [
-      { name: 'Text Files', extensions: ['txt', 'md'] },
+      { name: 'Text Files', extensions: ['txt'] },
       { name: 'All Files', extensions: ['*'] }
     ],
     properties: ['openFile']
@@ -172,7 +172,6 @@ async function saveFile(event, { filePath, content, saveAs = false }) {
       defaultPath: WRITING_DIR,
       filters: [
         { name: 'Text Files', extensions: ['txt'] },
-        { name: 'Markdown', extensions: ['md'] },
         { name: 'All Files', extensions: ['*'] }
       ]
     });
@@ -219,18 +218,54 @@ app.whenReady().then(() => {
   createWindow();
   setupIPC();
   
-  // Check if a file path was passed as an argument
-  const fileArg = process.argv.find(arg => 
-    arg.endsWith('.txt') || arg.endsWith('.md')
-  );
+  // Log all command line arguments for debugging
+  console.log('Command line arguments:', process.argv);
   
-  if (fileArg && fs.existsSync(fileArg)) {
+  // Improved file argument detection for .txt files only
+  let fileArg = null;
+  for (const arg of process.argv) {
+    // Clean up the argument to handle potential quotes or spaces
+    const cleanArg = arg.replace(/^["']|["']$/g, '');
+    
+    console.log('Checking argument:', cleanArg);
+    
+    // Check if it's a .txt file that exists
+    if (cleanArg.endsWith('.txt') && fs.existsSync(cleanArg)) {
+      fileArg = cleanArg;
+      console.log('Found valid .txt file:', fileArg);
+      break;
+    }
+  }
+  
+  if (fileArg) {
     const filePath = path.resolve(fileArg);
+    console.log('Resolved file path:', filePath);
+    
     // Only open if in allowed directory
     if (filePath.startsWith(WRITING_DIR)) {
-      const content = fs.readFileSync(filePath, 'utf8');
-      mainWindow.webContents.send('file-opened', { filePath, content });
+      try {
+        console.log('Reading file contents from:', filePath);
+        const content = fs.readFileSync(filePath, 'utf8');
+        
+        // Wait for window to be ready
+        if (mainWindow.webContents.isLoading()) {
+          console.log('Window still loading, waiting to send file content...');
+          mainWindow.webContents.once('did-finish-load', () => {
+            console.log('Window loaded, sending file content now');
+            mainWindow.webContents.send('file-opened', { filePath, content });
+          });
+        } else {
+          console.log('Window ready, sending file content immediately');
+          mainWindow.webContents.send('file-opened', { filePath, content });
+        }
+      } catch (error) {
+        console.error('Error reading file:', error);
+      }
+    } else {
+      console.warn('File is outside the allowed directory:', filePath);
     }
+  } else {
+    console.log('No valid .txt file argument found');
   }
   
   app.on('activate', function () {

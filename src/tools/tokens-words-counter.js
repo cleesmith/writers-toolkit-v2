@@ -3,6 +3,7 @@ const BaseTool = require('./base-tool');
 const path = require('path');
 const util = require('util');
 const fileCache = require('../cache/file-cache'); // Import the cache module
+const appState = require('../../src/state.js');
 
 class TokensWordsCounter extends BaseTool {
   constructor(claudeService, config = {}) {
@@ -35,8 +36,15 @@ class TokensWordsCounter extends BaseTool {
     
     // Extract options
     const inputFile = options.input_file;
-    const saveDir = options.save_dir || '.';
     const outputFiles = [];
+
+    const saveDir = options.save_dir || appState.CURRENT_PROJECT_PATH;
+    if (!saveDir) {
+      const errorMsg = 'Error: No save directory specified and no current project selected.\n' +
+                      'Please select a project or specify a save directory.';
+      this.emitOutput(errorMsg);
+      throw new Error('No save directory available');
+    }
     
     try {
       // Read the input file
