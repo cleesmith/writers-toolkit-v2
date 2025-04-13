@@ -263,15 +263,20 @@ runBtn.addEventListener('click', async () => {
           editButton.style.fontSize = '13px';
           
           // Create select dropdown
+          // const select = document.createElement('select');
+          // select.id = 'output-file-select';
+          // select.style.maxWidth = '250px';
+          // select.style.padding = '4px 8px';
+          // select.style.backgroundColor = document.body.classList.contains('light-mode') ? '#ffffff' : '#2a2a2a';
+          // select.style.color = document.body.classList.contains('light-mode') ? '#333333' : '#ffffff';
+          // select.style.border = document.body.classList.contains('light-mode') ? '1px solid #cccccc' : '1px solid #444444';
+          // select.style.borderRadius = '4px';
+          // select.style.fontSize = '13px';
           const select = document.createElement('select');
           select.id = 'output-file-select';
           select.style.maxWidth = '250px';
-          select.style.padding = '4px 8px';
-          select.style.backgroundColor = document.body.classList.contains('light-mode') ? '#ffffff' : '#2a2a2a';
-          select.style.color = document.body.classList.contains('light-mode') ? '#333333' : '#ffffff';
-          select.style.border = document.body.classList.contains('light-mode') ? '1px solid #cccccc' : '1px solid #444444';
-          select.style.borderRadius = '4px';
           select.style.fontSize = '13px';
+          select.style.appearance = 'auto';
           
           // Add each file as an option
           result.createdFiles.forEach(file => {
