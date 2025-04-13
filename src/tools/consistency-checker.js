@@ -70,7 +70,6 @@ class ConsistencyChecker extends BaseTool {
 
       // Read the manuscript file
       this.emitOutput(`Reading manuscript file: ${manuscriptFile}\n`);
-      console.log(`*** Reading manuscript file: ${manuscriptFile}`);
       const manuscriptContent = await this.readInputFile(manuscriptFile);
       
       // Read the outline file if provided

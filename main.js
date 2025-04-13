@@ -510,13 +510,11 @@ function setupToolHandlers() {
           
           // Send completion notification
           if (toolSetupRunWindow && !toolSetupRunWindow.isDestroyed()) {
-            console.log('>>> About to send tool-finished event with files:', allFiles);
             toolSetupRunWindow.webContents.send('tool-finished', { 
               runId, 
               code: 0, 
               createdFiles: allFiles 
             });
-            console.log('>>> Sent tool-finished event');
           }
         } catch (error) {
           console.error(`Error running tool ${toolName}:`, error);
