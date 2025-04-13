@@ -2,6 +2,7 @@
 const BaseTool = require('./base-tool');
 const path = require('path');
 const util = require('util');
+const fileCache = require('../cache/file-cache'); // Import the cache module
 
 class TokensWordsCounter extends BaseTool {
   constructor(claudeService, config = {}) {
@@ -27,6 +28,10 @@ class TokensWordsCounter extends BaseTool {
    */
   async execute(options) {
     console.log('Executing TokensWordsCounter with options:', options);
+    
+    // Clear the cache for this tool
+    const toolName = 'tokens_words_counter';
+    fileCache.clear(toolName);
     
     // Extract options
     const inputFile = options.input_file;
@@ -92,9 +97,20 @@ Desired output tokens: ${desiredOutputTokens} tokens`;
         saveDir, 
         outputFileName
       );
+      
+      // Add to local tracking array
       outputFiles.push(outputFile);
       
+      // Add to the shared file cache
+      fileCache.addFile(toolName, outputFile);
+
+      console.log('toolName=', toolName);
+      console.log('outputFile=', outputFile);
+      // fileCache.addFile('tokens_words_counter', outputFile);
+      // console.log('Files in cache:', fileCache.getFiles('tokens_words_counter'));
+      
       console.log('TokensWordsCounter execution complete');
+      console.log('*** Files in cache:', fileCache.getFiles(toolName));
       
       // Return the result
       return {

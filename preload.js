@@ -38,7 +38,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
     if (channel === 'tool-finished') ipcRenderer.removeAllListeners('tool-finished');
     if (channel === 'tool-error') ipcRenderer.removeAllListeners('tool-error');
   },
-  
+  // Get output files for a tool run
+  getToolOutputFiles: (toolId) => ipcRenderer.invoke('get-tool-output-files', toolId),
+  // Open a file in the editor
+  openFileInEditor: (filePath) => ipcRenderer.invoke('open-file-in-editor', filePath),  
+
   // API settings
   getClaudeApiSettings: () => ipcRenderer.invoke('get-claude-api-settings'),
   saveClaudeApiSettings: (settings) => ipcRenderer.invoke('save-claude-api-settings', settings),

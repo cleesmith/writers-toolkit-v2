@@ -463,7 +463,7 @@ function setupToolHandlers() {
     }
   });
   
-  // Run tool - UPDATED to use module-based approach instead of spawning processes
+  // When updating the start-tool-run handler:
   ipcMain.handle('start-tool-run', async (event, toolName, optionValues) => {
     try {
       // Generate a unique run ID
@@ -496,15 +496,27 @@ function setupToolHandlers() {
           tool.emitOutput = sendOutput;
           
           // Execute the tool
-          const result = await toolSystem.executeToolById(toolName, optionValues);
+          const result = await toolSystem.executeToolById(toolName, optionValues, runId);
+          
+          // Get files from cache
+          const fileCache = require('./src/cache/file-cache');
+          const cachedFiles = fileCache.getFiles(toolName);
+          
+          // Combine cached files with any files returned by the tool
+          const allFiles = [...new Set([
+            ...(result.outputFiles || []),
+            ...cachedFiles.map(file => file.path)
+          ])];
           
           // Send completion notification
           if (toolSetupRunWindow && !toolSetupRunWindow.isDestroyed()) {
+            console.log('>>> About to send tool-finished event with files:', allFiles);
             toolSetupRunWindow.webContents.send('tool-finished', { 
               runId, 
               code: 0, 
-              createdFiles: result.outputFiles 
+              createdFiles: allFiles 
             });
+            console.log('>>> Sent tool-finished event');
           }
         } catch (error) {
           console.error(`Error running tool ${toolName}:`, error);
@@ -849,6 +861,99 @@ function setupIPCHandlers() {
           });
         }
       }
+    }
+  });
+
+  // // Handler for opening a file in the editor
+  // ipcMain.handle('open-file-in-editor', async (event, filePath) => {
+  //   try {
+  //     // Verify the file exists
+  //     if (!fs.existsSync(filePath)) {
+  //       return { 
+  //         success: false, 
+  //         error: 'File not found: ' + filePath 
+  //       };
+  //     }
+      
+  //     console.log(`Opening file in editor: ${filePath}`);
+      
+  //     // Launch the editor with the file path as an argument
+  //     const editorProcess = spawn(
+  //       process.execPath, // Current Electron executable
+  //       [path.join(__dirname, 'editor-main.js'), filePath], // Path to editor-main.js with file argument
+  //       {
+  //         detached: true,  // Run independently from parent
+  //         stdio: 'ignore', // Don't pipe stdio
+  //         env: process.env // Pass environment variables
+  //       }
+  //     );
+      
+  //     // Allow the editor to run independently
+  //     editorProcess.unref();
+      
+  //     return { success: true, filePath };
+  //   } catch (error) {
+  //     console.error('Error opening file in editor:', error);
+  //     return { 
+  //       success: false, 
+  //       error: error.message 
+  //     };
+  //   }
+  // });
+
+  // Get output files for a tool run
+  ipcMain.handle('get-tool-output-files', (event, toolId) => {
+    try {
+      // For simplicity, if toolId is a runId, we just use the tool name part
+      // This assumes runIds are in the format toolName-uuid
+      const toolName = toolId.includes('-') ? toolId.split('-')[0] : toolId;
+      
+      // Get files from the cache
+      const fileCache = require('./src/cache/file-cache');
+      const files = fileCache.getFiles(toolName);
+      
+      console.log(`Retrieved ${files.length} output files for tool: ${toolName}`);
+      return files;
+    } catch (error) {
+      console.error('Error getting tool output files:', error);
+      return [];
+    }
+  });
+
+  // Handler for opening a file in the editor
+  ipcMain.handle('open-file-in-editor', async (event, filePath) => {
+    try {
+      // Verify the file exists
+      if (!fs.existsSync(filePath)) {
+        return { 
+          success: false, 
+          error: 'File not found: ' + filePath 
+        };
+      }
+      
+      console.log(`Opening file in editor: ${filePath}`);
+      
+      // Launch the editor with the file path as an argument
+      const editorProcess = spawn(
+        process.execPath, // Current Electron executable
+        [path.join(__dirname, 'editor-main.js'), filePath], // Path to editor-main.js with file argument
+        {
+          detached: true,  // Run independently from parent
+          stdio: 'ignore', // Don't pipe stdio
+          env: process.env // Pass environment variables
+        }
+      );
+      
+      // Allow the editor to run independently
+      editorProcess.unref();
+      
+      return { success: true, filePath };
+    } catch (error) {
+      console.error('Error opening file in editor:', error);
+      return { 
+        success: false, 
+        error: error.message 
+      };
     }
   });
 }

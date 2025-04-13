@@ -1,3 +1,11 @@
+// Define path functions for filename extraction
+const path = {
+  basename: function(filepath) {
+    // Simple implementation to extract filename from path
+    return filepath.split(/[\/\\]/).pop();
+  }
+};
+
 // Get UI elements
 const toolNameElement = document.getElementById('tool-name');
 const dialogToolNameElement = document.getElementById('dialog-tool-name');
@@ -179,7 +187,7 @@ runBtn.addEventListener('click', async () => {
         outputElement.scrollTop = outputElement.scrollHeight;
       }
     });
-    
+
     // Listen for tool completion
     window.electronAPI.onToolFinished((result) => {
       // Only process completion for the current run
@@ -192,13 +200,92 @@ runBtn.addEventListener('click', async () => {
         runBtn.disabled = false;
         setupBtn.disabled = false;
         
-        // Add completion message
+        // Add completion message to output area
         outputElement.textContent += `\n\nTool finished with exit code: ${result.code}`;
         
+        // Create file selector if there are output files
         if (result.createdFiles && result.createdFiles.length > 0) {
-          outputElement.textContent += `\n\nFiles created/modified:\n${result.createdFiles.join('\n')}`;
+          // First, log the files to the output area
+          outputElement.textContent += `\n\nFiles created/modified:`;
+          const fileList = document.createElement('pre');
+          fileList.style.marginTop = '10px';
+          fileList.style.whiteSpace = 'pre-wrap';
+          fileList.style.fontSize = '12px';
+          fileList.style.color = document.body.classList.contains('light-mode') ? '#666666' : '#aaaaaa';
+          
+          const fileListItems = result.createdFiles.map(file => `- ${file}`).join('\n');
+          fileList.textContent = fileListItems;
+          outputElement.appendChild(fileList);
+          
+          // Create a compact selector to place right after elapsed time
+          const compactSelector = document.createElement('div');
+          compactSelector.className = 'compact-file-selector';
+          compactSelector.style.display = 'flex';
+          compactSelector.style.alignItems = 'center';
+          compactSelector.style.gap = '8px';
+          compactSelector.style.marginLeft = '5px';
+          
+          // Create Edit button
+          const editButton = document.createElement('button');
+          editButton.textContent = 'Edit';
+          editButton.className = 'action-button';
+          editButton.style.padding = '4px 10px';
+          editButton.style.fontSize = '13px';
+          
+          // Create select dropdown
+          const select = document.createElement('select');
+          select.id = 'output-file-select';
+          select.style.maxWidth = '250px';
+          select.style.padding = '4px 8px';
+          select.style.backgroundColor = document.body.classList.contains('light-mode') ? '#ffffff' : '#2a2a2a';
+          select.style.color = document.body.classList.contains('light-mode') ? '#333333' : '#ffffff';
+          select.style.border = document.body.classList.contains('light-mode') ? '1px solid #cccccc' : '1px solid #444444';
+          select.style.borderRadius = '4px';
+          select.style.fontSize = '13px';
+          
+          // Add each file as an option
+          result.createdFiles.forEach(file => {
+            const option = document.createElement('option');
+            option.value = file;
+            option.textContent = path.basename(file);
+            select.appendChild(option);
+          });
+          
+          // Add click handler to the Edit button
+          editButton.addEventListener('click', () => {
+            const selectedFile = select.value;
+            if (selectedFile) {
+              window.electronAPI.openFileInEditor(selectedFile)
+                .then(result => {
+                  if (!result.success) {
+                    alert(`Error opening file: ${result.error || 'Unknown error'}`);
+                  }
+                })
+                .catch(error => {
+                  console.error('Error opening file in editor:', error);
+                });
+            }
+          });
+          
+          // Assemble the selector
+          compactSelector.appendChild(editButton);
+          compactSelector.appendChild(select);
+          
+          // Insert right after elapsed time
+          const elapsedTimeParent = elapsedTimeElement.parentNode;
+          if (elapsedTimeParent) {
+            if (elapsedTimeElement.nextSibling) {
+              elapsedTimeParent.insertBefore(compactSelector, elapsedTimeElement.nextSibling);
+            } else {
+              elapsedTimeParent.appendChild(compactSelector);
+            }
+          } else {
+            // Fallback - insert before Clear button
+            const buttonRow = document.querySelector('.button-row');
+            buttonRow.insertBefore(compactSelector, clearBtn);
+          }
         }
-        
+
         currentRunId = null;
       }
     });
@@ -237,7 +324,7 @@ clearBtn.addEventListener('click', () => {
   outputElement.textContent = 'Output cleared.';
   
   // Reset elapsed time display
-  elapsedTimeElement.textContent = 'elapsed time: 0m 0s';
+  elapsedTimeElement.textContent = 'elapsed: 0m 0s';
   
   // Reset timer variables
   startTime = null;
@@ -585,5 +672,5 @@ function updateElapsedTime() {
   const minutes = Math.floor(elapsedMs / 60000);
   const seconds = Math.floor((elapsedMs % 60000) / 1000);
   
-  elapsedTimeElement.textContent = `elapsed time: ${minutes}m ${seconds}s`;
+  elapsedTimeElement.textContent = `elapsed: ${minutes}m ${seconds}s`;
 }
