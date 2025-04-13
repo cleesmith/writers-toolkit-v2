@@ -2,7 +2,7 @@
 const BaseTool = require('./base-tool');
 const path = require('path');
 const util = require('util');
-const fileCache = require('../cache/file-cache'); // Import the cache module
+const fileCache = require('../cache/file-cache');
 const appState = require('../../src/state.js');
 
 class TokensWordsCounter extends BaseTool {
@@ -114,8 +114,6 @@ Desired output tokens: ${desiredOutputTokens} tokens`;
 
       console.log('toolName=', toolName);
       console.log('outputFile=', outputFile);
-      // fileCache.addFile('tokens_words_counter', outputFile);
-      // console.log('Files in cache:', fileCache.getFiles('tokens_words_counter'));
       
       console.log('TokensWordsCounter execution complete');
       console.log('*** Files in cache:', fileCache.getFiles(toolName));
