@@ -5,6 +5,8 @@ const toolRegistry = require('./tools/registry');
 const TokensWordsCounter = require('./tools/tokens-words-counter');
 const ConsistencyChecker = require('./tools/consistency-checker');
 const BrainstormTool = require('./tools/brainstorm');
+const OutlineWriter = require('./tools/outline-writer');
+const WorldWriter = require('./tools/world-writer');
 
 /**
  * Initialize the tool system
@@ -58,6 +60,38 @@ async function initializeToolSystem(settings, database) {
         toolRegistry.registerTool(
           toolInfo.name,
           new BrainstormTool(claudeService, {
+            ...toolConfig,
+            ...settings
+          })
+        );
+        console.log(`Successfully registered tool: ${toolInfo.name}`);
+      }
+    }
+    else if (toolInfo.name === 'outline_writer') {
+      const toolConfig = database.getToolByName(toolInfo.name);
+      console.log('Outline Writer tool config:', toolConfig);
+      
+      if (toolConfig) {
+        // Register the tool
+        toolRegistry.registerTool(
+          toolInfo.name,
+          new OutlineWriter(claudeService, {
+            ...toolConfig,
+            ...settings
+          })
+        );
+        console.log(`Successfully registered tool: ${toolInfo.name}`);
+      }
+    }
+    else if (toolInfo.name === 'world_writer') {
+      const toolConfig = database.getToolByName(toolInfo.name);
+      console.log('World Writer tool config:', toolConfig);
+      
+      if (toolConfig) {
+        // Register the tool
+        toolRegistry.registerTool(
+          toolInfo.name,
+          new WorldWriter(claudeService, {
             ...toolConfig,
             ...settings
           })
