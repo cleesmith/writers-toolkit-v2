@@ -1135,12 +1135,11 @@
 			"desired_output_tokens": 12000
 		},
 		"projects": {
-			"current": "Gaia_Minds",
+			"current": "Tsu_Liz",
 			"paths": {
-				"A_Darker_Roast": "/Users/cleesmith/writing/Tsu",
-				"Gaia_Minds": "/Users/cleesmith/writing/Gaia_Minds"
+				"Tsu_Liz": "/Users/cleesmith/writing/Tsu_Liz"
 			}
 		},
-		"default_save_dir": "/Users/cleesmith/writing/Gaia_Minds"
+		"default_save_dir": "/Users/cleesmith/writing/Tsu_Liz"
 	}
 }

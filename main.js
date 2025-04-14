@@ -1002,6 +1002,9 @@ async function main() {
     
     // Initialize database
     await database.init();
+
+    // clean up project history on startup
+    await database.cleanProjectHistory();
     
     // Initialize tool system with Claude API settings
     await toolSystem.initializeToolSystem(

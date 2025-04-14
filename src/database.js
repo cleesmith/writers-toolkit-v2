@@ -170,15 +170,25 @@ class Database {
       this.store.set('settings.claude_api', settings.claude_api_configuration);
     }
 
-    // Update current project
+    // Create a completely new projects object that contains only the current project
     if (settings.current_project) {
+      // Set current project
       this.store.set('settings.projects.current', settings.current_project);
       
-      // Update project path if provided
+      // IMPORTANT CHANGE: Completely replace the paths object instead of merging
+      // This ensures only the current project is stored
       if (settings.current_project_path) {
-        const paths = this.store.get('settings.projects.paths', {});
-        paths[settings.current_project] = settings.current_project_path;
-        this.store.set('settings.projects.paths', paths);
+        const newPaths = {};
+        newPaths[settings.current_project] = settings.current_project_path;
+        this.store.set('settings.projects.paths', newPaths);
+      }
+    } else if (settings.projects) {
+      // Handle direct projects update (from our cleanup code)
+      if (settings.projects.current) {
+        this.store.set('settings.projects.current', settings.projects.current);
+      }
+      if (settings.projects.paths) {
+        this.store.set('settings.projects.paths', settings.projects.paths);
       }
     }
 
@@ -188,6 +198,28 @@ class Database {
     }
 
     return true;
+  }
+
+  async cleanProjectHistory() {
+    if (!this.isInitialized || !this.store) {
+      throw new Error('Store not initialized. Call init() first.');
+    }
+    
+    // Get current project
+    const currentProject = this.store.get('settings.projects.current', null);
+    const projectPaths = this.store.get('settings.projects.paths', {});
+    const currentProjectPath = currentProject ? (projectPaths[currentProject] || null) : null;
+    
+    if (currentProject && currentProjectPath) {
+      // Reset paths to contain only the current project
+      const newPaths = {};
+      newPaths[currentProject] = currentProjectPath;
+      this.store.set('settings.projects.paths', newPaths);
+      console.log('Project history cleaned successfully');
+      return true;
+    }
+    
+    return false;
   }
 
   // Get Claude API settings
