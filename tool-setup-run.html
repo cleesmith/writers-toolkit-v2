@@ -13,14 +13,19 @@
       padding: 0;
       overflow: hidden;
     }
-    
+
     .tool-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 10px 15px;
+      padding: 0px 0px;
       border-bottom: 1px solid #333;
     }
+
+    #tool-title {
+      font-size: 12px; /* Reduce from likely 24px */
+      margin: 0; /* Remove any margin */
+    }    
     
     .tool-close-btn {
       background: none;
@@ -37,7 +42,7 @@
       display: flex;
       flex-direction: column;
     }
-    
+
     .tool-output {
       background-color: #121824;
       border-radius: 6px;
@@ -45,12 +50,13 @@
       font-family: monospace;
       color: #e2e2e2;
       flex: 1;
+      /*height: 500px;*/
       overflow: auto;
-      min-height: 200px;
       white-space: pre-wrap;
       margin-top: 20px;
+      margin-bottom: 20px;
     }
-    
+
     .button-row {
       display: flex;
       gap: 10px;

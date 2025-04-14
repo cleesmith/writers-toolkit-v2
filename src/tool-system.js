@@ -1,9 +1,10 @@
 // src/tool-system.js
+const path = require('path');
 const ClaudeAPIService = require('./claude-api/client');
 const toolRegistry = require('./tools/registry');
 const TokensWordsCounter = require('./tools/tokens-words-counter');
 const ConsistencyChecker = require('./tools/consistency-checker');
-const path = require('path');
+const BrainstormTool = require('./tools/brainstorm');
 
 /**
  * Initialize the tool system
@@ -41,6 +42,22 @@ async function initializeToolSystem(settings, database) {
         toolRegistry.registerTool(
           toolInfo.name, // Use ID as the registry key
           new TokensWordsCounter(claudeService, {
+            ...toolConfig,
+            ...settings
+          })
+        );
+        console.log(`Successfully registered tool: ${toolInfo.name}`);
+      }
+    }
+    else if (toolInfo.name === 'brainstorm') {
+      const toolConfig = database.getToolByName(toolInfo.name);
+      console.log('Brainstorm tool config:', toolConfig);
+      
+      if (toolConfig) {
+        // Register the tool
+        toolRegistry.registerTool(
+          toolInfo.name,
+          new BrainstormTool(claudeService, {
             ...toolConfig,
             ...settings
           })
