@@ -1,5 +1,30 @@
 {
 	"tools": {
+		"tokens_words_counter": {
+			"id": "tokens_words_counter",
+			"name": "tokens_words_counter.js",
+			"title": "Tokens & Words Counter",
+			"description": "Analyzes a text file to count tokens, words.",
+			"help_text": "",
+			"category": "analysis",
+			"options": [
+				{
+					"name": "input_file",
+					"label": "Input File",
+					"type": "file",
+					"description": "The text file to analyze",
+					"required": true,
+					"filters": [
+						{
+							"name": "Text Files",
+							"extensions": [
+								"txt"
+							]
+						}
+					]
+				}
+			]
+		},
 		"brainstorm": {
 			"id": "brainstorm",
 			"name": "brainstorm.js",
@@ -314,7 +339,7 @@
 					"type": "file",
 					"description": "Path to world file",
 					"required": false,
-					"default": "world.txt",
+					"default": "",
 					"group": "Input Files"
 				},
 				{
@@ -379,31 +404,6 @@
 					"required": false,
 					"default": null,
 					"group": "Input Files"
-				}
-			]
-		},
-		"tokens_words_counter": {
-			"id": "tokens_words_counter",
-			"name": "tokens_words_counter.js",
-			"title": "Tokens & Words Counter",
-			"description": "Analyzes a text file to count tokens, words.",
-			"help_text": "",
-			"category": "analysis",
-			"options": [
-				{
-					"name": "input_file",
-					"label": "Input File",
-					"type": "file",
-					"description": "The text file to analyze",
-					"required": true,
-					"filters": [
-						{
-							"name": "Text Files",
-							"extensions": [
-								"txt"
-							]
-						}
-					]
 				}
 			]
 		},

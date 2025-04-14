@@ -7,6 +7,7 @@ const ConsistencyChecker = require('./tools/consistency-checker');
 const BrainstormTool = require('./tools/brainstorm');
 const OutlineWriter = require('./tools/outline-writer');
 const WorldWriter = require('./tools/world-writer');
+const ChapterWriter = require('./tools/chapter-writer');
 
 /**
  * Initialize the tool system
@@ -92,6 +93,22 @@ async function initializeToolSystem(settings, database) {
         toolRegistry.registerTool(
           toolInfo.name,
           new WorldWriter(claudeService, {
+            ...toolConfig,
+            ...settings
+          })
+        );
+        console.log(`Successfully registered tool: ${toolInfo.name}`);
+      }
+    }
+    else if (toolInfo.name === 'chapter_writer') {
+      const toolConfig = database.getToolByName(toolInfo.name);
+      console.log('Chapter Writer tool config:', toolConfig);
+      
+      if (toolConfig) {
+        // Register the tool
+        toolRegistry.registerTool(
+          toolInfo.name,
+          new ChapterWriter(claudeService, {
             ...toolConfig,
             ...settings
           })
