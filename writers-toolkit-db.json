@@ -1,1130 +1,1146 @@
 {
-  "tools": {
-    "brainstorm": {
-      "id": "brainstorm",
-      "name": "brainstorm.js",
-      "title": "Brainstorm",
-      "description": "Helps generate initial story ideas, prompts, and creative angles. Appends more ideas to the existing 'ideas.txt' file.",
-      "help_text": "Generates creative writing concepts, characters, and worldbuilding based on input ideas",
-      "category": "creation",
-      "options": [
-        {
-          "name": "ideas_file",
-          "label": "IDEAS_FILE",
-          "type": "file",
-          "description": "Path to ideas.txt file containing the concept and/or characters",
-          "required": true,
-          "default": "/Users/cleesmith/writing/Spooky_Action/Ovid_Solon_Hailuo_AI.txt",
-          "group": "Input Files"
-        },
-        {
-          "name": "continue",
-          "label": "CONTINUE",
-          "type": "boolean",
-          "description": "Continue building on existing ideas in the ideas file",
-          "required": false,
-          "default": false,
-          "group": "Operation Mode"
-        },
-        {
-          "name": "lang",
-          "label": "LANG",
-          "type": "text",
-          "description": "Language for writing (default: English)",
-          "required": false,
-          "default": "English",
-          "group": "Content Configuration"
-        },
-        {
-          "name": "title",
-          "label": "TITLE",
-          "type": "text",
-          "description": "Suggested title for the writing (optional)",
-          "required": false,
-          "default": null,
-          "group": "Content Configuration"
-        },
-        {
-          "name": "genre",
-          "label": "GENRE",
-          "type": "text",
-          "description": "Suggested genre for the writing (optional)",
-          "required": false,
-          "default": null,
-          "group": "Content Configuration"
-        },
-        {
-          "name": "num_characters",
-          "label": "NUM_CHARACTERS",
-          "type": "number",
-          "description": "Number of main characters to generate (default: 5)",
-          "required": false,
-          "default": 5,
-          "group": "Content Configuration"
-        },
-        {
-          "name": "worldbuilding_depth",
-          "label": "WORLDBUILDING_DEPTH",
-          "type": "number",
-          "description": "Depth of worldbuilding detail (1-5, where 5 is most detailed) (default: 3)",
-          "required": false,
-          "default": 3,
-          "group": "Content Configuration"
-        },
-        {
-          "name": "character_relationships",
-          "label": "CHARACTER_RELATIONSHIPS",
-          "type": "boolean",
-          "description": "Include detailed character relationships",
-          "required": false,
-          "default": false,
-          "group": "Content Configuration"
-        },
-        {
-          "name": "concept_only",
-          "label": "CONCEPT_ONLY",
-          "type": "boolean",
-          "description": "Generate only the concept file",
-          "required": false,
-          "default": false,
-          "group": "Operation Mode"
-        },
-        {
-          "name": "characters_only",
-          "label": "CHARACTERS_ONLY",
-          "type": "boolean",
-          "description": "Generate only the characters file",
-          "required": false,
-          "default": false,
-          "group": "Operation Mode"
-        },
-        {
-          "name": "allow_new_characters",
-          "label": "ALLOW_NEW_CHARACTERS",
-          "type": "boolean",
-          "description": "Allow creation of new characters not in the ideas file",
-          "required": false,
-          "default": false,
-          "group": "Content Configuration"
-        }
-      ]
-    },
-    "outline_writer": {
-      "id": "outline_writer",
-      "name": "outline_writer.js",
-      "title": "Outline Writer",
-      "description": "Generates a plot outline from your brainstorming file.  You can provide your own outline skeleton and let the AI fill in details.",
-      "help_text": "Generates comprehensive novel outlines with customizable sections, chapters, and detail levels",
-      "category": "creation",
-      "options": [
-        {
-          "name": "premise_file",
-          "label": "PREMISE_FILE",
-          "type": "file",
-          "description": "File containing the story premise (required)",
-          "required": true,
-          "default": "",
-          "group": "Input Files"
-        },
-        {
-          "name": "example_outline",
-          "label": "EXAMPLE_OUTLINE",
-          "type": "text",
-          "description": "Example outline for reference",
-          "required": false,
-          "default": null,
-          "group": "Input Files"
-        },
-        {
-          "name": "concept_file",
-          "label": "CONCEPT_FILE",
-          "type": "file",
-          "description": "File containing detailed concept information (optional)",
-          "required": false,
-          "default": null,
-          "group": "Input Files"
-        },
-        {
-          "name": "characters_file",
-          "label": "CHARACTERS_FILE",
-          "type": "file",
-          "description": "File containing character descriptions (optional)",
-          "required": false,
-          "default": null,
-          "group": "Input Files"
-        },
-        {
-          "name": "sections",
-          "label": "SECTIONS",
-          "type": "number",
-          "description": "Number of main parts/sections in the outline (default: 5)",
-          "required": false,
-          "default": 5,
-          "group": "Output Configuration"
-        },
-        {
-          "name": "chapters",
-          "label": "CHAPTERS",
-          "type": "number",
-          "description": "Number of chapters in the outline (default: 25)",
-          "required": false,
-          "default": 25,
-          "group": "Output Configuration"
-        },
-        {
-          "name": "lang",
-          "label": "LANG",
-          "type": "text",
-          "description": "Language for writing (default: English)",
-          "required": false,
-          "default": "English",
-          "group": "Output Configuration"
-        },
-        {
-          "name": "title",
-          "label": "TITLE",
-          "type": "text",
-          "description": "Suggested title for the novel (optional)",
-          "required": false,
-          "default": null,
-          "group": "Output Configuration"
-        },
-        {
-          "name": "genre",
-          "label": "GENRE",
-          "type": "text",
-          "description": "Suggested genre for the novel (optional)",
-          "required": false,
-          "default": null,
-          "group": "Output Configuration"
-        },
-        {
-          "name": "detailed",
-          "label": "DETAILED",
-          "type": "boolean",
-          "description": "Generate a more detailed outline with chapter summaries",
-          "required": false,
-          "default": false,
-          "group": "Output Configuration"
-        }
-      ]
-    },
-    "world_writer": {
-      "id": "world_writer",
-      "name": "world_writer.js",
-      "title": "World Writer",
-      "description": "Extract and develop characters and world elements from a novel outline.  It requires: title, POV, and characters.txt and outline.txt.",
-      "help_text": "Creates comprehensive world-building documents based on story outlines and character files",
-      "category": "creation",
-      "options": [
-        {
-          "name": "lang",
-          "label": "LANG",
-          "type": "text",
-          "description": "Language for writing (default: English)",
-          "required": false,
-          "default": "English",
-          "group": "Content Configuration"
-        },
-        {
-          "name": "title",
-          "label": "TITLE",
-          "type": "text",
-          "description": "Title of story",
-          "required": true,
-          "default": "",
-          "group": "Content Configuration"
-        },
-        {
-          "name": "pov",
-          "label": "POV",
-          "type": "text",
-          "description": "Point of view",
-          "required": true,
-          "default": "third person perspective",
-          "group": "Content Configuration"
-        },
-        {
-          "name": "characters_file",
-          "label": "CHARACTERS_FILE",
-          "type": "file",
-          "description": "Characters",
-          "required": true,
-          "default": "",
-          "group": "Input Files"
-        },
-        {
-          "name": "outline_file",
-          "label": "OUTLINE_FILE",
-          "type": "file",
-          "description": "Path to the outline file generated by outline_writer.py",
-          "required": true,
-          "default": null,
-          "group": "Input Files"
-        },
-        {
-          "name": "detailed",
-          "label": "DETAILED",
-          "type": "boolean",
-          "description": "Generate more detailed character and world profiles",
-          "required": false,
-          "default": false,
-          "group": "Content Configuration"
-        }
-      ]
-    },
-    "chapter_writer": {
-      "id": "chapter_writer",
-      "name": "chapter_writer.js",
-      "title": "Chapter Writer",
-      "description": "Uses the outline, chapters list, world document, and any existing manuscript to write rough draft chapters",
-      "help_text": "Uses the outline, chapters list, world document, and any existing manuscript to write rough draft chapters",
-      "category": "creation",
-      "options": [
-        {
-          "name": "chapters_to_write",
-          "label": "chapters_to_write",
-          "type": "file",
-          "description": "Path to a file containing a list of chapters to write sequentially, and the format is \"9. Chapter Title\" per line. \nIt may contain one or more chapters. \nIt must match the chapter format in the outline.",
-          "required": false,
-          "default": "chapters.txt",
-          "group": "Input Files"
-        },
-        {
-          "name": "manuscript",
-          "label": "manuscript",
-          "type": "file",
-          "description": "Path to manuscript file",
-          "required": true,
-          "default": "manuscript.txt",
-          "group": "Input Files"
-        },
-        {
-          "name": "outline",
-          "label": "outline",
-          "type": "file",
-          "description": "Path to outline file",
-          "required": true,
-          "default": "outline.txt",
-          "group": "Input Files"
-        },
-        {
-          "name": "world",
-          "label": "world",
-          "type": "file",
-          "description": "Path to world file",
-          "required": false,
-          "default": "world.txt",
-          "group": "Input Files"
-        },
-        {
-          "name": "lang",
-          "label": "lang",
-          "type": "text",
-          "description": "Language for writing",
-          "required": false,
-          "default": "English",
-          "group": "Input Files"
-        },
-        {
-          "name": "chapter_delay",
-          "label": "chapter_delay",
-          "type": "number",
-          "description": "Delay in seconds between processing multiple chapters (default: 15 seconds)",
-          "required": false,
-          "default": 15,
-          "group": "Input Files"
-        },
-        {
-          "name": "no_dialogue_emphasis",
-          "label": "no_dialogue_emphasis",
-          "type": "boolean",
-          "description": "Turn off the additional dialogue emphasis (dialogue emphasis is ON by default)",
-          "required": false,
-          "default": true,
-          "group": "Input Files"
-        },
-        {
-          "name": "no_append",
-          "label": "no_append",
-          "type": "boolean",
-          "description": "Disable auto-appending new chapters to manuscript file",
-          "required": false,
-          "default": false,
-          "group": "Input Files"
-        },
-        {
-          "name": "backup",
-          "label": "backup",
-          "type": "boolean",
-          "description": "Create backup of manuscript file before appending (default: False)",
-          "required": false,
-          "default": false,
-          "group": "Output Configuration"
-        },
-        {
-          "name": "show_token_stats",
-          "label": "show_token_stats",
-          "type": "boolean",
-          "description": "Show tokens stats but do not call API\nYou just want to double check the settings/numbers.",
-          "required": false,
-          "default": false,
-          "group": "Claude API Configuration"
-        },
-        {
-          "name": "request",
-          "label": "request",
-          "type": "text",
-          "description": "Single chapter format: \"Chapter 9: Title\"   or  \"9: Title\"   or  \"9. Title\"",
-          "required": false,
-          "default": null,
-          "group": "Input Files"
-        }
-      ]
-    },
-    "tokens_words_counter": {
-      "id": "tokens_words_counter",
-      "name": "tokens_words_counter.js",
-      "title": "Tokens & Words Counter",
-      "description": "Analyzes a text file to count tokens, words.",
-      "help_text": "",
-      "category": "analysis",
-      "options": [
-        {
-          "name": "input_file",
-          "label": "Input File",
-          "type": "file",
-          "description": "The text file to analyze",
-          "required": true,
-          "filters": [
-            {
-              "name": "Text Files",
-              "extensions": [
-                "txt"
-              ]
-            }
-          ]
-        }
-      ]
-    },
-    "character_analyzer": {
-      "id": "character_analyzer",
-      "name": "character_analyzer.js",
-      "title": "Character Analyzer",
-      "description": "Analyzes manuscript, outline, and world files to identify and compare character appearances. It extracts a master character list that details which files each character appears in, examines consistency across documents, and highlights discrepancies in names, roles, or relationships. The analysis produces a detailed report with sections and recommendations to improve character coherence. This is needed because AI draft writing has a tendency to add new characters!",
-      "help_text": "Analyze characters across story files using Claude AI.",
-      "category": "analysis",
-      "options": [
-        {
-          "name": "manuscript_file",
-          "label": "MANUSCRIPT_FILE",
-          "type": "file",
-          "description": "File containing the manuscript to analyze (required)",
-          "required": true,
-          "default": "",
-          "group": "Input Files"
-        },
-        {
-          "name": "outline_file",
-          "label": "OUTLINE_FILE",
-          "type": "file",
-          "description": "File containing the story outline (optional)",
-          "required": false,
-          "default": "",
-          "group": "Input Files"
-        },
-        {
-          "name": "world_file",
-          "label": "WORLD_FILE",
-          "type": "file",
-          "description": "File containing the story world/lore information (optional)",
-          "required": false,
-          "default": "",
-          "group": "Input Files"
-        },
-        {
-          "name": "skip_thinking",
-          "label": "skip_thinking",
-          "type": "boolean",
-          "description": "Skip saving the AI thinking process (smaller output files)",
-          "required": false,
-          "default": false,
-          "group": "Output Configuration"
-        },
-        {
-          "name": "analysis_description",
-          "label": "ANALYSIS_DESCRIPTION",
-          "type": "text",
-          "description": "Optional description to include in output filenames",
-          "required": false,
-          "default": "",
-          "group": "Output Configuration"
-        }
-      ]
-    },
-    "tense_consistency_checker": {
-      "id": "tense_consistency_checker",
-      "name": "tense_consistency_checker.js",
-      "title": "Tense Consistency Checker",
-      "description": "Examines the manuscript to evaluate verb tense consistency. It identifies shifts between past and present tense that might confuse readers, focusing on unintentional changes in narrative flow. With customizable analysis levels and configurable chapter markers, it generates a detailed report with examples, explanations, and suggestions for improving consistency.",
-      "help_text": "Analyze manuscript for verb tense consistency using Claude AI.",
-      "category": "analysis",
-      "options": [
-        {
-          "name": "manuscript_file",
-          "label": "MANUSCRIPT_FILE",
-          "type": "file",
-          "description": "File containing the manuscript to analyze (required)",
-          "required": true,
-          "default": "/Users/cleesmith/writing/A_Darker_Roast/manuscript.txt",
-          "group": "Input Files"
-        },
-        {
-          "name": "analysis_level",
-          "label": "analysis_level",
-          "type": "text",
-          "description": "Level of tense analysis detail:\nbasic, standard, detailed",
-          "required": false,
-          "default": "detailed",
-          "group": "Analysis Options"
-        },
-        {
-          "name": "chapter_markers",
-          "label": "CHAPTER_MARKERS",
-          "type": "text",
-          "description": "Text that marks the start of chapters (default: 'Chapter')",
-          "required": false,
-          "default": "Chapter",
-          "group": "Analysis Options"
-        },
-        {
-          "name": "skip_thinking",
-          "label": "skip_thinking",
-          "type": "boolean",
-          "description": "Skip saving the AI thinking process (smaller output files)",
-          "required": false,
-          "default": false,
-          "group": "Output Configuration"
-        },
-        {
-          "name": "analysis_description",
-          "label": "ANALYSIS_DESCRIPTION",
-          "type": "text",
-          "description": "Optional description to include in output filenames",
-          "required": false,
-          "default": "",
-          "group": "Output Configuration"
-        }
-      ]
-    },
-    "adjective_adverb_optimizer": {
-      "id": "adjective_adverb_optimizer",
-      "name": "adjective_adverb_optimizer.js",
-      "title": "Adjective Adverb Optimizer",
-      "description": "Analyzes manuscript adjective and adverb usage to pinpoint unnecessary modifiers and overused qualifiers, offering specific suggestions for replacing weak descriptive patterns with stronger verbs and nouns, in line with Ursula K. Le Guin's guidance.",
-      "help_text": "Adjective Adverb Optimizer",
-      "category": "editing",
-      "options": [
-        {
-          "name": "manuscript_file",
-          "label": "MANUSCRIPT_FILE",
-          "type": "file",
-          "description": "File containing the manuscript to analyze",
-          "required": true,
-          "default": "manuscript.txt",
-          "group": "Input Files"
-        },
-        {
-          "name": "skip_thinking",
-          "label": "skip_thinking",
-          "type": "boolean",
-          "description": "Skip saving the AI thinking process",
-          "required": false,
-          "default": false,
-          "group": "Output Configuration"
-        },
-        {
-          "name": "analysis_description",
-          "label": "ANALYSIS_DESCRIPTION",
-          "type": "text",
-          "description": "Optional description to include in output filenames",
-          "required": false,
-          "default": "",
-          "group": "Output Configuration"
-        },
-        {
-          "name": "analysis_level",
-          "label": "analysis_level",
-          "type": "text",
-          "description": "Level of analysis detail (default: standard)\nChoices: basic, standard, detailed",
-          "required": false,
-          "default": "all",
-          "group": "Analysis Options"
-        },
-        {
-          "name": "focus_areas",
-          "label": "focus_areas",
-          "type": "text",
-          "description": "Specific areas to focus analysis on (default: all areas)\nChoices: qualifiers, adverbs, adjectives, imagery",
-          "required": false,
-          "default": "all",
-          "group": "Analysis Options"
-        }
-      ]
-    },
-    "dangling_modifier_checker": {
-      "id": "dangling_modifier_checker",
-      "name": "dangling_modifier_checker.js",
-      "title": "Dangling Modifier Checker",
-      "description": "Manuscript analysis software that detects dangling and misplaced modifiers.\nIt examines text to pinpoint instances where descriptive phrases don't logically connect to their intended subjects, potentially causing confusion or unintended humor.\nWith customizable analysis level, sensitivity, and specific modifier types, it generates a detailed report complete with examples, explanations, and revision suggestions to enhance clarity and precision.",
-      "help_text": "Dangling Modifier Checker",
-      "category": "analysis",
-      "options": [
-        {
-          "name": "manuscript_file",
-          "label": "MANUSCRIPT_FILE",
-          "type": "file",
-          "description": "File containing the manuscript to analyze",
-          "required": true,
-          "default": "manuscript.txt",
-          "group": "Input Files"
-        },
-        {
-          "name": "skip_thinking",
-          "label": "skip_thinking",
-          "type": "boolean",
-          "description": "Skip saving the AI thinking process",
-          "required": false,
-          "default": false,
-          "group": "Output Configuration"
-        },
-        {
-          "name": "analysis_description",
-          "label": "ANALYSIS_DESCRIPTION",
-          "type": "text",
-          "description": "Optional description to include in output filenames",
-          "required": false,
-          "default": "",
-          "group": "Output Configuration"
-        },
-        {
-          "name": "analysis_level",
-          "label": "analysis_level",
-          "type": "text",
-          "description": "Level of analysis detail (default: standard)\nChoices: basic, standard, detailed",
-          "required": false,
-          "default": "all",
-          "group": "Analysis Options"
-        },
-        {
-          "name": "modifier_types",
-          "label": "modifier_types",
-          "type": "text",
-          "description": "Specific modifier types to focus on (default: all types)\nChoices: dangling, misplaced, squinting, limiting",
-          "required": false,
-          "default": "all",
-          "group": "Analysis Options"
-        },
-        {
-          "name": "sensitivity",
-          "label": "sensitivity",
-          "type": "text",
-          "description": "Sensitivity level for modifier detection (default: medium)\nChoices: low, medium, high",
-          "required": false,
-          "default": "medium",
-          "group": "Analysis Options"
-        }
-      ]
-    },
-    "rhythm_analyzer": {
-      "id": "rhythm_analyzer",
-      "name": "rhythm_analyzer.js",
-      "title": "Rhythm Analyzer",
-      "description": "Manuscript analysis utility for evaluating the rhythm and flow of prose.\nIt measures sentence length variations, detects monotonous patterns, and highlights sections where the writing's rhythm doesn't match the intended mood.\n Configurable analysis levels, selectable scene types, and adjustable sensitivity settings allow it to generate a detailed report with examples, explanations, and suggestions for enhancing overall narrative rhythm.",
-      "help_text": "Rhythm Analyzer",
-      "category": "analysis",
-      "options": [
-        {
-          "name": "manuscript_file",
-          "label": "MANUSCRIPT_FILE",
-          "type": "file",
-          "description": "File containing the manuscript to analyze",
-          "required": true,
-          "default": "manuscript.txt",
-          "group": "Input Files"
-        },
-        {
-          "name": "skip_thinking",
-          "label": "skip_thinking",
-          "type": "boolean",
-          "description": "Skip saving the AI thinking process",
-          "required": false,
-          "default": false,
-          "group": "Output Configuration"
-        },
-        {
-          "name": "analysis_description",
-          "label": "ANALYSIS_DESCRIPTION",
-          "type": "text",
-          "description": "Optional description to include in output filenames",
-          "required": false,
-          "default": "",
-          "group": "Output Configuration"
-        },
-        {
-          "name": "analysis_level",
-          "label": "analysis_level",
-          "type": "text",
-          "description": "Level of analysis detail (default: standard)\nChoices: basic, standard, detailed",
-          "required": false,
-          "default": "all",
-          "group": "Analysis Options"
-        },
-        {
-          "name": "scene_types",
-          "label": "scene_types",
-          "type": "text",
-          "description": "Specific scene types to focus analysis on (default: all types)\nChoices: action, dialogue, description, exposition",
-          "required": false,
-          "default": "all",
-          "group": "Analysis Options"
-        },
-        {
-          "name": "rhythm_sensitivity",
-          "label": "rhythm_sensitivity",
-          "type": "text",
-          "description": "Sensitivity level for rhythm analysis (default: medium)\nChoices: low, medium, high",
-          "required": false,
-          "default": "medium",
-          "group": "Analysis Options"
-        }
-      ]
-    },
-    "crowding_leaping_evaluator": {
-      "id": "crowding_leaping_evaluator",
-      "name": "crowding_leaping_evaluator.js",
-      "title": "Crowding Leaping Evaluator",
-      "description": "Manuscript pacing evaluator that examines narrative structure for pacing issues.\nIt identifies overly dense sections (crowding) and abrupt transitions or time jumps (leaping) based on concepts inspired by Ursula K. Le Guin.\n With configurable analysis levels and sensitivity settings, it produces a detailed report—including optional text-based visualizations—that offers feedback and suggestions for improving narrative rhythm and clarity.",
-      "help_text": "Crowding Leaping Evaluator",
-      "category": "editing",
-      "options": [
-        {
-          "name": "manuscript_file",
-          "label": "MANUSCRIPT_FILE",
-          "type": "file",
-          "description": "File containing the manuscript to analyze",
-          "required": true,
-          "default": "manuscript.txt",
-          "group": "Input Files"
-        },
-        {
-          "name": "include_visualization",
-          "label": "include_visualization",
-          "type": "boolean",
-          "description": "Include a text-based visualization of pacing patterns",
-          "required": false,
-          "default": false,
-          "group": "Output Configuration"
-        },
-        {
-          "name": "skip_thinking",
-          "label": "skip_thinking",
-          "type": "boolean",
-          "description": "Skip saving the AI thinking process",
-          "required": false,
-          "default": false,
-          "group": "Output Configuration"
-        },
-        {
-          "name": "analysis_description",
-          "label": "ANALYSIS_DESCRIPTION",
-          "type": "text",
-          "description": "Optional description to include in output filenames",
-          "required": false,
-          "default": "",
-          "group": "Output Configuration"
-        },
-        {
-          "name": "analysis_level",
-          "label": "analysis_level",
-          "type": "text",
-          "description": "Level of analysis detail (default: standard)\nChoices: basic, standard, detailed",
-          "required": false,
-          "default": "all",
-          "group": "Analysis Options"
-        },
-        {
-          "name": "focus_areas",
-          "label": "focus_areas",
-          "type": "text",
-          "description": "Specific areas to focus on (default: all areas)\nChoices: crowding, leaping, transitions, pacing",
-          "required": false,
-          "default": "all",
-          "group": "Analysis Options"
-        },
-        {
-          "name": "sensitivity",
-          "label": "sensitivity",
-          "type": "text",
-          "description": "Sensitivity level for pattern detection (default: medium)\nChoices: low, medium, high",
-          "required": false,
-          "default": "all",
-          "group": "Analysis Options"
-        }
-      ]
-    },
-    "punctuation_auditor": {
-      "id": "punctuation_auditor",
-      "name": "punctuation_auditor.js",
-      "title": "Punctuation Auditor",
-      "description": "Manuscript analysis utility focused on evaluating punctuation effectiveness.\nIt detects issues such as run-on sentences, missing commas, and irregular punctuation patterns that may hinder clarity and flow.\nConfigurable analysis levels, strictness settings, and selectable punctuation elements enable it to generate a detailed report with examples, explanations, and recommendations for enhancing punctuation and overall readability.",
-      "help_text": "Punctuation Auditor",
-      "category": "editing",
-      "options": [
-        {
-          "name": "manuscript_file",
-          "label": "MANUSCRIPT_FILE",
-          "type": "file",
-          "description": "File containing the manuscript to analyze",
-          "required": true,
-          "default": "manuscript.txt",
-          "group": "Input Files"
-        },
-        {
-          "name": "skip_thinking",
-          "label": "skip_thinking",
-          "type": "boolean",
-          "description": "Skip saving the AI thinking process",
-          "required": false,
-          "default": false,
-          "group": "Output Configuration"
-        },
-        {
-          "name": "analysis_description",
-          "label": "ANALYSIS_DESCRIPTION",
-          "type": "text",
-          "description": "Optional description to include in output filenames",
-          "required": false,
-          "default": "",
-          "group": "Output Configuration"
-        },
-        {
-          "name": "analysis_level",
-          "label": "analysis_level",
-          "type": "text",
-          "description": "Level of analysis detail (default: standard)\nChoices: basic, standard, detailed",
-          "required": false,
-          "default": "all",
-          "group": "Analysis Options"
-        },
-        {
-          "name": "elements",
-          "label": "elements",
-          "type": "text",
-          "description": "Specific punctuation elements to focus on (default: all elements)\nChoices: commas, periods, semicolons, dashes, parentheses, colons, run-ons",
-          "required": false,
-          "default": "all",
-          "group": "Analysis Options"
-        },
-        {
-          "name": "strictness",
-          "label": "strictness",
-          "type": "text",
-          "description": "Strictness level for punctuation analysis (default: medium)\nChoices: low, medium, high",
-          "required": false,
-          "default": "all",
-          "group": "Analysis Options"
-        }
-      ]
-    },
-    "consistency_checker": {
-      "id": "consistency_checker",
-      "name": "consistency_checker.js",
-      "title": "Consistency Checker",
-      "description": "Manuscript consistency checker utility that compares a manuscript against a world document (and optionally an outline).\nIt supports various consistency checks: world, internal, development, and unresolved.\nConfigurable options enable targeted analysis of character, setting, timeline, and thematic consistency, producing detailed reports with examples and recommendations for resolving discrepancies.",
-      "help_text": "Manuscript consistency checker",
-      "category": "analysis",
-      "options": [
-        {
-          "name": "manuscript_file",
-          "label": "MANUSCRIPT_FILE",
-          "type": "file",
-          "description": "File containing the manuscript to analyze",
-          "required": true,
-          "default": "manuscript.txt",
-          "group": "Input Files"
-        },
-        {
-          "name": "world_file",
-          "label": "world_file",
-          "type": "file",
-          "description": "File containing the world details (required)",
-          "required": true,
-          "default": "world.txt",
-          "group": "Input Files"
-        },
-        {
-          "name": "outline_file",
-          "label": "outline_file",
-          "type": "file",
-          "description": "File containing the story outline (optional)",
-          "required": false,
-          "default": "outline.txt",
-          "group": "Input Files"
-        },
-        {
-          "name": "skip_thinking",
-          "label": "skip_thinking",
-          "type": "boolean",
-          "description": "Skip saving the AI thinking process",
-          "required": false,
-          "default": false,
-          "group": "Output Configuration"
-        },
-        {
-          "name": "check_type",
-          "label": "Check Type",
-          "type": "select",
-          "description": "Type of consistency check to perform",
-          "required": false,
-          "default": "all",
-          "group": "Analysis Options",
-          "choices": [
-            { "value": "world", "label": "World Consistency" },
-            { "value": "internal", "label": "Internal Consistency" },
-            { "value": "development", "label": "Development Consistency" },
-            { "value": "unresolved", "label": "Unresolved Elements" },
-            { "value": "all", "label": "All Checks" }
-          ]
-        },
-        {
-          "name": "check_description",
-          "label": "check_description",
-          "type": "text",
-          "description": "Optional description to include in output filenames",
-          "required": false,
-          "default": "",
-          "group": "Output Configuration"
-        }
-      ]
-    },
-    "conflict_analyzer": {
-      "id": "conflict_analyzer",
-      "name": "conflict_analyzer.js",
-      "title": "Conflict Analyzer",
-      "description": "Manuscript conflict analysis utility that examines conflict patterns at different narrative levels.\nIt identifies conflict nature, escalation, and resolution at scene, chapter, and arc levels.\nWith customizable analysis levels and selectable conflict types, it produces a detailed report featuring examples, assessments, and recommendations for strengthening narrative tension and coherence.",
-      "help_text": "Conflict Analyzer",
-      "category": "analysis",
-      "options": [
-        {
-          "name": "manuscript_file",
-          "label": "MANUSCRIPT_FILE",
-          "type": "file",
-          "description": "File containing the manuscript to analyze",
-          "required": true,
-          "default": "manuscript.txt",
-          "group": "Input Files"
-        },
-        {
-          "name": "outline_file",
-          "label": "outline_file",
-          "type": "file",
-          "description": "File containing the story outline (optional)",
-          "required": false,
-          "default": "outline.txt",
-          "group": "Input Files"
-        },
-        {
-          "name": "skip_thinking",
-          "label": "skip_thinking",
-          "type": "boolean",
-          "description": "Skip saving the AI thinking process",
-          "required": false,
-          "default": false,
-          "group": "Output Configuration"
-        },
-        {
-          "name": "analysis_level",
-          "label": "analysis_level",
-          "type": "text",
-          "description": "Level of conflict analysis to perform (default: all)\nChoices: scene, chapter, arc, all",
-          "required": false,
-          "default": "all",
-          "group": "Analysis Options"
-        },
-        {
-          "name": "analysis_description",
-          "label": "ANALYSIS_DESCRIPTION",
-          "type": "text",
-          "description": "Optional description to include in output filenames",
-          "required": false,
-          "default": "",
-          "group": "Output Configuration"
-        },
-        {
-          "name": "conflict_types",
-          "label": "conflict_types",
-          "type": "text",
-          "description": "Specific conflict types to analyze (default: all main types)\nChoices: internal, interpersonal, environmental, societal, cosmic",
-          "required": false,
-          "default": "all",
-          "group": "Analysis Options"
-        }
-      ]
-    },
-    "foreshadowing_tracker": {
-      "id": "foreshadowing_tracker",
-      "name": "foreshadowing_tracker.js",
-      "title": "Foreshadowing Tracker",
-      "description": "Manuscript analysis utility for identifying foreshadowing elements and tracking their payoffs.\n It pinpoints explicit clues, subtle hints, and Chekhov's Gun elements to evaluate how well narrative setups are resolved.\n With customizable options to select foreshadowing types and organization modes (chronological or by type), it generates detailed reports featuring examples, assessments, and recommendations for fulfilling narrative promises.",
-      "help_text": "Foreshadowing Tracker",
-      "category": "analysis",
-      "options": [
-        {
-          "name": "manuscript_file",
-          "label": "MANUSCRIPT_FILE",
-          "type": "file",
-          "description": "File containing the manuscript to analyze",
-          "required": true,
-          "default": "manuscript.txt",
-          "group": "Input Files"
-        },
-        {
-          "name": "outline_file",
-          "label": "outline_file",
-          "type": "file",
-          "description": "File containing the story outline (optional)",
-          "required": false,
-          "default": "outline.txt",
-          "group": "Input Files"
-        },
-        {
-          "name": "skip_thinking",
-          "label": "skip_thinking",
-          "type": "boolean",
-          "description": "Skip saving the AI thinking process",
-          "required": false,
-          "default": false,
-          "group": "Output Configuration"
-        },
-        {
-          "name": "chronological",
-          "label": "chronological",
-          "type": "boolean",
-          "description": "Sort foreshadowing elements chronologically rather than by type",
-          "required": false,
-          "default": false,
-          "group": "Output Configuration"
-        },
-        {
-          "name": "foreshadowing_type",
-          "label": "foreshadowing_type",
-          "type": "text",
-          "description": "Type of foreshadowing to analyze (default: all)\nChoices: explicit, implicit, chekhov, all",
-          "required": false,
-          "default": "all",
-          "group": "Analysis Options"
-        },
-        {
-          "name": "analysis_description",
-          "label": "ANALYSIS_DESCRIPTION",
-          "type": "text",
-          "description": "Optional description to include in output filenames",
-          "required": false,
-          "default": "",
-          "group": "Output Configuration"
-        }
-      ]
-    },
-    "plot_thread_tracker": {
-      "id": "plot_thread_tracker",
-      "name": "plot_thread_tracker.js",
-      "title": "Plot Thread Tracker",
-      "description": "Manuscript analysis utility for identifying and tracking distinct plot threads—revealing how they interconnect, converge, and diverge throughout the narrative.\n It uses text-based representations (with optional ASCII art visualization) and supports configurable analysis depth (basic, detailed, or comprehensive) to produce detailed reports with progression maps, thread connections, and narrative assessments, including manuscript excerpts and recommendations for strengthening the plot architecture.",
-      "help_text": "Plot Thread Tracker",
-      "category": "analysis",
-      "options": [
-        {
-          "name": "manuscript_file",
-          "label": "MANUSCRIPT_FILE",
-          "type": "file",
-          "description": "File containing the manuscript to analyze",
-          "required": true,
-          "default": "manuscript.txt",
-          "group": "Input Files"
-        },
-        {
-          "name": "outline_file",
-          "label": "outline_file",
-          "type": "file",
-          "description": "File containing the story outline (optional)",
-          "required": false,
-          "default": "outline.txt",
-          "group": "Input Files"
-        },
-        {
-          "name": "skip_thinking",
-          "label": "skip_thinking",
-          "type": "boolean",
-          "description": "Skip saving the AI thinking process",
-          "required": false,
-          "default": false,
-          "group": "Output Configuration"
-        },
-        {
-          "name": "ascii_art",
-          "label": "ascii_art",
-          "type": "boolean",
-          "description": "Include simple ASCII art visualization in the output",
-          "required": false,
-          "default": false,
-          "group": "Output Configuration"
-        },
-        {
-          "name": "analysis_depth",
-          "label": "analysis_depth",
-          "type": "text",
-          "description": "Depth of plot thread analysis to perform (default: comprehensive)",
-          "required": false,
-          "default": "comprehensive",
-          "group": "Analysis Options"
-        },
-        {
-          "name": "analysis_description",
-          "label": "ANALYSIS_DESCRIPTION",
-          "type": "text",
-          "description": "Optional description to include in output filenames",
-          "required": false,
-          "default": "",
-          "group": "Output Configuration"
-        },
-        {
-          "name": "thread_focus",
-          "label": "thread_focus",
-          "type": "text",
-          "description": "Optional list of specific plot threads to focus on (e.g., 'romance' 'mystery'). \nAlternative default: [\"romance\", \"mystery\"]",
-          "required": false,
-          "default": null,
-          "group": "Output Configuration"
-        }
-      ]
-    }
-  },
-  "settings": {
-    "claude_api": {
-      "max_retries": 1,
-      "request_timeout": 300,
-      "context_window": 200000,
-      "thinking_budget_tokens": 32000,
-      "betas_max_tokens": 128000,
-      "desired_output_tokens": 12000
-    },
-    "projects": {
-      "current": "Formic",
-      "paths": {
-        "Formic": "/Users/cleesmith/writing/Formic"
-      }
-    },
-    "default_save_dir": "/Users/cleesmith/writing/Formic"
-  }
+	"tools": {
+		"brainstorm": {
+			"id": "brainstorm",
+			"name": "brainstorm.js",
+			"title": "Brainstorm",
+			"description": "Helps generate initial story ideas, prompts, and creative angles. Appends more ideas to the existing 'ideas.txt' file.",
+			"help_text": "Generates creative writing concepts, characters, and worldbuilding based on input ideas",
+			"category": "creation",
+			"options": [
+				{
+					"name": "ideas_file",
+					"label": "IDEAS_FILE",
+					"type": "file",
+					"description": "Path to ideas.txt file containing the concept and/or characters",
+					"required": true,
+					"default": "/Users/cleesmith/writing/Spooky_Action/Ovid_Solon_Hailuo_AI.txt",
+					"group": "Input Files"
+				},
+				{
+					"name": "continue",
+					"label": "CONTINUE",
+					"type": "boolean",
+					"description": "Continue building on existing ideas in the ideas file",
+					"required": false,
+					"default": false,
+					"group": "Operation Mode"
+				},
+				{
+					"name": "lang",
+					"label": "LANG",
+					"type": "text",
+					"description": "Language for writing (default: English)",
+					"required": false,
+					"default": "English",
+					"group": "Content Configuration"
+				},
+				{
+					"name": "title",
+					"label": "TITLE",
+					"type": "text",
+					"description": "Suggested title for the writing (optional)",
+					"required": false,
+					"default": null,
+					"group": "Content Configuration"
+				},
+				{
+					"name": "genre",
+					"label": "GENRE",
+					"type": "text",
+					"description": "Suggested genre for the writing (optional)",
+					"required": false,
+					"default": null,
+					"group": "Content Configuration"
+				},
+				{
+					"name": "num_characters",
+					"label": "NUM_CHARACTERS",
+					"type": "number",
+					"description": "Number of main characters to generate (default: 5)",
+					"required": false,
+					"default": 5,
+					"group": "Content Configuration"
+				},
+				{
+					"name": "worldbuilding_depth",
+					"label": "WORLDBUILDING_DEPTH",
+					"type": "number",
+					"description": "Depth of worldbuilding detail (1-5, where 5 is most detailed) (default: 3)",
+					"required": false,
+					"default": 3,
+					"group": "Content Configuration"
+				},
+				{
+					"name": "character_relationships",
+					"label": "CHARACTER_RELATIONSHIPS",
+					"type": "boolean",
+					"description": "Include detailed character relationships",
+					"required": false,
+					"default": false,
+					"group": "Content Configuration"
+				},
+				{
+					"name": "concept_only",
+					"label": "CONCEPT_ONLY",
+					"type": "boolean",
+					"description": "Generate only the concept file",
+					"required": false,
+					"default": false,
+					"group": "Operation Mode"
+				},
+				{
+					"name": "characters_only",
+					"label": "CHARACTERS_ONLY",
+					"type": "boolean",
+					"description": "Generate only the characters file",
+					"required": false,
+					"default": false,
+					"group": "Operation Mode"
+				},
+				{
+					"name": "allow_new_characters",
+					"label": "ALLOW_NEW_CHARACTERS",
+					"type": "boolean",
+					"description": "Allow creation of new characters not in the ideas file",
+					"required": false,
+					"default": false,
+					"group": "Content Configuration"
+				}
+			]
+		},
+		"outline_writer": {
+			"id": "outline_writer",
+			"name": "outline_writer.js",
+			"title": "Outline Writer",
+			"description": "Generates a plot outline from your brainstorming file.  You can provide your own outline skeleton and let the AI fill in details.",
+			"help_text": "Generates comprehensive novel outlines with customizable sections, chapters, and detail levels",
+			"category": "creation",
+			"options": [
+				{
+					"name": "premise_file",
+					"label": "PREMISE_FILE",
+					"type": "file",
+					"description": "File containing the story premise (required)",
+					"required": true,
+					"default": "",
+					"group": "Input Files"
+				},
+				{
+					"name": "example_outline",
+					"label": "EXAMPLE_OUTLINE",
+					"type": "text",
+					"description": "Example outline for reference",
+					"required": false,
+					"default": null,
+					"group": "Input Files"
+				},
+				{
+					"name": "concept_file",
+					"label": "CONCEPT_FILE",
+					"type": "file",
+					"description": "File containing detailed concept information (optional)",
+					"required": false,
+					"default": null,
+					"group": "Input Files"
+				},
+				{
+					"name": "characters_file",
+					"label": "CHARACTERS_FILE",
+					"type": "file",
+					"description": "File containing character descriptions (optional)",
+					"required": false,
+					"default": null,
+					"group": "Input Files"
+				},
+				{
+					"name": "sections",
+					"label": "SECTIONS",
+					"type": "number",
+					"description": "Number of main parts/sections in the outline (default: 5)",
+					"required": false,
+					"default": 5,
+					"group": "Output Configuration"
+				},
+				{
+					"name": "chapters",
+					"label": "CHAPTERS",
+					"type": "number",
+					"description": "Number of chapters in the outline (default: 25)",
+					"required": false,
+					"default": 25,
+					"group": "Output Configuration"
+				},
+				{
+					"name": "lang",
+					"label": "LANG",
+					"type": "text",
+					"description": "Language for writing (default: English)",
+					"required": false,
+					"default": "English",
+					"group": "Output Configuration"
+				},
+				{
+					"name": "title",
+					"label": "TITLE",
+					"type": "text",
+					"description": "Suggested title for the novel (optional)",
+					"required": false,
+					"default": null,
+					"group": "Output Configuration"
+				},
+				{
+					"name": "genre",
+					"label": "GENRE",
+					"type": "text",
+					"description": "Suggested genre for the novel (optional)",
+					"required": false,
+					"default": null,
+					"group": "Output Configuration"
+				},
+				{
+					"name": "detailed",
+					"label": "DETAILED",
+					"type": "boolean",
+					"description": "Generate a more detailed outline with chapter summaries",
+					"required": false,
+					"default": false,
+					"group": "Output Configuration"
+				}
+			]
+		},
+		"world_writer": {
+			"id": "world_writer",
+			"name": "world_writer.js",
+			"title": "World Writer",
+			"description": "Extract and develop characters and world elements from a novel outline.  It requires: title, POV, and characters.txt and outline.txt.",
+			"help_text": "Creates comprehensive world-building documents based on story outlines and character files",
+			"category": "creation",
+			"options": [
+				{
+					"name": "lang",
+					"label": "LANG",
+					"type": "text",
+					"description": "Language for writing (default: English)",
+					"required": false,
+					"default": "English",
+					"group": "Content Configuration"
+				},
+				{
+					"name": "title",
+					"label": "TITLE",
+					"type": "text",
+					"description": "Title of story",
+					"required": true,
+					"default": "",
+					"group": "Content Configuration"
+				},
+				{
+					"name": "pov",
+					"label": "POV",
+					"type": "text",
+					"description": "Point of view",
+					"required": true,
+					"default": "third person perspective",
+					"group": "Content Configuration"
+				},
+				{
+					"name": "characters_file",
+					"label": "CHARACTERS_FILE",
+					"type": "file",
+					"description": "Characters",
+					"required": true,
+					"default": "",
+					"group": "Input Files"
+				},
+				{
+					"name": "outline_file",
+					"label": "OUTLINE_FILE",
+					"type": "file",
+					"description": "Path to the outline file generated by outline_writer.py",
+					"required": true,
+					"default": null,
+					"group": "Input Files"
+				},
+				{
+					"name": "detailed",
+					"label": "DETAILED",
+					"type": "boolean",
+					"description": "Generate more detailed character and world profiles",
+					"required": false,
+					"default": false,
+					"group": "Content Configuration"
+				}
+			]
+		},
+		"chapter_writer": {
+			"id": "chapter_writer",
+			"name": "chapter_writer.js",
+			"title": "Chapter Writer",
+			"description": "Uses the outline, chapters list, world document, and any existing manuscript to write rough draft chapters",
+			"help_text": "Uses the outline, chapters list, world document, and any existing manuscript to write rough draft chapters",
+			"category": "creation",
+			"options": [
+				{
+					"name": "chapters_to_write",
+					"label": "chapters_to_write",
+					"type": "file",
+					"description": "Path to a file containing a list of chapters to write sequentially, and the format is \"9. Chapter Title\" per line. \nIt may contain one or more chapters. \nIt must match the chapter format in the outline.",
+					"required": false,
+					"default": "chapters.txt",
+					"group": "Input Files"
+				},
+				{
+					"name": "manuscript",
+					"label": "manuscript",
+					"type": "file",
+					"description": "Path to manuscript file",
+					"required": true,
+					"default": "manuscript.txt",
+					"group": "Input Files"
+				},
+				{
+					"name": "outline",
+					"label": "outline",
+					"type": "file",
+					"description": "Path to outline file",
+					"required": true,
+					"default": "outline.txt",
+					"group": "Input Files"
+				},
+				{
+					"name": "world",
+					"label": "world",
+					"type": "file",
+					"description": "Path to world file",
+					"required": false,
+					"default": "world.txt",
+					"group": "Input Files"
+				},
+				{
+					"name": "lang",
+					"label": "lang",
+					"type": "text",
+					"description": "Language for writing",
+					"required": false,
+					"default": "English",
+					"group": "Input Files"
+				},
+				{
+					"name": "chapter_delay",
+					"label": "chapter_delay",
+					"type": "number",
+					"description": "Delay in seconds between processing multiple chapters (default: 15 seconds)",
+					"required": false,
+					"default": 15,
+					"group": "Input Files"
+				},
+				{
+					"name": "no_dialogue_emphasis",
+					"label": "no_dialogue_emphasis",
+					"type": "boolean",
+					"description": "Turn off the additional dialogue emphasis (dialogue emphasis is ON by default)",
+					"required": false,
+					"default": true,
+					"group": "Input Files"
+				},
+				{
+					"name": "no_append",
+					"label": "no_append",
+					"type": "boolean",
+					"description": "Disable auto-appending new chapters to manuscript file",
+					"required": false,
+					"default": false,
+					"group": "Input Files"
+				},
+				{
+					"name": "backup",
+					"label": "backup",
+					"type": "boolean",
+					"description": "Create backup of manuscript file before appending (default: False)",
+					"required": false,
+					"default": false,
+					"group": "Output Configuration"
+				},
+				{
+					"name": "show_token_stats",
+					"label": "show_token_stats",
+					"type": "boolean",
+					"description": "Show tokens stats but do not call API\nYou just want to double check the settings/numbers.",
+					"required": false,
+					"default": false,
+					"group": "Claude API Configuration"
+				},
+				{
+					"name": "request",
+					"label": "request",
+					"type": "text",
+					"description": "Single chapter format: \"Chapter 9: Title\"   or  \"9: Title\"   or  \"9. Title\"",
+					"required": false,
+					"default": null,
+					"group": "Input Files"
+				}
+			]
+		},
+		"tokens_words_counter": {
+			"id": "tokens_words_counter",
+			"name": "tokens_words_counter.js",
+			"title": "Tokens & Words Counter",
+			"description": "Analyzes a text file to count tokens, words.",
+			"help_text": "",
+			"category": "analysis",
+			"options": [
+				{
+					"name": "input_file",
+					"label": "Input File",
+					"type": "file",
+					"description": "The text file to analyze",
+					"required": true,
+					"filters": [
+						{
+							"name": "Text Files",
+							"extensions": [
+								"txt"
+							]
+						}
+					]
+				}
+			]
+		},
+		"character_analyzer": {
+			"id": "character_analyzer",
+			"name": "character_analyzer.js",
+			"title": "Character Analyzer",
+			"description": "Analyzes manuscript, outline, and world files to identify and compare character appearances. It extracts a master character list that details which files each character appears in, examines consistency across documents, and highlights discrepancies in names, roles, or relationships. The analysis produces a detailed report with sections and recommendations to improve character coherence. This is needed because AI draft writing has a tendency to add new characters!",
+			"help_text": "Analyze characters across story files using Claude AI.",
+			"category": "analysis",
+			"options": [
+				{
+					"name": "manuscript_file",
+					"label": "MANUSCRIPT_FILE",
+					"type": "file",
+					"description": "File containing the manuscript to analyze (required)",
+					"required": true,
+					"default": "",
+					"group": "Input Files"
+				},
+				{
+					"name": "outline_file",
+					"label": "OUTLINE_FILE",
+					"type": "file",
+					"description": "File containing the story outline (optional)",
+					"required": false,
+					"default": "",
+					"group": "Input Files"
+				},
+				{
+					"name": "world_file",
+					"label": "WORLD_FILE",
+					"type": "file",
+					"description": "File containing the story world/lore information (optional)",
+					"required": false,
+					"default": "",
+					"group": "Input Files"
+				},
+				{
+					"name": "skip_thinking",
+					"label": "skip_thinking",
+					"type": "boolean",
+					"description": "Skip saving the AI thinking process (smaller output files)",
+					"required": false,
+					"default": false,
+					"group": "Output Configuration"
+				},
+				{
+					"name": "analysis_description",
+					"label": "ANALYSIS_DESCRIPTION",
+					"type": "text",
+					"description": "Optional description to include in output filenames",
+					"required": false,
+					"default": "",
+					"group": "Output Configuration"
+				}
+			]
+		},
+		"tense_consistency_checker": {
+			"id": "tense_consistency_checker",
+			"name": "tense_consistency_checker.js",
+			"title": "Tense Consistency Checker",
+			"description": "Examines the manuscript to evaluate verb tense consistency. It identifies shifts between past and present tense that might confuse readers, focusing on unintentional changes in narrative flow. With customizable analysis levels and configurable chapter markers, it generates a detailed report with examples, explanations, and suggestions for improving consistency.",
+			"help_text": "Analyze manuscript for verb tense consistency using Claude AI.",
+			"category": "analysis",
+			"options": [
+				{
+					"name": "manuscript_file",
+					"label": "MANUSCRIPT_FILE",
+					"type": "file",
+					"description": "File containing the manuscript to analyze (required)",
+					"required": true,
+					"default": "/Users/cleesmith/writing/A_Darker_Roast/manuscript.txt",
+					"group": "Input Files"
+				},
+				{
+					"name": "analysis_level",
+					"label": "analysis_level",
+					"type": "text",
+					"description": "Level of tense analysis detail:\nbasic, standard, detailed",
+					"required": false,
+					"default": "detailed",
+					"group": "Analysis Options"
+				},
+				{
+					"name": "chapter_markers",
+					"label": "CHAPTER_MARKERS",
+					"type": "text",
+					"description": "Text that marks the start of chapters (default: 'Chapter')",
+					"required": false,
+					"default": "Chapter",
+					"group": "Analysis Options"
+				},
+				{
+					"name": "skip_thinking",
+					"label": "skip_thinking",
+					"type": "boolean",
+					"description": "Skip saving the AI thinking process (smaller output files)",
+					"required": false,
+					"default": false,
+					"group": "Output Configuration"
+				},
+				{
+					"name": "analysis_description",
+					"label": "ANALYSIS_DESCRIPTION",
+					"type": "text",
+					"description": "Optional description to include in output filenames",
+					"required": false,
+					"default": "",
+					"group": "Output Configuration"
+				}
+			]
+		},
+		"adjective_adverb_optimizer": {
+			"id": "adjective_adverb_optimizer",
+			"name": "adjective_adverb_optimizer.js",
+			"title": "Adjective Adverb Optimizer",
+			"description": "Analyzes manuscript adjective and adverb usage to pinpoint unnecessary modifiers and overused qualifiers, offering specific suggestions for replacing weak descriptive patterns with stronger verbs and nouns, in line with Ursula K. Le Guin's guidance.",
+			"help_text": "Adjective Adverb Optimizer",
+			"category": "editing",
+			"options": [
+				{
+					"name": "manuscript_file",
+					"label": "MANUSCRIPT_FILE",
+					"type": "file",
+					"description": "File containing the manuscript to analyze",
+					"required": true,
+					"default": "manuscript.txt",
+					"group": "Input Files"
+				},
+				{
+					"name": "skip_thinking",
+					"label": "skip_thinking",
+					"type": "boolean",
+					"description": "Skip saving the AI thinking process",
+					"required": false,
+					"default": false,
+					"group": "Output Configuration"
+				},
+				{
+					"name": "analysis_description",
+					"label": "ANALYSIS_DESCRIPTION",
+					"type": "text",
+					"description": "Optional description to include in output filenames",
+					"required": false,
+					"default": "",
+					"group": "Output Configuration"
+				},
+				{
+					"name": "analysis_level",
+					"label": "analysis_level",
+					"type": "text",
+					"description": "Level of analysis detail (default: standard)\nChoices: basic, standard, detailed",
+					"required": false,
+					"default": "all",
+					"group": "Analysis Options"
+				},
+				{
+					"name": "focus_areas",
+					"label": "focus_areas",
+					"type": "text",
+					"description": "Specific areas to focus analysis on (default: all areas)\nChoices: qualifiers, adverbs, adjectives, imagery",
+					"required": false,
+					"default": "all",
+					"group": "Analysis Options"
+				}
+			]
+		},
+		"dangling_modifier_checker": {
+			"id": "dangling_modifier_checker",
+			"name": "dangling_modifier_checker.js",
+			"title": "Dangling Modifier Checker",
+			"description": "Manuscript analysis software that detects dangling and misplaced modifiers.\nIt examines text to pinpoint instances where descriptive phrases don't logically connect to their intended subjects, potentially causing confusion or unintended humor.\nWith customizable analysis level, sensitivity, and specific modifier types, it generates a detailed report complete with examples, explanations, and revision suggestions to enhance clarity and precision.",
+			"help_text": "Dangling Modifier Checker",
+			"category": "analysis",
+			"options": [
+				{
+					"name": "manuscript_file",
+					"label": "MANUSCRIPT_FILE",
+					"type": "file",
+					"description": "File containing the manuscript to analyze",
+					"required": true,
+					"default": "manuscript.txt",
+					"group": "Input Files"
+				},
+				{
+					"name": "skip_thinking",
+					"label": "skip_thinking",
+					"type": "boolean",
+					"description": "Skip saving the AI thinking process",
+					"required": false,
+					"default": false,
+					"group": "Output Configuration"
+				},
+				{
+					"name": "analysis_description",
+					"label": "ANALYSIS_DESCRIPTION",
+					"type": "text",
+					"description": "Optional description to include in output filenames",
+					"required": false,
+					"default": "",
+					"group": "Output Configuration"
+				},
+				{
+					"name": "analysis_level",
+					"label": "analysis_level",
+					"type": "text",
+					"description": "Level of analysis detail (default: standard)\nChoices: basic, standard, detailed",
+					"required": false,
+					"default": "all",
+					"group": "Analysis Options"
+				},
+				{
+					"name": "modifier_types",
+					"label": "modifier_types",
+					"type": "text",
+					"description": "Specific modifier types to focus on (default: all types)\nChoices: dangling, misplaced, squinting, limiting",
+					"required": false,
+					"default": "all",
+					"group": "Analysis Options"
+				},
+				{
+					"name": "sensitivity",
+					"label": "sensitivity",
+					"type": "text",
+					"description": "Sensitivity level for modifier detection (default: medium)\nChoices: low, medium, high",
+					"required": false,
+					"default": "medium",
+					"group": "Analysis Options"
+				}
+			]
+		},
+		"rhythm_analyzer": {
+			"id": "rhythm_analyzer",
+			"name": "rhythm_analyzer.js",
+			"title": "Rhythm Analyzer",
+			"description": "Manuscript analysis utility for evaluating the rhythm and flow of prose.\nIt measures sentence length variations, detects monotonous patterns, and highlights sections where the writing's rhythm doesn't match the intended mood.\n Configurable analysis levels, selectable scene types, and adjustable sensitivity settings allow it to generate a detailed report with examples, explanations, and suggestions for enhancing overall narrative rhythm.",
+			"help_text": "Rhythm Analyzer",
+			"category": "analysis",
+			"options": [
+				{
+					"name": "manuscript_file",
+					"label": "MANUSCRIPT_FILE",
+					"type": "file",
+					"description": "File containing the manuscript to analyze",
+					"required": true,
+					"default": "manuscript.txt",
+					"group": "Input Files"
+				},
+				{
+					"name": "skip_thinking",
+					"label": "skip_thinking",
+					"type": "boolean",
+					"description": "Skip saving the AI thinking process",
+					"required": false,
+					"default": false,
+					"group": "Output Configuration"
+				},
+				{
+					"name": "analysis_description",
+					"label": "ANALYSIS_DESCRIPTION",
+					"type": "text",
+					"description": "Optional description to include in output filenames",
+					"required": false,
+					"default": "",
+					"group": "Output Configuration"
+				},
+				{
+					"name": "analysis_level",
+					"label": "analysis_level",
+					"type": "text",
+					"description": "Level of analysis detail (default: standard)\nChoices: basic, standard, detailed",
+					"required": false,
+					"default": "all",
+					"group": "Analysis Options"
+				},
+				{
+					"name": "scene_types",
+					"label": "scene_types",
+					"type": "text",
+					"description": "Specific scene types to focus analysis on (default: all types)\nChoices: action, dialogue, description, exposition",
+					"required": false,
+					"default": "all",
+					"group": "Analysis Options"
+				},
+				{
+					"name": "rhythm_sensitivity",
+					"label": "rhythm_sensitivity",
+					"type": "text",
+					"description": "Sensitivity level for rhythm analysis (default: medium)\nChoices: low, medium, high",
+					"required": false,
+					"default": "medium",
+					"group": "Analysis Options"
+				}
+			]
+		},
+		"crowding_leaping_evaluator": {
+			"id": "crowding_leaping_evaluator",
+			"name": "crowding_leaping_evaluator.js",
+			"title": "Crowding Leaping Evaluator",
+			"description": "Manuscript pacing evaluator that examines narrative structure for pacing issues.\nIt identifies overly dense sections (crowding) and abrupt transitions or time jumps (leaping) based on concepts inspired by Ursula K. Le Guin.\n With configurable analysis levels and sensitivity settings, it produces a detailed report—including optional text-based visualizations—that offers feedback and suggestions for improving narrative rhythm and clarity.",
+			"help_text": "Crowding Leaping Evaluator",
+			"category": "editing",
+			"options": [
+				{
+					"name": "manuscript_file",
+					"label": "MANUSCRIPT_FILE",
+					"type": "file",
+					"description": "File containing the manuscript to analyze",
+					"required": true,
+					"default": "manuscript.txt",
+					"group": "Input Files"
+				},
+				{
+					"name": "include_visualization",
+					"label": "include_visualization",
+					"type": "boolean",
+					"description": "Include a text-based visualization of pacing patterns",
+					"required": false,
+					"default": false,
+					"group": "Output Configuration"
+				},
+				{
+					"name": "skip_thinking",
+					"label": "skip_thinking",
+					"type": "boolean",
+					"description": "Skip saving the AI thinking process",
+					"required": false,
+					"default": false,
+					"group": "Output Configuration"
+				},
+				{
+					"name": "analysis_description",
+					"label": "ANALYSIS_DESCRIPTION",
+					"type": "text",
+					"description": "Optional description to include in output filenames",
+					"required": false,
+					"default": "",
+					"group": "Output Configuration"
+				},
+				{
+					"name": "analysis_level",
+					"label": "analysis_level",
+					"type": "text",
+					"description": "Level of analysis detail (default: standard)\nChoices: basic, standard, detailed",
+					"required": false,
+					"default": "all",
+					"group": "Analysis Options"
+				},
+				{
+					"name": "focus_areas",
+					"label": "focus_areas",
+					"type": "text",
+					"description": "Specific areas to focus on (default: all areas)\nChoices: crowding, leaping, transitions, pacing",
+					"required": false,
+					"default": "all",
+					"group": "Analysis Options"
+				},
+				{
+					"name": "sensitivity",
+					"label": "sensitivity",
+					"type": "text",
+					"description": "Sensitivity level for pattern detection (default: medium)\nChoices: low, medium, high",
+					"required": false,
+					"default": "all",
+					"group": "Analysis Options"
+				}
+			]
+		},
+		"punctuation_auditor": {
+			"id": "punctuation_auditor",
+			"name": "punctuation_auditor.js",
+			"title": "Punctuation Auditor",
+			"description": "Manuscript analysis utility focused on evaluating punctuation effectiveness.\nIt detects issues such as run-on sentences, missing commas, and irregular punctuation patterns that may hinder clarity and flow.\nConfigurable analysis levels, strictness settings, and selectable punctuation elements enable it to generate a detailed report with examples, explanations, and recommendations for enhancing punctuation and overall readability.",
+			"help_text": "Punctuation Auditor",
+			"category": "editing",
+			"options": [
+				{
+					"name": "manuscript_file",
+					"label": "MANUSCRIPT_FILE",
+					"type": "file",
+					"description": "File containing the manuscript to analyze",
+					"required": true,
+					"default": "manuscript.txt",
+					"group": "Input Files"
+				},
+				{
+					"name": "skip_thinking",
+					"label": "skip_thinking",
+					"type": "boolean",
+					"description": "Skip saving the AI thinking process",
+					"required": false,
+					"default": false,
+					"group": "Output Configuration"
+				},
+				{
+					"name": "analysis_description",
+					"label": "ANALYSIS_DESCRIPTION",
+					"type": "text",
+					"description": "Optional description to include in output filenames",
+					"required": false,
+					"default": "",
+					"group": "Output Configuration"
+				},
+				{
+					"name": "analysis_level",
+					"label": "analysis_level",
+					"type": "text",
+					"description": "Level of analysis detail (default: standard)\nChoices: basic, standard, detailed",
+					"required": false,
+					"default": "all",
+					"group": "Analysis Options"
+				},
+				{
+					"name": "elements",
+					"label": "elements",
+					"type": "text",
+					"description": "Specific punctuation elements to focus on (default: all elements)\nChoices: commas, periods, semicolons, dashes, parentheses, colons, run-ons",
+					"required": false,
+					"default": "all",
+					"group": "Analysis Options"
+				},
+				{
+					"name": "strictness",
+					"label": "strictness",
+					"type": "text",
+					"description": "Strictness level for punctuation analysis (default: medium)\nChoices: low, medium, high",
+					"required": false,
+					"default": "all",
+					"group": "Analysis Options"
+				}
+			]
+		},
+		"consistency_checker": {
+			"id": "consistency_checker",
+			"name": "consistency_checker.js",
+			"title": "Consistency Checker",
+			"description": "Manuscript consistency checker utility that compares a manuscript against a world document (and optionally an outline).\nIt supports various consistency checks: world, internal, development, and unresolved.\nConfigurable options enable targeted analysis of character, setting, timeline, and thematic consistency, producing detailed reports with examples and recommendations for resolving discrepancies.",
+			"help_text": "Manuscript consistency checker",
+			"category": "analysis",
+			"options": [
+				{
+					"name": "manuscript_file",
+					"label": "MANUSCRIPT_FILE",
+					"type": "file",
+					"description": "File containing the manuscript to analyze",
+					"required": true,
+					"default": "manuscript.txt",
+					"group": "Input Files"
+				},
+				{
+					"name": "world_file",
+					"label": "world_file",
+					"type": "file",
+					"description": "File containing the world details (required)",
+					"required": true,
+					"default": "world.txt",
+					"group": "Input Files"
+				},
+				{
+					"name": "outline_file",
+					"label": "outline_file",
+					"type": "file",
+					"description": "File containing the story outline (optional)",
+					"required": false,
+					"default": "outline.txt",
+					"group": "Input Files"
+				},
+				{
+					"name": "skip_thinking",
+					"label": "skip_thinking",
+					"type": "boolean",
+					"description": "Skip saving the AI thinking process",
+					"required": false,
+					"default": false,
+					"group": "Output Configuration"
+				},
+				{
+					"name": "check_type",
+					"label": "Check Type",
+					"type": "select",
+					"description": "Type of consistency check to perform",
+					"required": false,
+					"default": "all",
+					"group": "Analysis Options",
+					"choices": [
+						{
+							"value": "world",
+							"label": "World Consistency"
+						},
+						{
+							"value": "internal",
+							"label": "Internal Consistency"
+						},
+						{
+							"value": "development",
+							"label": "Development Consistency"
+						},
+						{
+							"value": "unresolved",
+							"label": "Unresolved Elements"
+						},
+						{
+							"value": "all",
+							"label": "All Checks"
+						}
+					]
+				},
+				{
+					"name": "check_description",
+					"label": "check_description",
+					"type": "text",
+					"description": "Optional description to include in output filenames",
+					"required": false,
+					"default": "",
+					"group": "Output Configuration"
+				}
+			]
+		},
+		"conflict_analyzer": {
+			"id": "conflict_analyzer",
+			"name": "conflict_analyzer.js",
+			"title": "Conflict Analyzer",
+			"description": "Manuscript conflict analysis utility that examines conflict patterns at different narrative levels.\nIt identifies conflict nature, escalation, and resolution at scene, chapter, and arc levels.\nWith customizable analysis levels and selectable conflict types, it produces a detailed report featuring examples, assessments, and recommendations for strengthening narrative tension and coherence.",
+			"help_text": "Conflict Analyzer",
+			"category": "analysis",
+			"options": [
+				{
+					"name": "manuscript_file",
+					"label": "MANUSCRIPT_FILE",
+					"type": "file",
+					"description": "File containing the manuscript to analyze",
+					"required": true,
+					"default": "manuscript.txt",
+					"group": "Input Files"
+				},
+				{
+					"name": "outline_file",
+					"label": "outline_file",
+					"type": "file",
+					"description": "File containing the story outline (optional)",
+					"required": false,
+					"default": "outline.txt",
+					"group": "Input Files"
+				},
+				{
+					"name": "skip_thinking",
+					"label": "skip_thinking",
+					"type": "boolean",
+					"description": "Skip saving the AI thinking process",
+					"required": false,
+					"default": false,
+					"group": "Output Configuration"
+				},
+				{
+					"name": "analysis_level",
+					"label": "analysis_level",
+					"type": "text",
+					"description": "Level of conflict analysis to perform (default: all)\nChoices: scene, chapter, arc, all",
+					"required": false,
+					"default": "all",
+					"group": "Analysis Options"
+				},
+				{
+					"name": "analysis_description",
+					"label": "ANALYSIS_DESCRIPTION",
+					"type": "text",
+					"description": "Optional description to include in output filenames",
+					"required": false,
+					"default": "",
+					"group": "Output Configuration"
+				},
+				{
+					"name": "conflict_types",
+					"label": "conflict_types",
+					"type": "text",
+					"description": "Specific conflict types to analyze (default: all main types)\nChoices: internal, interpersonal, environmental, societal, cosmic",
+					"required": false,
+					"default": "all",
+					"group": "Analysis Options"
+				}
+			]
+		},
+		"foreshadowing_tracker": {
+			"id": "foreshadowing_tracker",
+			"name": "foreshadowing_tracker.js",
+			"title": "Foreshadowing Tracker",
+			"description": "Manuscript analysis utility for identifying foreshadowing elements and tracking their payoffs.\n It pinpoints explicit clues, subtle hints, and Chekhov's Gun elements to evaluate how well narrative setups are resolved.\n With customizable options to select foreshadowing types and organization modes (chronological or by type), it generates detailed reports featuring examples, assessments, and recommendations for fulfilling narrative promises.",
+			"help_text": "Foreshadowing Tracker",
+			"category": "analysis",
+			"options": [
+				{
+					"name": "manuscript_file",
+					"label": "MANUSCRIPT_FILE",
+					"type": "file",
+					"description": "File containing the manuscript to analyze",
+					"required": true,
+					"default": "manuscript.txt",
+					"group": "Input Files"
+				},
+				{
+					"name": "outline_file",
+					"label": "outline_file",
+					"type": "file",
+					"description": "File containing the story outline (optional)",
+					"required": false,
+					"default": "outline.txt",
+					"group": "Input Files"
+				},
+				{
+					"name": "skip_thinking",
+					"label": "skip_thinking",
+					"type": "boolean",
+					"description": "Skip saving the AI thinking process",
+					"required": false,
+					"default": false,
+					"group": "Output Configuration"
+				},
+				{
+					"name": "chronological",
+					"label": "chronological",
+					"type": "boolean",
+					"description": "Sort foreshadowing elements chronologically rather than by type",
+					"required": false,
+					"default": false,
+					"group": "Output Configuration"
+				},
+				{
+					"name": "foreshadowing_type",
+					"label": "foreshadowing_type",
+					"type": "text",
+					"description": "Type of foreshadowing to analyze (default: all)\nChoices: explicit, implicit, chekhov, all",
+					"required": false,
+					"default": "all",
+					"group": "Analysis Options"
+				},
+				{
+					"name": "analysis_description",
+					"label": "ANALYSIS_DESCRIPTION",
+					"type": "text",
+					"description": "Optional description to include in output filenames",
+					"required": false,
+					"default": "",
+					"group": "Output Configuration"
+				}
+			]
+		},
+		"plot_thread_tracker": {
+			"id": "plot_thread_tracker",
+			"name": "plot_thread_tracker.js",
+			"title": "Plot Thread Tracker",
+			"description": "Manuscript analysis utility for identifying and tracking distinct plot threads—revealing how they interconnect, converge, and diverge throughout the narrative.\n It uses text-based representations (with optional ASCII art visualization) and supports configurable analysis depth (basic, detailed, or comprehensive) to produce detailed reports with progression maps, thread connections, and narrative assessments, including manuscript excerpts and recommendations for strengthening the plot architecture.",
+			"help_text": "Plot Thread Tracker",
+			"category": "analysis",
+			"options": [
+				{
+					"name": "manuscript_file",
+					"label": "MANUSCRIPT_FILE",
+					"type": "file",
+					"description": "File containing the manuscript to analyze",
+					"required": true,
+					"default": "manuscript.txt",
+					"group": "Input Files"
+				},
+				{
+					"name": "outline_file",
+					"label": "outline_file",
+					"type": "file",
+					"description": "File containing the story outline (optional)",
+					"required": false,
+					"default": "outline.txt",
+					"group": "Input Files"
+				},
+				{
+					"name": "skip_thinking",
+					"label": "skip_thinking",
+					"type": "boolean",
+					"description": "Skip saving the AI thinking process",
+					"required": false,
+					"default": false,
+					"group": "Output Configuration"
+				},
+				{
+					"name": "ascii_art",
+					"label": "ascii_art",
+					"type": "boolean",
+					"description": "Include simple ASCII art visualization in the output",
+					"required": false,
+					"default": false,
+					"group": "Output Configuration"
+				},
+				{
+					"name": "analysis_depth",
+					"label": "analysis_depth",
+					"type": "text",
+					"description": "Depth of plot thread analysis to perform (default: comprehensive)",
+					"required": false,
+					"default": "comprehensive",
+					"group": "Analysis Options"
+				},
+				{
+					"name": "analysis_description",
+					"label": "ANALYSIS_DESCRIPTION",
+					"type": "text",
+					"description": "Optional description to include in output filenames",
+					"required": false,
+					"default": "",
+					"group": "Output Configuration"
+				},
+				{
+					"name": "thread_focus",
+					"label": "thread_focus",
+					"type": "text",
+					"description": "Optional list of specific plot threads to focus on (e.g., 'romance' 'mystery'). \nAlternative default: [\"romance\", \"mystery\"]",
+					"required": false,
+					"default": null,
+					"group": "Output Configuration"
+				}
+			]
+		}
+	},
+	"settings": {
+		"claude_api": {
+			"max_retries": 1,
+			"request_timeout": 300,
+			"context_window": 200000,
+			"thinking_budget_tokens": 32000,
+			"betas_max_tokens": 128000,
+			"desired_output_tokens": 12000
+		},
+		"projects": {
+			"current": "Gaia_Minds",
+			"paths": {
+				"A_Darker_Roast": "/Users/cleesmith/writing/Tsu",
+				"Gaia_Minds": "/Users/cleesmith/writing/Gaia_Minds"
+			}
+		},
+		"default_save_dir": "/Users/cleesmith/writing/Gaia_Minds"
+	}
 }

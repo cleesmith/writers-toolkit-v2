@@ -55,6 +55,7 @@ class AppState {
       this.store = new Store({
         name: 'writers-toolkit-config'
       });
+      console.log(`*** Electron Store location: ${this.store.path}`);
       
       // Load saved settings
       this.loadSettings();

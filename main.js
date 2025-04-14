@@ -220,6 +220,25 @@ function setupProjectHandlers() {
           current_project_path: projectPath
         });
       }
+
+      // Also update the database
+      // await database.updateGlobalSettings({
+      //   current_project: projectName,
+      //   current_project_path: projectPath,
+      //   default_save_dir: projectPath
+      // });
+      await database.updateGlobalSettings({
+        current_project: projectName,
+        current_project_path: projectPath,
+        default_save_dir: projectPath,
+        // Add this to only store the current project in paths
+        projects: {
+          current: projectName,
+          paths: {
+            [projectName]: projectPath  // This syntax creates an object with just the current project
+          }
+        }
+      });
       
       return {
         success: true,
@@ -263,7 +282,26 @@ function setupProjectHandlers() {
           current_project_path: projectPath
         });
       }
-      
+
+      // Also update the database
+      // await database.updateGlobalSettings({
+      //   current_project: projectName,
+      //   current_project_path: projectPath,
+      //   default_save_dir: projectPath
+      // });
+      await database.updateGlobalSettings({
+        current_project: projectName,
+        current_project_path: projectPath,
+        default_save_dir: projectPath,
+        // Add this to only store the current project in paths
+        projects: {
+          current: projectName,
+          paths: {
+            [projectName]: projectPath  // This overwrites the entire paths object
+          }
+        }
+      });      
+
       return {
         success: true,
         projectPath
