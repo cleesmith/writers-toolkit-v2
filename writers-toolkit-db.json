@@ -1135,11 +1135,11 @@
 			"desired_output_tokens": 12000
 		},
 		"projects": {
-			"current": "Tsu_Liz",
+			"current": "Ezra Patel",
 			"paths": {
-				"Tsu_Liz": "/Users/cleesmith/writing/Tsu_Liz"
+				"Ezra Patel": "/Users/cleesmith/writing/Ezra Patel"
 			}
 		},
-		"default_save_dir": "/Users/cleesmith/writing/Tsu_Liz"
+		"default_save_dir": "/Users/cleesmith/writing/Ezra Patel"
 	}
 }
