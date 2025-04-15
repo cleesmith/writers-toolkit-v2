@@ -428,42 +428,67 @@ function generateOptionsForm(options) {
   options.forEach(option => {
     const formGroup = document.createElement('div');
     formGroup.className = 'form-group';
-    
-    // Create label
-    const label = document.createElement('label');
-    label.setAttribute('for', `option-${option.name}`);
-    label.textContent = option.label || option.name;
-    if (option.required) {
-      label.textContent += ' *';
+
+    // only create labels and descriptions for non-boolean fields
+    if (option.type !== 'boolean') {
+      // Create label
+      const label = document.createElement('label');
+      label.setAttribute('for', `option-${option.name}`);
+      label.textContent = option.label || option.name;
+      formGroup.appendChild(label);
+      
+      // Add description if available
+      if (option.description) {
+        const description = document.createElement('p');
+        description.className = 'option-description';
+        description.textContent = option.description;
+        formGroup.appendChild(description);
+      }
     }
-    formGroup.appendChild(label);
-    
-    // Add description if available
-    if (option.description) {
-      const description = document.createElement('p');
-      description.className = 'option-description';
-      description.textContent = option.description;
-      formGroup.appendChild(description);
-    }
-    
+
     // Create input based on type
     let input;
     
     switch (option.type) {
       case 'boolean':
-        const checkboxGroup = document.createElement('div');
-        checkboxGroup.className = 'checkbox-group';
+        // Remove any previously created label element
+        if (formGroup.querySelector('label')) {
+          formGroup.removeChild(formGroup.querySelector('label'));
+        }
         
+        // Create a simple wrapper for the checkbox and label
+        const checkboxWrapper = document.createElement('div');
+        checkboxWrapper.className = 'checkbox-wrapper';
+        
+        // Create the checkbox input
         input = document.createElement('input');
         input.type = 'checkbox';
         input.id = `option-${option.name}`;
         input.name = option.name;
         input.checked = option.default === true;
         
-        checkboxGroup.appendChild(input);
-        formGroup.appendChild(checkboxGroup);
-        break;
+        // Create the label that will appear next to the checkbox
+        const checkboxLabel = document.createElement('label');
+        checkboxLabel.setAttribute('for', `option-${option.name}`);
+        checkboxLabel.textContent = option.name.toUpperCase();
+        checkboxLabel.className = 'checkbox-label';
         
+        // Add the checkbox and label to the wrapper
+        checkboxWrapper.appendChild(input);
+        checkboxWrapper.appendChild(checkboxLabel);
+        
+        // Add the wrapper to the form group
+        formGroup.appendChild(checkboxWrapper);
+
+        // Add description if available
+        if (option.description) {
+          const description = document.createElement('p');
+          description.className = 'option-description';
+          description.textContent = option.description;
+          formGroup.appendChild(description);
+        }
+        break;
+
       case 'number':
         input = document.createElement('input');
         input.type = 'number';
@@ -676,6 +701,7 @@ function generateOptionsForm(options) {
     dialogOptionsContainer.appendChild(formGroup);
   });
 }
+
 
 // Validate a single input field
 function validateInput(input, errorElement, option) {

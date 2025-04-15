@@ -170,6 +170,19 @@ async function executeToolById(toolId, options) {
   }
 }
 
+function reinitializeClaudeService(settings) {
+  // Create a new Claude service with the updated settings
+  const claudeService = new ClaudeAPIService(settings);
+  
+  // Update the service in all registered tools
+  for (const toolId of toolRegistry.getAllToolIds()) {
+    const tool = toolRegistry.getTool(toolId);
+    tool.claudeService = claudeService;
+  }
+  
+  return claudeService;
+}
+
 module.exports = {
   initializeToolSystem,
   executeToolById,

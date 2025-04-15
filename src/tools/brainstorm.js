@@ -132,41 +132,72 @@ class BrainstormTool extends BaseTool {
       prompt = this.createCharacterPrompt(ideasContent, options);
     }
     
-    // Count tokens in prompt
-    this.emitOutput(`\n--- Generating ${promptType} ---\n`);
+    // // Count tokens in prompt
+    // this.emitOutput(`\n--- Generating ${promptType} ---\n`);
+    // this.emitOutput(`Counting tokens in prompt...\n`);
+    // const promptTokens = await this.claudeService.countTokens(prompt);
+    
+    // // Calculate available tokens after prompt
+    // const contextWindow = this.config.context_window || 200000;
+    // const desiredOutputTokens = this.config.desired_output_tokens || 12000;
+    // const configuredThinkingBudget = this.config.thinking_budget_tokens || 32000;
+    
+    // const availableTokens = contextWindow - promptTokens;
+    // // For API call, max_tokens must respect the API limit
+    // const maxTokens = Math.min(availableTokens, 128000); // Limited by beta feature
+    // // Thinking budget must be LESS than max_tokens to leave room for visible output
+    // let thinkingBudget = maxTokens - desiredOutputTokens;
+    // if (thinkingBudget > 32000) {
+    //   this.emitOutput("Warning: thinking budget is larger than 32K, set to 32K. Use batch for larger thinking budgets.\n");
+    //   thinkingBudget = 32000;
+    // }
+    
+    // // Display token stats
+    // this.emitOutput(`\nToken stats:\n`);
+    // this.emitOutput(`Max AI model context window: [${contextWindow}] tokens\n`);
+    // this.emitOutput(`Input prompt tokens: [${promptTokens}] ...\n`);
+    // this.emitOutput(`                     = ideas file + prompt instructions\n`);
+    // this.emitOutput(`Available tokens: [${availableTokens}]  = ${contextWindow} - ${promptTokens} = context_window - prompt\n`);
+    // this.emitOutput(`Desired output tokens: [${desiredOutputTokens}]\n`);
+    // this.emitOutput(`AI model thinking budget: [${thinkingBudget}] tokens  = ${maxTokens} - ${desiredOutputTokens}\n`);
+    // this.emitOutput(`Max output tokens (max_tokens): [${maxTokens}] tokens  = min(${availableTokens}, 128000)\n`);
+    // this.emitOutput(`                                = can not exceed: 'betas=["output-128k-2025-02-19"]'\n`);
+    
+    // if (thinkingBudget < configuredThinkingBudget) {
+    //   this.emitOutput(`Error: prompt is too large to have a ${configuredThinkingBudget} thinking budget!\n`);
+    //   this.emitOutput(`Run aborted!\n`);
+    //   throw new Error(`Prompt is too large for ${configuredThinkingBudget} thinking budget - run aborted`);
+    // }
+
+    // Inside a tool's execute method (e.g., in consistency-checker.js)
+    // Count tokens in the prompt
     this.emitOutput(`Counting tokens in prompt...\n`);
     const promptTokens = await this.claudeService.countTokens(prompt);
-    
-    // Calculate available tokens after prompt
-    const contextWindow = this.config.context_window || 200000;
-    const desiredOutputTokens = this.config.desired_output_tokens || 12000;
-    const configuredThinkingBudget = this.config.thinking_budget_tokens || 32000;
-    
-    const availableTokens = contextWindow - promptTokens;
-    // For API call, max_tokens must respect the API limit
-    const maxTokens = Math.min(availableTokens, 128000); // Limited by beta feature
-    // Thinking budget must be LESS than max_tokens to leave room for visible output
-    let thinkingBudget = maxTokens - desiredOutputTokens;
-    if (thinkingBudget > 32000) {
-      this.emitOutput("Warning: thinking budget is larger than 32K, set to 32K. Use batch for larger thinking budgets.\n");
-      thinkingBudget = 32000;
-    }
-    
-    // Display token stats
+
+    // Call the shared token budget calculator
+    const tokenBudgets = this.claudeService.calculateTokenBudgets(promptTokens);
+
+    // Handle logging based on the returned values
     this.emitOutput(`\nToken stats:\n`);
-    this.emitOutput(`Max AI model context window: [${contextWindow}] tokens\n`);
-    this.emitOutput(`Input prompt tokens: [${promptTokens}] ...\n`);
-    this.emitOutput(`                     = ideas file + prompt instructions\n`);
-    this.emitOutput(`Available tokens: [${availableTokens}]  = ${contextWindow} - ${promptTokens} = context_window - prompt\n`);
-    this.emitOutput(`Desired output tokens: [${desiredOutputTokens}]\n`);
-    this.emitOutput(`AI model thinking budget: [${thinkingBudget}] tokens  = ${maxTokens} - ${desiredOutputTokens}\n`);
-    this.emitOutput(`Max output tokens (max_tokens): [${maxTokens}] tokens  = min(${availableTokens}, 128000)\n`);
-    this.emitOutput(`                                = can not exceed: 'betas=["output-128k-2025-02-19"]'\n`);
-    
-    if (thinkingBudget < configuredThinkingBudget) {
-      this.emitOutput(`Error: prompt is too large to have a ${configuredThinkingBudget} thinking budget!\n`);
+    this.emitOutput(`Max AI model context window: [${tokenBudgets.contextWindow}] tokens\n`);
+    this.emitOutput(`Input prompt tokens: [${tokenBudgets.promptTokens}] ...\n`);
+    this.emitOutput(`                     = outline.txt + world.txt + manuscript.txt\n`);
+    this.emitOutput(`                       + prompt instructions\n`);
+    this.emitOutput(`Available tokens: [${tokenBudgets.availableTokens}]  = ${tokenBudgets.contextWindow} - ${tokenBudgets.promptTokens} = context_window - prompt\n`);
+    this.emitOutput(`Desired output tokens: [${tokenBudgets.desiredOutputTokens}]\n`);
+    this.emitOutput(`AI model thinking budget: [${tokenBudgets.thinkingBudget}] tokens\n`);
+    this.emitOutput(`Max output tokens: [${tokenBudgets.maxTokens}] tokens\n`);
+
+    // Check for special conditions
+    if (tokenBudgets.capThinkingBudget) {
+      this.emitOutput(`Warning: thinking budget is larger than 32K, set to 32K.\n`);
+    }
+
+    // Check if the prompt is too large
+    if (tokenBudgets.isPromptTooLarge) {
+      this.emitOutput(`Error: prompt is too large to have a ${tokenBudgets.configuredThinkingBudget} thinking budget!\n`);
       this.emitOutput(`Run aborted!\n`);
-      throw new Error(`Prompt is too large for ${configuredThinkingBudget} thinking budget - run aborted`);
+      throw new Error(`Prompt is too large for ${tokenBudgets.configuredThinkingBudget} thinking budget - run aborted`);
     }
     
     // Call Claude API with streaming
@@ -179,17 +210,45 @@ class BrainstormTool extends BaseTool {
     // Create system prompt to avoid markdown
     const systemPrompt = "NO Markdown! Never respond with Markdown formatting, plain text only.";
     
+    // try {
+    //   // Use streaming API call
+    //   await this.claudeService.streamWithThinking(
+    //     prompt,
+    //     {
+    //       model: "claude-3-7-sonnet-20250219",
+    //       system: systemPrompt,
+    //       max_tokens: maxTokens,
+    //       thinking: {
+    //         type: "enabled",
+    //         budget_tokens: thinkingBudget
+    //       },
+    //       betas: ["output-128k-2025-02-19"]
+    //     },
+    //     // Callback for thinking content
+    //     (thinkingDelta) => {
+    //       thinkingContent += thinkingDelta;
+    //     },
+    //     // Callback for response text
+    //     (textDelta) => {
+    //       fullResponse += textDelta;
+    //     }
+    //   );
+    // } catch (error) {
+    //   this.emitOutput(`\nAPI Error: ${error.message}\n`);
+    //   throw error;
+    // }
+
+    // Use the calculated values in the API call
     try {
-      // Use streaming API call
       await this.claudeService.streamWithThinking(
         prompt,
         {
           model: "claude-3-7-sonnet-20250219",
           system: systemPrompt,
-          max_tokens: maxTokens,
+          max_tokens: tokenBudgets.maxTokens,
           thinking: {
             type: "enabled",
-            budget_tokens: thinkingBudget
+            budget_tokens: tokenBudgets.thinkingBudget
           },
           betas: ["output-128k-2025-02-19"]
         },
@@ -200,10 +259,6 @@ class BrainstormTool extends BaseTool {
         // Callback for response text
         (textDelta) => {
           fullResponse += textDelta;
-          // Print progress indicator
-          if (fullResponse.length % 1000 === 0) {
-            this.emitOutput(`.`);
-          }
         }
       );
     } catch (error) {

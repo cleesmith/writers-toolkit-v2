@@ -671,6 +671,30 @@ function setupApiSettingsHandlers() {
   });
   
   // Save Claude API settings
+  // ipcMain.handle('save-claude-api-settings', async (event, settings) => {
+  //   try {
+  //     // Update app state with new settings
+  //     appState.settings_claude_api_configuration = {
+  //       ...appState.settings_claude_api_configuration,
+  //       ...settings
+  //     };
+      
+  //     // Save to database
+  //     await database.updateGlobalSettings({
+  //       claude_api_configuration: appState.settings_claude_api_configuration
+  //     });
+      
+  //     return {
+  //       success: true
+  //     };
+  //   } catch (error) {
+  //     console.error('Error saving Claude API settings:', error);
+  //     return {
+  //       success: false,
+  //       message: error.message
+  //     };
+  //   }
+  // });
   ipcMain.handle('save-claude-api-settings', async (event, settings) => {
     try {
       // Update app state with new settings
@@ -683,6 +707,9 @@ function setupApiSettingsHandlers() {
       await database.updateGlobalSettings({
         claude_api_configuration: appState.settings_claude_api_configuration
       });
+      
+      // Reinitialize the Claude service with new settings
+      const claudeService = toolSystem.reinitializeClaudeService(appState.settings_claude_api_configuration);
       
       return {
         success: true
