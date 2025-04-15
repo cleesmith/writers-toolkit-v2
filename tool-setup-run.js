@@ -297,7 +297,8 @@ runBtn.addEventListener('click', async () => {
               
               // Show a notification that we're opening the file
               const tempOutput = outputElement.textContent;
-              outputElement.textContent += '\nOpening file in editor: ' + selectedFile;
+              // stop showing message about opening file in editor:
+              // outputElement.textContent += '\nOpening file in editor: ' + selectedFile;
               
               window.electronAPI.openFileInEditor(selectedFile)
                 .then(result => {
