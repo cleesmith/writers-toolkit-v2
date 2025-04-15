@@ -11,6 +11,7 @@ const WorldWriter = require('./tools/world-writer');
 const ChapterWriter = require('./tools/chapter-writer');
 const CharacterAnalyzer = require('./tools/character-analyzer');
 const TenseConsistencyChecker = require('./tools/tense-consistency-checker');
+const AdjectiveAdverbOptimizer = require('./tools/adjective-adverb-optimizer');
 
 /**
  * Initialize the tool system
@@ -160,6 +161,22 @@ async function initializeToolSystem(settings, database) {
         toolRegistry.registerTool(
           toolInfo.name,
           new TenseConsistencyChecker(claudeService, {
+            ...toolConfig,
+            ...settings
+          })
+        );
+        console.log(`Successfully registered tool: ${toolInfo.name}`);
+      }
+    }
+    else if (toolInfo.name === 'adjective_adverb_optimizer') {
+      const toolConfig = database.getToolByName(toolInfo.name);
+      console.log('Adjective Adverb Optimizer tool config:', toolConfig);
+      
+      if (toolConfig) {
+        // Register the tool
+        toolRegistry.registerTool(
+          toolInfo.name,
+          new AdjectiveAdverbOptimizer(claudeService, {
             ...toolConfig,
             ...settings
           })
