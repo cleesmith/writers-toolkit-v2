@@ -1135,11 +1135,11 @@
 			"desired_output_tokens": 12000
 		},
 		"projects": {
-			"current": "Dire_Consequences",
+			"current": "Ezra Patel",
 			"paths": {
-				"Dire_Consequences": "/Users/cleesmith/writing/Dire_Consequences"
+				"Ezra Patel": "/Users/cleesmith/writing/Ezra Patel"
 			}
 		},
-		"default_save_dir": "/Users/cleesmith/writing/Dire_Consequences"
+		"default_save_dir": "/Users/cleesmith/writing/Ezra Patel"
 	}
 }

@@ -1,6 +1,7 @@
 // src/tool-system.js
 const path = require('path');
 const ClaudeAPIService = require('./claude-api/client');
+
 const toolRegistry = require('./tools/registry');
 const TokensWordsCounter = require('./tools/tokens-words-counter');
 const ConsistencyChecker = require('./tools/consistency-checker');
@@ -8,6 +9,7 @@ const BrainstormTool = require('./tools/brainstorm');
 const OutlineWriter = require('./tools/outline-writer');
 const WorldWriter = require('./tools/world-writer');
 const ChapterWriter = require('./tools/chapter-writer');
+const CharacterAnalyzer = require('./tools/character-analyzer');
 
 /**
  * Initialize the tool system
@@ -116,7 +118,6 @@ async function initializeToolSystem(settings, database) {
         console.log(`Successfully registered tool: ${toolInfo.name}`);
       }
     }
-    // For consistency_checker.js
     else if (toolInfo.name === 'consistency_checker') {
       const toolConfig = database.getToolByName(toolInfo.name);
       console.log('Consistency Checker tool config:', toolConfig);
@@ -133,6 +134,23 @@ async function initializeToolSystem(settings, database) {
         console.log(`Successfully registered tool: ${toolInfo.name}`);
       }
     }
+    else if (toolInfo.name === 'character_analyzer') {
+      const toolConfig = database.getToolByName(toolInfo.name);
+      console.log('Chapter Analyzer tool config:', toolConfig);
+      
+      if (toolConfig) {
+        // Register the tool
+        toolRegistry.registerTool(
+          toolInfo.name,
+          new CharacterAnalyzer(claudeService, {
+            ...toolConfig,
+            ...settings
+          })
+        );
+        console.log(`Successfully registered tool: ${toolInfo.name}`);
+      }
+    }
+
   });
   
   return {
