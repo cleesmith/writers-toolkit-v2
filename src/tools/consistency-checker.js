@@ -8,8 +8,10 @@ const fs = require('fs/promises');
 
 /**
  * Consistency Checker Tool
- * Checks a manuscript for consistency against a world document and optionally an outline
- * Supports different types of consistency checks: world, internal, development, unresolved
+ * Checks a manuscript for consistency against:
+ *    a world document and optionally an outline
+ * Supports different types of consistency checks: 
+ *    world, internal, development, unresolved
  */
 class ConsistencyChecker extends BaseTool {
   /**
@@ -95,34 +97,66 @@ class ConsistencyChecker extends BaseTool {
         // Create the prompt for this check type
         const prompt = this.createPrompt(type, outlineContent, worldContent, manuscriptContent);
         
+        // // Count tokens in the prompt
+        // this.emitOutput(`Counting tokens in prompt...\n`);
+        // const promptTokens = await this.claudeService.countTokens(prompt);
+        
+        // // Calculate available tokens for response
+        // const contextWindow = this.config.context_window || 200000;
+        // const thinkingBudget = this.config.thinking_budget_tokens || 32000;
+        // const desiredOutputTokens = this.config.desired_output_tokens || 12000;
+        
+        // const availableTokens = contextWindow - promptTokens;
+        // const maxOutputTokens = Math.min(availableTokens, 128000); // Limited by beta feature
+        
+        // this.emitOutput(`\nToken stats:\n`);
+        // this.emitOutput(`Max AI model context window: [${contextWindow}] tokens\n`);
+        // this.emitOutput(`Input prompt tokens: [${promptTokens}] ...\n`);
+        // this.emitOutput(`                     = outline.txt + world.txt + manuscript.txt\n`);
+        // this.emitOutput(`                       + prompt instructions\n`);
+        // this.emitOutput(`Available tokens: [${availableTokens}]  = ${contextWindow} - ${promptTokens} = context_window - prompt\n`);
+        // this.emitOutput(`Desired output tokens: [${desiredOutputTokens}]\n`);
+        // this.emitOutput(`AI model thinking budget: [${thinkingBudget}] tokens\n`);
+        // this.emitOutput(`Max output tokens: [${maxOutputTokens}] tokens\n`);
+        
+        // // Ensure thinking budget is less than max_tokens and leaves room for visible output
+        // const effectiveThinkingBudget = Math.min(thinkingBudget, maxOutputTokens - desiredOutputTokens);
+        
+        // if (effectiveThinkingBudget < 1000) {
+        //   this.emitOutput(`Error: prompt is too large to have sufficient thinking budget!\n`);
+        //   throw new Error(`Prompt is too large for thinking budget`);
+        // }
+        // // Create prompt using input content
+        // const prompt = this.createPrompt(inputContent);
+
         // Count tokens in the prompt
         this.emitOutput(`Counting tokens in prompt...\n`);
         const promptTokens = await this.claudeService.countTokens(prompt);
-        
-        // Calculate available tokens for response
-        const contextWindow = this.config.context_window || 200000;
-        const thinkingBudget = this.config.thinking_budget_tokens || 32000;
-        const desiredOutputTokens = this.config.desired_output_tokens || 12000;
-        
-        const availableTokens = contextWindow - promptTokens;
-        const maxOutputTokens = Math.min(availableTokens, 128000); // Limited by beta feature
-        
+
+        // Call the shared token budget calculator
+        const tokenBudgets = this.claudeService.calculateTokenBudgets(promptTokens);
+
+        // Handle logging based on the returned values
         this.emitOutput(`\nToken stats:\n`);
-        this.emitOutput(`Max AI model context window: [${contextWindow}] tokens\n`);
-        this.emitOutput(`Input prompt tokens: [${promptTokens}] ...\n`);
+        this.emitOutput(`Max AI model context window: [${tokenBudgets.contextWindow}] tokens\n`);
+        this.emitOutput(`Input prompt tokens: [${tokenBudgets.promptTokens}] ...\n`);
         this.emitOutput(`                     = outline.txt + world.txt + manuscript.txt\n`);
         this.emitOutput(`                       + prompt instructions\n`);
-        this.emitOutput(`Available tokens: [${availableTokens}]  = ${contextWindow} - ${promptTokens} = context_window - prompt\n`);
-        this.emitOutput(`Desired output tokens: [${desiredOutputTokens}]\n`);
-        this.emitOutput(`AI model thinking budget: [${thinkingBudget}] tokens\n`);
-        this.emitOutput(`Max output tokens: [${maxOutputTokens}] tokens\n`);
-        
-        // Ensure thinking budget is less than max_tokens and leaves room for visible output
-        const effectiveThinkingBudget = Math.min(thinkingBudget, maxOutputTokens - desiredOutputTokens);
-        
-        if (effectiveThinkingBudget < 1000) {
-          this.emitOutput(`Error: prompt is too large to have sufficient thinking budget!\n`);
-          throw new Error(`Prompt is too large for thinking budget`);
+        this.emitOutput(`Available tokens: [${tokenBudgets.availableTokens}]  = ${tokenBudgets.contextWindow} - ${tokenBudgets.promptTokens} = context_window - prompt\n`);
+        this.emitOutput(`Desired output tokens: [${tokenBudgets.desiredOutputTokens}]\n`);
+        this.emitOutput(`AI model thinking budget: [${tokenBudgets.thinkingBudget}] tokens\n`);
+        this.emitOutput(`Max output tokens: [${tokenBudgets.maxTokens}] tokens\n`);
+
+        // Check for special conditions
+        if (tokenBudgets.capThinkingBudget) {
+          this.emitOutput(`Warning: thinking budget is larger than 32K, set to 32K.\n`);
+        }
+
+        // Check if the prompt is too large
+        if (tokenBudgets.isPromptTooLarge) {
+          this.emitOutput(`Error: prompt is too large to have a ${tokenBudgets.configuredThinkingBudget} thinking budget!\n`);
+          this.emitOutput(`Run aborted!\n`);
+          throw new Error(`Prompt is too large for ${tokenBudgets.configuredThinkingBudget} thinking budget - run aborted`);
         }
         
         // Call Claude API with streaming
@@ -135,17 +169,45 @@ class ConsistencyChecker extends BaseTool {
         // Create system prompt to avoid markdown
         const systemPrompt = "NO Markdown! Never respond with Markdown formatting, plain text only.";
         
+        // try {
+        //   // Use streaming API call
+        //   await this.claudeService.streamWithThinking(
+        //     prompt,
+        //     {
+        //       model: "claude-3-7-sonnet-20250219",
+        //       system: systemPrompt,
+        //       max_tokens: maxOutputTokens,
+        //       thinking: {
+        //         type: "enabled",
+        //         budget_tokens: effectiveThinkingBudget
+        //       },
+        //       betas: ["output-128k-2025-02-19"]
+        //     },
+        //     // Callback for thinking content
+        //     (thinkingDelta) => {
+        //       thinkingContent += thinkingDelta;
+        //     },
+        //     // Callback for response text
+        //     (textDelta) => {
+        //       fullResponse += textDelta;
+        //     }
+        //   );
+        // } catch (error) {
+        //   this.emitOutput(`\nAPI Error: ${error.message}\n`);
+        //   throw error;
+        // }
+
+        // Use the calculated values in the API call
         try {
-          // Use streaming API call
           await this.claudeService.streamWithThinking(
             prompt,
             {
               model: "claude-3-7-sonnet-20250219",
               system: systemPrompt,
-              max_tokens: maxOutputTokens,
+              max_tokens: tokenBudgets.maxTokens,
               thinking: {
                 type: "enabled",
-                budget_tokens: effectiveThinkingBudget
+                budget_tokens: tokenBudgets.thinkingBudget
               },
               betas: ["output-128k-2025-02-19"]
             },
@@ -156,17 +218,13 @@ class ConsistencyChecker extends BaseTool {
             // Callback for response text
             (textDelta) => {
               fullResponse += textDelta;
-              // Print progress indicator
-              if (fullResponse.length % 1000 === 0) {
-                this.emitOutput(`.`);
-              }
             }
           );
         } catch (error) {
           this.emitOutput(`\nAPI Error: ${error.message}\n`);
           throw error;
         }
-        
+
         const elapsed = (Date.now() - startTime) / 1000;
         const minutes = Math.floor(elapsed / 60);
         const seconds = elapsed % 60;

@@ -171,34 +171,6 @@ class BrainstormTool extends BaseTool {
     
     // Create system prompt to avoid markdown
     const systemPrompt = "NO Markdown! Never respond with Markdown formatting, plain text only.";
-    
-    // try {
-    //   // Use streaming API call
-    //   await this.claudeService.streamWithThinking(
-    //     prompt,
-    //     {
-    //       model: "claude-3-7-sonnet-20250219",
-    //       system: systemPrompt,
-    //       max_tokens: maxTokens,
-    //       thinking: {
-    //         type: "enabled",
-    //         budget_tokens: thinkingBudget
-    //       },
-    //       betas: ["output-128k-2025-02-19"]
-    //     },
-    //     // Callback for thinking content
-    //     (thinkingDelta) => {
-    //       thinkingContent += thinkingDelta;
-    //     },
-    //     // Callback for response text
-    //     (textDelta) => {
-    //       fullResponse += textDelta;
-    //     }
-    //   );
-    // } catch (error) {
-    //   this.emitOutput(`\nAPI Error: ${error.message}\n`);
-    //   throw error;
-    // }
 
     // Use the calculated values in the API call
     try {
