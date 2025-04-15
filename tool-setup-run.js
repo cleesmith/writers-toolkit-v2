@@ -224,11 +224,14 @@ runBtn.addEventListener('click', async () => {
         stopTimer();
         
         // Re-enable buttons
-        runBtn.disabled = false;
         setupBtn.disabled = false;
         clearBtn.disabled = false;
         closeBtn.disabled = false;
-        
+
+        runBtn.disabled = true;
+        // Reset setupCompleted flag to require going through setup again
+        setupCompleted = false;        
+
         // Add completion message to output area
         outputElement.textContent += `\n\nTool finished with exit code: ${result.code}`;
         

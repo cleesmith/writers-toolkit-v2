@@ -96,38 +96,6 @@ class ConsistencyChecker extends BaseTool {
         
         // Create the prompt for this check type
         const prompt = this.createPrompt(type, outlineContent, worldContent, manuscriptContent);
-        
-        // // Count tokens in the prompt
-        // this.emitOutput(`Counting tokens in prompt...\n`);
-        // const promptTokens = await this.claudeService.countTokens(prompt);
-        
-        // // Calculate available tokens for response
-        // const contextWindow = this.config.context_window || 200000;
-        // const thinkingBudget = this.config.thinking_budget_tokens || 32000;
-        // const desiredOutputTokens = this.config.desired_output_tokens || 12000;
-        
-        // const availableTokens = contextWindow - promptTokens;
-        // const maxOutputTokens = Math.min(availableTokens, 128000); // Limited by beta feature
-        
-        // this.emitOutput(`\nToken stats:\n`);
-        // this.emitOutput(`Max AI model context window: [${contextWindow}] tokens\n`);
-        // this.emitOutput(`Input prompt tokens: [${promptTokens}] ...\n`);
-        // this.emitOutput(`                     = outline.txt + world.txt + manuscript.txt\n`);
-        // this.emitOutput(`                       + prompt instructions\n`);
-        // this.emitOutput(`Available tokens: [${availableTokens}]  = ${contextWindow} - ${promptTokens} = context_window - prompt\n`);
-        // this.emitOutput(`Desired output tokens: [${desiredOutputTokens}]\n`);
-        // this.emitOutput(`AI model thinking budget: [${thinkingBudget}] tokens\n`);
-        // this.emitOutput(`Max output tokens: [${maxOutputTokens}] tokens\n`);
-        
-        // // Ensure thinking budget is less than max_tokens and leaves room for visible output
-        // const effectiveThinkingBudget = Math.min(thinkingBudget, maxOutputTokens - desiredOutputTokens);
-        
-        // if (effectiveThinkingBudget < 1000) {
-        //   this.emitOutput(`Error: prompt is too large to have sufficient thinking budget!\n`);
-        //   throw new Error(`Prompt is too large for thinking budget`);
-        // }
-        // // Create prompt using input content
-        // const prompt = this.createPrompt(inputContent);
 
         // Count tokens in the prompt
         this.emitOutput(`Counting tokens in prompt...\n`);
@@ -167,35 +135,7 @@ class ConsistencyChecker extends BaseTool {
         let thinkingContent = "";
         
         // Create system prompt to avoid markdown
-        const systemPrompt = "NO Markdown! Never respond with Markdown formatting, plain text only.";
-        
-        // try {
-        //   // Use streaming API call
-        //   await this.claudeService.streamWithThinking(
-        //     prompt,
-        //     {
-        //       model: "claude-3-7-sonnet-20250219",
-        //       system: systemPrompt,
-        //       max_tokens: maxOutputTokens,
-        //       thinking: {
-        //         type: "enabled",
-        //         budget_tokens: effectiveThinkingBudget
-        //       },
-        //       betas: ["output-128k-2025-02-19"]
-        //     },
-        //     // Callback for thinking content
-        //     (thinkingDelta) => {
-        //       thinkingContent += thinkingDelta;
-        //     },
-        //     // Callback for response text
-        //     (textDelta) => {
-        //       fullResponse += textDelta;
-        //     }
-        //   );
-        // } catch (error) {
-        //   this.emitOutput(`\nAPI Error: ${error.message}\n`);
-        //   throw error;
-        // }
+        const systemPrompt = "CRITICAL INSTRUCTION: NO Markdown formatting of ANY kind. Never use headers, bullets, or any formatting symbols. Plain text only with standard punctuation.";
 
         // Use the calculated values in the API call
         try {
@@ -238,7 +178,9 @@ class ConsistencyChecker extends BaseTool {
         // Count tokens in response
         const responseTokens = await this.claudeService.countTokens(fullResponse);
         this.emitOutput(`Response token count: ${responseTokens}\n`);
-        
+
+        fullResponse = this.removeMarkdown(fullResponse);
+
         // Save the report
         const outputFile = await this.saveReport(
           type,
@@ -251,7 +193,8 @@ class ConsistencyChecker extends BaseTool {
           checkDescription
         );
         
-        outputFiles.push(outputFile);
+        // Use spread operator to push all elements individually
+        outputFiles.push(...outputFile);
       }
       
       // Return the result
@@ -501,7 +444,7 @@ For each unresolved element, provide:
     
     return prompts[checkType] || "";
   }
-  
+
   /**
    * Save report and thinking content to files
    * @param {string} checkType - Type of consistency check
@@ -512,10 +455,21 @@ For each unresolved element, provide:
    * @param {string} saveDir - Directory to save to
    * @param {boolean} skipThinking - Whether to skip saving thinking
    * @param {string} description - Optional description
-   * @returns {Promise<string>} - Path to saved report
+   * @returns {Promise<string[]>} - Array of paths to saved files
    */
   async saveReport(checkType, content, thinking, promptTokens, responseTokens, saveDir, skipThinking, description) {
     try {
+      const formatter = new Intl.DateTimeFormat('en-US', {
+        weekday: 'long',
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      });
+      const dateTimeStr2 = formatter.format(new Date());
+
       // Create timestamp for filename
       const timestamp = new Date().toISOString().replace(/[-:.]/g, '').substring(0, 15);
       
@@ -523,14 +477,17 @@ For each unresolved element, provide:
       const desc = description ? `_${description}` : '';
       const baseFilename = `consistency_${checkType}${desc}_${timestamp}`;
       
+      // Array to collect all saved file paths
+      const savedFilePaths = [];
+      
       // Create stats for thinking file
       const stats = `
-Details:
+Details:  ${dateTimeStr2}
 Check type: ${checkType} consistency check
-Max request timeout: ${this.config.request_timeout || 300} seconds
-Max AI model context window: ${this.config.context_window || 200000} tokens
-AI model thinking budget: ${this.config.thinking_budget_tokens || 32000} tokens
-Desired output tokens: ${this.config.desired_output_tokens || 12000} tokens
+Max request timeout: ${this.config.request_timeout} seconds
+Max AI model context window: ${this.config.context_window} tokens
+AI model thinking budget: ${this.config.thinking_budget_tokens} tokens
+Desired output tokens: ${this.config.desired_output_tokens} tokens
 
 Input tokens: ${promptTokens}
 Output tokens: ${responseTokens}
@@ -540,10 +497,13 @@ Output tokens: ${responseTokens}
       const reportFilename = `${baseFilename}.txt`;
       const reportPath = path.join(saveDir, reportFilename);
       await this.writeOutputFile(content, saveDir, reportFilename);
+      savedFilePaths.push(reportPath);
       
       // Save thinking content if available and not skipped
       if (thinking && !skipThinking) {
         const thinkingFilename = `${baseFilename}_thinking.txt`;
+        const thinkingPath = path.join(saveDir, thinkingFilename);
+        console.log('$>$>$> thinkingFilename=',thinkingFilename, '  thinkingPath=',thinkingPath);
         const thinkingContent = `=== CONSISTENCY CHECK TYPE ===
 ${checkType}
 
@@ -555,11 +515,14 @@ ${thinking}
 ${stats}`;
         
         await this.writeOutputFile(thinkingContent, saveDir, thinkingFilename);
-        this.emitOutput(`AI thinking saved to: ${path.join(saveDir, thinkingFilename)}\n`);
+        this.emitOutput(`AI thinking saved to: ${thinkingPath}\n`);
+        savedFilePaths.push(thinkingPath);
       }
-      
+
+      console.log('$>$>$> Current saved paths:', savedFilePaths);
+
       this.emitOutput(`Report saved to: ${reportPath}\n`);
-      return reportPath;
+      return savedFilePaths;
     } catch (error) {
       console.error(`Error saving report:`, error);
       this.emitOutput(`Error saving report: ${error.message}\n`);

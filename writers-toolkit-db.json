@@ -885,7 +885,7 @@
 					"name": "check_type",
 					"label": "Check Type",
 					"type": "select",
-					"description": "Type of consistency check to perform",
+					"description": "Select type of consistency check to perform",
 					"required": false,
 					"default": "all",
 					"group": "Analysis Options",

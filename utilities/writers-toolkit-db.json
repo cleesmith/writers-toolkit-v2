@@ -1001,7 +1001,7 @@
 				{
 					"name": "--check_type",
 					"arg_name": "check_type",
-					"description": "Type of consistency check to perform (default: world)\nChoices: world, internal, development, unresolved, all",
+					"description": "Select type of consistency check to perform (default: world)\nChoices: world, internal, development, unresolved, all",
 					"type": "str",
 					"default": "all",
 					"required": false,
