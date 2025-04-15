@@ -10,6 +10,7 @@ const OutlineWriter = require('./tools/outline-writer');
 const WorldWriter = require('./tools/world-writer');
 const ChapterWriter = require('./tools/chapter-writer');
 const CharacterAnalyzer = require('./tools/character-analyzer');
+const TenseConsistencyChecker = require('./tools/tense-consistency-checker');
 
 /**
  * Initialize the tool system
@@ -143,6 +144,22 @@ async function initializeToolSystem(settings, database) {
         toolRegistry.registerTool(
           toolInfo.name,
           new CharacterAnalyzer(claudeService, {
+            ...toolConfig,
+            ...settings
+          })
+        );
+        console.log(`Successfully registered tool: ${toolInfo.name}`);
+      }
+    }
+    else if (toolInfo.name === 'tense_consistency_checker') {
+      const toolConfig = database.getToolByName(toolInfo.name);
+      console.log('Tense Consistency Checker tool config:', toolConfig);
+      
+      if (toolConfig) {
+        // Register the tool
+        toolRegistry.registerTool(
+          toolInfo.name,
+          new TenseConsistencyChecker(claudeService, {
             ...toolConfig,
             ...settings
           })
