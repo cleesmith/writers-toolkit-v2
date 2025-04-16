@@ -147,7 +147,6 @@ Desired output tokens: ${desiredOutputTokens} tokens`;
       fileCache.addFile(toolName, outputFile);
       
       console.log('TokensWordsCounter execution complete');
-      // console.log('*** Files in cache:', fileCache.getFiles(toolName));
       
       // Return the result
       return {

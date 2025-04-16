@@ -222,6 +222,11 @@ async function executeToolById(toolId, options) {
   }
 }
 
+/**
+ * Reinitialize the Claude API service with updated settings
+ * @param {Object} settings - Claude API settings
+ * @returns {Object} - New Claude API service instance
+ */
 function reinitializeClaudeService(settings) {
   // Create a new Claude service with the updated settings
   const claudeService = new ClaudeAPIService(settings);
@@ -238,5 +243,6 @@ function reinitializeClaudeService(settings) {
 module.exports = {
   initializeToolSystem,
   executeToolById,
+  reinitializeClaudeService, // Add the missing export here
   toolRegistry
 };

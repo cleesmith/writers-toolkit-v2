@@ -230,13 +230,11 @@ class Database {
   // Return the schema for Claude API settings
   getClaudeApiSettingsSchema() {
     return [
+      // Existing settings
       {
         name: 'max_retries',
         label: 'Max Retries',
         type: 'number',
-        min: 0,
-        max: 5,
-        step: 1,
         default: 1,
         required: true,
         description: 'Maximum number of retry attempts if the API call fails.'
@@ -245,20 +243,22 @@ class Database {
         name: 'request_timeout',
         label: 'Request Timeout (seconds)',
         type: 'number',
-        min: 30,
-        max: 600,
-        step: 30,
         default: 300,
         required: true,
         description: 'Maximum time (in seconds) to wait for a response from the API.'
       },
       {
+        name: 'desired_output_tokens',
+        label: 'Desired Output Tokens (* safe to change)',
+        type: 'number',
+        default: 12000,
+        required: true,
+        description: 'Adjust this to get more words (12,000 tokens = 9,000 words) in the model\'s output.'
+      },
+      {
         name: 'context_window',
         label: 'Context Window (tokens)',
         type: 'number',
-        min: 50000,
-        max: 200000,
-        step: 10000,
         default: 200000,
         required: true,
         description: 'Maximum number of tokens for the context window.'
@@ -267,9 +267,6 @@ class Database {
         name: 'thinking_budget_tokens',
         label: 'Thinking Budget (tokens)',
         type: 'number',
-        min: 1000,
-        max: 100000,
-        step: 1000,
         default: 32000,
         required: true,
         description: 'Maximum tokens for model thinking.'
@@ -278,26 +275,37 @@ class Database {
         name: 'betas_max_tokens',
         label: 'Betas Max Tokens',
         type: 'number',
-        min: 10000,
-        max: 200000,
-        step: 1000,
         default: 128000,
         required: true,
         description: 'Maximum tokens for beta features.'
       },
       {
-        name: 'desired_output_tokens',
-        label: 'Desired Output Tokens',
-        type: 'number',
-        min: 1000,
-        max: 30000,
-        step: 1000,
-        default: 12000,
+        name: 'model_name',
+        label: 'Model Name',
+        type: 'text',
+        default: 'claude-3-7-sonnet-20250219',
         required: true,
-        description: 'Target number of tokens for the model\'s output.'
+        description: 'Claude model identifier (e.g., claude-3-7-sonnet-20250219)'
+      },
+      {
+        name: 'betas',
+        label: 'Beta Features',
+        type: 'text',
+        default: 'output-128k-2025-02-19',
+        required: true,
+        description: 'Comma-separated beta features (e.g., output-128k-2025-02-19)'
+      },
+      {
+        name: 'max_thinking_budget',
+        label: 'Max Thinking Budget',
+        type: 'number',
+        default: 32000,
+        required: true,
+        description: 'Maximum thinking budget cap (in tokens)'
       }
     ];
   }
+
 }
 
 // Export a singleton instance

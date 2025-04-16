@@ -4,24 +4,28 @@ const anthropic = require('@anthropic-ai/sdk');
 /**
  * Claude API Service
  * Handles interactions with the Claude AI API
+ * Uses UI settings with no hardcoded values
  */
 class ClaudeAPIService {
   /**
    * Constructor
-   * @param {Object} config - API configuration
+   * @param {Object} config - API configuration from UI settings
    */
-
   constructor(config = {}) {
-    // First, check if required settings are present
+    // Validate required settings
     this.validateConfig(config);
     
+    // Store all config values
     this.config = {
       max_retries: config.max_retries,
       request_timeout: config.request_timeout,
       context_window: config.context_window,
       thinking_budget_tokens: config.thinking_budget_tokens,
       betas_max_tokens: config.betas_max_tokens,
-      desired_output_tokens: config.desired_output_tokens
+      desired_output_tokens: config.desired_output_tokens,
+      model_name: config.model_name,
+      betas: config.betas,
+      max_thinking_budget: config.max_thinking_budget
     };
     
     // Create Claude API client
@@ -30,7 +34,21 @@ class ClaudeAPIService {
       maxRetries: this.config.max_retries,
     });
     
-    console.log('Claude API Service initialized with context window:', this.config.context_window);
+    console.log('Claude API Service initialized with:');
+    console.log('- Context window:', this.config.context_window);
+    console.log('- Model name:', this.config.model_name);
+    console.log('- Beta features:', this.config.betas);
+    console.log('- Max thinking budget:', this.config.max_thinking_budget);
+  }
+  
+  /**
+   * Helper method to convert betas string to array for API calls
+   * @returns {string[]} Array of beta features
+   */
+  _getBetasArray() {
+    return this.config.betas.split(',')
+      .map(beta => beta.trim())
+      .filter(beta => beta.length > 0);
   }
 
   /**
@@ -45,7 +63,10 @@ class ClaudeAPIService {
       'context_window',
       'thinking_budget_tokens',
       'betas_max_tokens',
-      'desired_output_tokens'
+      'desired_output_tokens',
+      'model_name',
+      'betas',
+      'max_thinking_budget'
     ];
     
     const missingSettings = requiredSettings.filter(setting => config[setting] === undefined);
@@ -63,13 +84,13 @@ class ClaudeAPIService {
   async countTokens(text) {
     try {
       const response = await this.client.beta.messages.countTokens({
-        model: "claude-3-7-sonnet-20250219",
+        model: this.config.model_name,
         messages: [{ role: "user", content: text }],
         thinking: {
           type: "enabled",
           budget_tokens: this.config.thinking_budget_tokens
         },
-        betas: ["output-128k-2025-02-19"]
+        betas: this._getBetasArray()
       });
       
       return response.input_tokens;
@@ -82,21 +103,22 @@ class ClaudeAPIService {
   /**
    * Complete a prompt with thinking
    * @param {string} prompt - Prompt to complete
-   * @param {Object} options - API options
+   * @param {Object} options - API options (only system is allowed to be overridden)
    * @returns {Promise<Object>} - Response with content and thinking
    */
   async completeWithThinking(prompt, options = {}) {
     const modelOptions = {
-      model: options.model || "claude-3-7-sonnet-20250219",
-      max_tokens: options.max_tokens || this.config.betas_max_tokens,
+      model: this.config.model_name,
+      max_tokens: this.config.betas_max_tokens,
       messages: [{ role: "user", content: prompt }],
       thinking: {
         type: "enabled",
-        budget_tokens: options.thinking_budget || this.config.thinking_budget_tokens
+        budget_tokens: this.config.thinking_budget_tokens
       },
-      betas: ["output-128k-2025-02-19"]
+      betas: this._getBetasArray()
     };
     
+    // Only allow system prompt to be overridden
     if (options.system) {
       modelOptions.system = options.system;
     }
@@ -118,23 +140,24 @@ class ClaudeAPIService {
   /**
    * Stream a response with thinking using callbacks
    * @param {string} prompt - Prompt to complete
-   * @param {Object} options - API options
+   * @param {Object} options - API options (only system is allowed to be overridden)
    * @param {Function} onThinking - Callback for thinking content
    * @param {Function} onText - Callback for response text
    * @returns {Promise<void>}
    */
   async streamWithThinking(prompt, options = {}, onThinking, onText) {
     const modelOptions = {
-      model: options.model || "claude-3-7-sonnet-20250219",
-      max_tokens: options.max_tokens || this.config.betas_max_tokens,
+      model: this.config.model_name,
+      max_tokens: this.config.betas_max_tokens,
       messages: [{ role: "user", content: prompt }],
       thinking: {
         type: "enabled",
-        budget_tokens: options.thinking?.budget_tokens || this.config.thinking_budget_tokens
+        budget_tokens: this.config.thinking_budget_tokens
       },
-      betas: options.betas || ["output-128k-2025-02-19"]
+      betas: this._getBetasArray()
     };
     
+    // Only allow system prompt to be overridden
     if (options.system) {
       modelOptions.system = options.system;
     }
@@ -166,16 +189,15 @@ class ClaudeAPIService {
   /**
    * Calculate token budgets and validate prompt size
    * @param {number} promptTokens - Number of tokens in the prompt
-   * @param {Object} options - Optional override values for calculations
    * @returns {Object} - Calculated token budgets and limits
-   * @throws {Error} - If prompt is too large for configured thinking budget
    */
-  calculateTokenBudgets(promptTokens, options = {}) {
-    // Use config directly, applying any overrides from options
-    const contextWindow = options.context_window || this.config.context_window;
-    const desiredOutputTokens = options.desired_output_tokens || this.config.desired_output_tokens;
-    const configuredThinkingBudget = options.thinking_budget_tokens || this.config.thinking_budget_tokens;
-    const betasMaxTokens = options.betas_max_tokens || this.config.betas_max_tokens;
+  calculateTokenBudgets(promptTokens) {
+    // Use configuration settings directly
+    const contextWindow = this.config.context_window;
+    const desiredOutputTokens = this.config.desired_output_tokens;
+    const configuredThinkingBudget = this.config.thinking_budget_tokens;
+    const betasMaxTokens = this.config.betas_max_tokens;
+    const maxThinkingBudget = this.config.max_thinking_budget;
     
     // Calculate available tokens after prompt
     const availableTokens = contextWindow - promptTokens;
@@ -186,10 +208,10 @@ class ClaudeAPIService {
     // Thinking budget must be LESS than max_tokens to leave room for visible output
     let thinkingBudget = maxTokens - desiredOutputTokens;
     
-    // Cap thinking budget if it's too large
-    const capThinkingBudget = thinkingBudget > 32000;
+    // Cap thinking budget if it's too large - use configurable limit
+    const capThinkingBudget = thinkingBudget > maxThinkingBudget;
     if (capThinkingBudget) {
-      thinkingBudget = 32000;
+      thinkingBudget = maxThinkingBudget;
     }
     
     // Check if prompt is too large for the configured thinking budget
@@ -209,7 +231,6 @@ class ClaudeAPIService {
       isPromptTooLarge
     };
   }
-
 }
 
 module.exports = ClaudeAPIService;

@@ -684,6 +684,9 @@ function setupApiSettingsHandlers() {
   //       claude_api_configuration: appState.settings_claude_api_configuration
   //     });
       
+  //     // Reinitialize the Claude service with new settings
+  //     const claudeService = toolSystem.reinitializeClaudeService(appState.settings_claude_api_configuration);
+      
   //     return {
   //       success: true
   //     };
@@ -697,6 +700,8 @@ function setupApiSettingsHandlers() {
   // });
   ipcMain.handle('save-claude-api-settings', async (event, settings) => {
     try {
+      console.log('Saving Claude API settings:', settings);
+      
       // Update app state with new settings
       appState.settings_claude_api_configuration = {
         ...appState.settings_claude_api_configuration,
@@ -710,6 +715,32 @@ function setupApiSettingsHandlers() {
       
       // Reinitialize the Claude service with new settings
       const claudeService = toolSystem.reinitializeClaudeService(appState.settings_claude_api_configuration);
+      
+      // Force each tool to update its internal config copy
+      const toolIds = toolSystem.toolRegistry.getAllToolIds();
+      for (const toolId of toolIds) {
+        const tool = toolSystem.toolRegistry.getTool(toolId);
+        // Update the tool's config with the new settings
+        tool.config = {
+          ...tool.config,
+          ...appState.settings_claude_api_configuration
+        };
+      }
+      
+      // Show a confirmation message to the user
+      if (apiSettingsWindow && !apiSettingsWindow.isDestroyed()) {
+        apiSettingsWindow.webContents.send('settings-saved-notification', {
+          message: 'Settings updated and applied to all tools',
+          requiresRestart: false
+        });
+      }
+      
+      // Notify main window that settings were updated
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.webContents.send('api-settings-updated', appState.settings_claude_api_configuration);
+      }
+      
+      console.log('Claude API settings saved and applied successfully');
       
       return {
         success: true
