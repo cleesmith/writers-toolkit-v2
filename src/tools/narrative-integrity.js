@@ -1,4 +1,4 @@
-// src/tools/consistency-checker.js
+// src/tools/narrative-integrity.js
 const BaseTool = require('./base-tool');
 const path = require('path');
 const util = require('util');
@@ -7,22 +7,22 @@ const appState = require('../../src/state.js');
 const fs = require('fs/promises');
 
 /**
- * Consistency Checker Tool
- * Checks a manuscript for consistency against:
+ * NarrativeIntegrity Tool
+ * Checks a manuscript for integrity against:
  *    a world document and optionally an outline
- * Supports different types of consistency checks: 
+ * Supports different types of consistency/integrity checks: 
  *    world, internal, development, unresolved
  */
-class ConsistencyChecker extends BaseTool {
+class NarrativeIntegrity extends BaseTool {
   /**
    * Constructor
    * @param {Object} claudeService - Claude API service
    * @param {Object} config - Tool configuration
    */
   constructor(claudeService, config = {}) {
-    super('consistency_checker', config);
+    super('narrative_integrity', config);
     this.claudeService = claudeService;
-    console.log('ConsistencyChecker initialized with config:', 
+    console.log('NarrativeIntegrity initialized with config:', 
       util.inspect(config, { depth: 1, colors: true }));
   }
   
@@ -32,16 +32,23 @@ class ConsistencyChecker extends BaseTool {
    * @returns {Promise<Object>} - Execution result
    */
   async execute(options) {
-    console.log('Executing ConsistencyChecker with options:', options);
+    console.log('Executing NarrativeIntegrity with options:', options);
     
     // Extract options
     let manuscriptFile = options.manuscript_file;
     let worldFile = options.world_file;
     let outlineFile = options.outline_file;
-    const checkType = options.check_type || 'world';
-    const skipThinking = options.skip_thinking || false;
-    const checkDescription = options.check_description || '';
-    const saveDir = options.save_dir || appState.CURRENT_PROJECT_PATH;
+    const checkType = options.check_type;
+    const skipThinking = options.skip_thinking;
+    const checkDescription = options.check_description;
+    let saveDir = options.save_dir;
+    
+    // If saveDir is not provided, use the default save directory from appState
+    if (!saveDir) {
+      saveDir = appState.DEFAULT_SAVE_DIR;
+    }
+    
+    // Check if we have a valid save directory
     if (!saveDir) {
       const errorMsg = 'Error: No save directory specified and no current project selected.\n' +
                       'Please select a project or specify a save directory.';
@@ -92,7 +99,7 @@ class ConsistencyChecker extends BaseTool {
       
       // Run each check type
       for (const type of checkTypes) {
-        this.emitOutput(`\nRunning ${type.toUpperCase()} consistency check...\n`);
+        this.emitOutput(`\nRunning ${type.toUpperCase()} integrity check...\n`);
         
         // Create the prompt for this check type
         const prompt = this.createPrompt(type, outlineContent, worldContent, manuscriptContent);
@@ -142,14 +149,12 @@ class ConsistencyChecker extends BaseTool {
           await this.claudeService.streamWithThinking(
             prompt,
             {
-              model: "claude-3-7-sonnet-20250219",
               system: systemPrompt,
               max_tokens: tokenBudgets.maxTokens,
               thinking: {
                 type: "enabled",
                 budget_tokens: tokenBudgets.thinkingBudget
-              },
-              betas: ["output-128k-2025-02-19"]
+              }
             },
             // Callback for thinking content
             (thinkingDelta) => {
@@ -206,7 +211,7 @@ class ConsistencyChecker extends BaseTool {
         }
       };
     } catch (error) {
-      console.error('Error in ConsistencyChecker:', error);
+      console.error('Error in NarrativeIntegrity:', error);
       this.emitOutput(`\nError: ${error.message}\n`);
       throw error;
     }
@@ -241,7 +246,7 @@ class ConsistencyChecker extends BaseTool {
   
   /**
    * Create prompt based on check type
-   * @param {string} checkType - Type of consistency check
+   * @param {string} checkType - Type of integrity check
    * @param {string} outlineContent - Outline content
    * @param {string} worldContent - World content
    * @param {string} manuscriptContent - Manuscript content
@@ -270,7 +275,7 @@ Using the WORLD document as the established source of truth, analyze
 the MANUSCRIPT for any inconsistencies or contradictions with the
 established facts. Focus on:
 
-1. CHARACTER CONSISTENCY:
+1. CHARACTER INTEGRITY:
    - Are characters acting in ways that match their established
      personality traits?
    - Does dialogue reflect their documented speech patterns and
@@ -279,7 +284,7 @@ established facts. Focus on:
      dynamics?
    - Are physical descriptions matching those in the WORLD document?
 
-2. SETTING & WORLD CONSISTENCY:
+2. SETTING & WORLD INTEGRITY:
    - Are locations described consistently with their established
      features?
    - Does the manuscript respect the established rules of the world?
@@ -297,7 +302,7 @@ established facts. Focus on:
    - Are the established themes being consistently developed?
    - Are symbolic elements used consistently with their established meanings?
 
-For each inconsistency, provide:
+For each inconsistency, lacking integrity, provide:
 - The specific element in the manuscript that contradicts the WORLD
 - The established fact in the WORLD it contradicts
 - The location in the manuscript where this occurs using verbatim text
@@ -314,8 +319,8 @@ ${manuscriptContent}
 ${noMarkdown}
 
 You are an expert fiction editor focusing on internal narrative
-consistency. Analyze the MANUSCRIPT to identify elements that are
-internally inconsistent or contradictory, regardless of the
+consistency and integrity. Analyze the MANUSCRIPT to identify elements that are
+internally inconsistent or contradictory or lacking integrity, regardless of the
 established story world. Focus on:
 
 1. NARRATIVE CONTINUITY:
@@ -342,14 +347,14 @@ established story world. Focus on:
    - Plot developments that contradict earlier established rules or
      limitations
 
-4. POV CONSISTENCY:
+4. POV INTEGRITY:
    - Shifts in viewpoint that break established narrative patterns
    - Knowledge revealed that the POV character couldn't logically
      possess
    - Tone or voice inconsistencies within the same POV sections
 
 For each issue found, provide:
-- The specific inconsistency with exact manuscript locations
+- The specific inconsistency, lacking integrity, with exact manuscript locations
 - Why it creates a continuity problem
 - A suggested revision approach
 `,
@@ -447,7 +452,7 @@ For each unresolved element, provide:
 
   /**
    * Save report and thinking content to files
-   * @param {string} checkType - Type of consistency check
+   * @param {string} checkType - Type of integrity check
    * @param {string} content - Response content
    * @param {string} thinking - Thinking content
    * @param {number} promptTokens - Prompt token count
@@ -475,7 +480,7 @@ For each unresolved element, provide:
       
       // Create descriptive filename
       const desc = description ? `_${description}` : '';
-      const baseFilename = `consistency_${checkType}${desc}_${timestamp}`;
+      const baseFilename = `narrative_integrity_${checkType}${desc}_${timestamp}`;
       
       // Array to collect all saved file paths
       const savedFilePaths = [];
@@ -483,7 +488,7 @@ For each unresolved element, provide:
       // Create stats for thinking file
       const stats = `
 Details:  ${dateTimeStr2}
-Check type: ${checkType} consistency check
+Check type: ${checkType} narrative integrity check
 Max request timeout: ${this.config.request_timeout} seconds
 Max AI model context window: ${this.config.context_window} tokens
 AI model thinking budget: ${this.config.thinking_budget_tokens} tokens
@@ -503,8 +508,7 @@ Output tokens: ${responseTokens}
       if (thinking && !skipThinking) {
         const thinkingFilename = `${baseFilename}_thinking.txt`;
         const thinkingPath = path.join(saveDir, thinkingFilename);
-        console.log('$>$>$> thinkingFilename=',thinkingFilename, '  thinkingPath=',thinkingPath);
-        const thinkingContent = `=== CONSISTENCY CHECK TYPE ===
+        const thinkingContent = `=== NARRATIVE INTEGRITY CHECK TYPE ===
 ${checkType}
 
 === AI'S THINKING PROCESS ===
@@ -518,8 +522,7 @@ ${stats}`;
         this.emitOutput(`AI thinking saved to: ${thinkingPath}\n`);
         savedFilePaths.push(thinkingPath);
       }
-
-      console.log('$>$>$> Current saved paths:', savedFilePaths);
+      // console.log('$>$>$> Current saved paths:', savedFilePaths);
 
       this.emitOutput(`Report saved to: ${reportPath}\n`);
       return savedFilePaths;
@@ -531,4 +534,4 @@ ${stats}`;
   }
 }
 
-module.exports = ConsistencyChecker;
+module.exports = NarrativeIntegrity;

@@ -837,19 +837,19 @@
 				}
 			]
 		},
-		"consistency_checker": {
-			"id": "consistency_checker",
-			"name": "consistency_checker.js",
-			"title": "Consistency Checker",
-			"description": "Manuscript consistency checker utility that compares a manuscript against a world document (and optionally an outline).\nIt supports various consistency checks: world, internal, development, and unresolved.\nConfigurable options enable targeted analysis of character, setting, timeline, and thematic consistency, producing detailed reports with examples and recommendations for resolving discrepancies.",
-			"help_text": "Manuscript consistency checker",
+		"narrative_integrity": {
+			"id": "narrative_integrity",
+			"name": "narrative_integrity.js",
+			"title": "Narrative Integrity",
+			"description": "Narrative integrity is about staying consistent with the rules established by the story itself.\nThe tool compares a manuscript against a world document (and optionally an outline).\nIt supports various checks: world, internal, development, and unresolved.\nConfigurable options enable targeted analysis of character, setting, timeline, and thematic consistency, producing detailed reports with examples and recommendations for resolving discrepancies.",
+			"help_text": "Manuscript narrative integrity",
 			"category": "analysis",
 			"options": [
 				{
 					"name": "manuscript_file",
 					"label": "MANUSCRIPT_FILE",
 					"type": "file",
-					"description": "File containing the manuscript to analyze",
+					"description": "File containing the manuscript/narrative to analyze",
 					"required": true,
 					"default": "manuscript.txt",
 					"group": "Input Files"
@@ -885,22 +885,22 @@
 					"name": "check_type",
 					"label": "Check Type",
 					"type": "select",
-					"description": "Select type of consistency check to perform",
+					"description": "Select type of integrity check to perform",
 					"required": false,
 					"default": "all",
 					"group": "Analysis Options",
 					"choices": [
 						{
 							"value": "world",
-							"label": "World Consistency"
+							"label": "World Integrity"
 						},
 						{
 							"value": "internal",
-							"label": "Internal Consistency"
+							"label": "Internal Integrity"
 						},
 						{
 							"value": "development",
-							"label": "Development Consistency"
+							"label": "Development Integrity"
 						},
 						{
 							"value": "unresolved",

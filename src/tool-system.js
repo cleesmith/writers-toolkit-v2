@@ -4,7 +4,7 @@ const ClaudeAPIService = require('./claude-api/client');
 
 const toolRegistry = require('./tools/registry');
 const TokensWordsCounter = require('./tools/tokens-words-counter');
-const ConsistencyChecker = require('./tools/consistency-checker');
+const NarrativeIntegrity = require('./tools/narrative-integrity');
 const BrainstormTool = require('./tools/brainstorm');
 const OutlineWriter = require('./tools/outline-writer');
 const WorldWriter = require('./tools/world-writer');
@@ -120,15 +120,15 @@ async function initializeToolSystem(settings, database) {
         console.log(`Successfully registered tool: ${toolInfo.name}`);
       }
     }
-    else if (toolInfo.name === 'consistency_checker') {
+    else if (toolInfo.name === 'narrative_integrity') {
       const toolConfig = database.getToolByName(toolInfo.name);
-      console.log('Consistency Checker tool config:', toolConfig);
+      console.log('Narrative Integrity tool config:', toolConfig);
       
       if (toolConfig) {
         // Register the tool
         toolRegistry.registerTool(
           toolInfo.name,
-          new ConsistencyChecker(claudeService, {
+          new NarrativeIntegrity(claudeService, {
             ...toolConfig,
             ...settings
           })
