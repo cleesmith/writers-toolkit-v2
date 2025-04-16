@@ -1129,10 +1129,13 @@
 		"claude_api": {
 			"max_retries": 1,
 			"request_timeout": 300,
+			"model_name": "claude-3-7-sonnet-20250219",
 			"context_window": 200000,
 			"thinking_budget_tokens": 32000,
 			"betas_max_tokens": 128000,
-			"desired_output_tokens": 12000
+			"desired_output_tokens": 12000,
+			"betas": "output-128k-2025-02-19",
+			"max_thinking_budget": 32000
 		},
 		"projects": {
 			"current": "Ezra Patel",
