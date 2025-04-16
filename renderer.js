@@ -102,34 +102,6 @@ window.electronAPI.onProjectUpdated((event) => {
 });
 
 // Load the list of tools
-// async function loadTools() {
-//   try {
-//     const tools = await window.electronAPI.getTools();
-    
-//     // Clear any existing options
-//     toolSelect.innerHTML = '';
-    
-//     // Add tools to the dropdown
-//     tools.forEach(tool => {
-//       const option = document.createElement('option');
-//       option.value = tool.name;
-//       option.textContent = tool.title;
-//       option.dataset.description = tool.description;
-//       toolSelect.appendChild(option);
-//     });
-    
-//     // Select the first tool by default
-//     if (tools.length > 0) {
-//       toolSelect.value = tools[0].name;
-//       toolDescription.textContent = tools[0].description;
-//     } else {
-//       toolDescription.textContent = 'No tools available.';
-//     }
-//   } catch (error) {
-//     console.error('Error loading tools:', error);
-//     toolDescription.textContent = 'Error loading tools.';
-//   }
-// }
 async function loadTools() {
   try {
     const tools = await window.electronAPI.getTools();
@@ -137,30 +109,67 @@ async function loadTools() {
     // Clear any existing options
     toolSelect.innerHTML = '';
     
-    // Flag to track if we've seen "Narrative Integrity"
-    let narrativeIntegrityFound = false;
+    // Define tool categories
+    const topTools = ["tokens_words_counter", "narrative_integrity", "brainstorm"];
+    const roughDraftTools = ["brainstorm", "outline_writer", "world_writer", "chapter_writer"];
     
-    // Add tools to the dropdown
+    // Track which tools have been added to avoid duplicates
+    const addedTools = new Set();
+    
+    // First add the top tools (first 2 only - brainstorm will go in rough draft section)
     tools.forEach(tool => {
-      const option = document.createElement('option');
-      option.value = tool.name;
-      option.textContent = tool.title;
-      option.dataset.description = tool.description;
-      toolSelect.appendChild(option);
-      
-      // Check if current tool is "Narrative Integrity"
-      if (tool.name === 'narrative_integrity' || tool.title === 'Narrative Integrity') {
-        narrativeIntegrityFound = true;
-        
-        // Add a divider option after Narrative Integrity
-        const divider = document.createElement('option');
-        divider.disabled = true; // Make it non-selectable
-        divider.value = ''; // Empty value
-        divider.textContent = '──────────────'; // Divider text
-        divider.style.color = '#888';
-        divider.style.fontWeight = 'normal';
-        
-        toolSelect.appendChild(divider);
+      if (topTools.includes(tool.name) && tool.name !== "brainstorm") {
+        const option = document.createElement('option');
+        option.value = tool.name;
+        option.textContent = tool.title;
+        option.dataset.description = tool.description;
+        toolSelect.appendChild(option);
+        addedTools.add(tool.name);
+      }
+    });
+    
+    // Add the "Rough Draft Writing Tools" header
+    const roughDraftHeader = document.createElement('option');
+    roughDraftHeader.disabled = true;
+    roughDraftHeader.value = '';
+    roughDraftHeader.textContent = '- Rough Draft Writing Tools:';
+    roughDraftHeader.style.color = '#999';
+    roughDraftHeader.style.fontWeight = 'bold';
+    roughDraftHeader.style.backgroundColor = '#252525';
+    roughDraftHeader.style.padding = '2px';
+    toolSelect.appendChild(roughDraftHeader);
+    
+    // Add the rough draft tools
+    tools.forEach(tool => {
+      if (roughDraftTools.includes(tool.name)) {
+        const option = document.createElement('option');
+        option.value = tool.name;
+        option.textContent = tool.title;
+        option.dataset.description = tool.description;
+        toolSelect.appendChild(option);
+        addedTools.add(tool.name);
+      }
+    });
+    
+    // Add the "Editor Tools" header
+    const editorHeader = document.createElement('option');
+    editorHeader.disabled = true;
+    editorHeader.value = '';
+    editorHeader.textContent = '- Editor Tools:';
+    editorHeader.style.color = '#999';
+    editorHeader.style.fontWeight = 'bold';
+    editorHeader.style.backgroundColor = '#252525';
+    editorHeader.style.padding = '2px';
+    toolSelect.appendChild(editorHeader);
+    
+    // Add all remaining tools that haven't been added yet
+    tools.forEach(tool => {
+      if (!addedTools.has(tool.name)) {
+        const option = document.createElement('option');
+        option.value = tool.name;
+        option.textContent = tool.title;
+        option.dataset.description = tool.description;
+        toolSelect.appendChild(option);
       }
     });
     

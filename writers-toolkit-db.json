@@ -4,7 +4,7 @@
 			"id": "tokens_words_counter",
 			"name": "tokens_words_counter.js",
 			"title": "Tokens & Words Counter",
-			"description": "Analyzes a text file to count tokens, words.",
+			"description": "Count tokens and words. Also, useful to test your Anthropic Claude API key for free.",
 			"help_text": "",
 			"category": "analysis",
 			"options": [
@@ -29,7 +29,7 @@
 			"id": "narrative_integrity",
 			"name": "narrative_integrity.js",
 			"title": "Narrative Integrity",
-			"description": "Narrative integrity is about staying consistent with the rules established by the story itself.\nThe tool compares a manuscript against a world document (and optionally an outline).\nIt supports various checks: world, internal, development, and unresolved.\nConfigurable options enable targeted analysis of character, setting, timeline, and thematic consistency, producing detailed reports with examples and recommendations for resolving discrepancies.",
+			"description": "Narrative integrity is about staying consistent with the rules established by the story itself.\nThe tool compares a manuscript against a world document (and optionally an outline).\nIt supports various checks: world, internal, development, and unresolved.\nConfigurable options enable targeted analysis of character, setting, timeline, and thematic consistency, producing detailed reports with examples and recommendations for resolving discrepancies.\n* Included at top as it's the most used Editor Tool.",
 			"help_text": "Manuscript narrative integrity",
 			"category": "analysis",
 			"options": [
