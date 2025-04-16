@@ -56,6 +56,22 @@ async function initializeToolSystem(settings, database) {
         console.log(`Successfully registered tool: ${toolInfo.name}`);
       }
     }
+    else if (toolInfo.name === 'narrative_integrity') {
+      const toolConfig = database.getToolByName(toolInfo.name);
+      console.log('Narrative Integrity tool config:', toolConfig);
+      
+      if (toolConfig) {
+        // Register the tool
+        toolRegistry.registerTool(
+          toolInfo.name,
+          new NarrativeIntegrity(claudeService, {
+            ...toolConfig,
+            ...settings
+          })
+        );
+        console.log(`Successfully registered tool: ${toolInfo.name}`);
+      }
+    }
     else if (toolInfo.name === 'brainstorm') {
       const toolConfig = database.getToolByName(toolInfo.name);
       console.log('Brainstorm tool config:', toolConfig);
@@ -113,22 +129,6 @@ async function initializeToolSystem(settings, database) {
         toolRegistry.registerTool(
           toolInfo.name,
           new ChapterWriter(claudeService, {
-            ...toolConfig,
-            ...settings
-          })
-        );
-        console.log(`Successfully registered tool: ${toolInfo.name}`);
-      }
-    }
-    else if (toolInfo.name === 'narrative_integrity') {
-      const toolConfig = database.getToolByName(toolInfo.name);
-      console.log('Narrative Integrity tool config:', toolConfig);
-      
-      if (toolConfig) {
-        // Register the tool
-        toolRegistry.registerTool(
-          toolInfo.name,
-          new NarrativeIntegrity(claudeService, {
             ...toolConfig,
             ...settings
           })

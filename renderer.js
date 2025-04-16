@@ -102,12 +102,43 @@ window.electronAPI.onProjectUpdated((event) => {
 });
 
 // Load the list of tools
+// async function loadTools() {
+//   try {
+//     const tools = await window.electronAPI.getTools();
+    
+//     // Clear any existing options
+//     toolSelect.innerHTML = '';
+    
+//     // Add tools to the dropdown
+//     tools.forEach(tool => {
+//       const option = document.createElement('option');
+//       option.value = tool.name;
+//       option.textContent = tool.title;
+//       option.dataset.description = tool.description;
+//       toolSelect.appendChild(option);
+//     });
+    
+//     // Select the first tool by default
+//     if (tools.length > 0) {
+//       toolSelect.value = tools[0].name;
+//       toolDescription.textContent = tools[0].description;
+//     } else {
+//       toolDescription.textContent = 'No tools available.';
+//     }
+//   } catch (error) {
+//     console.error('Error loading tools:', error);
+//     toolDescription.textContent = 'Error loading tools.';
+//   }
+// }
 async function loadTools() {
   try {
     const tools = await window.electronAPI.getTools();
     
     // Clear any existing options
     toolSelect.innerHTML = '';
+    
+    // Flag to track if we've seen "Narrative Integrity"
+    let narrativeIntegrityFound = false;
     
     // Add tools to the dropdown
     tools.forEach(tool => {
@@ -116,6 +147,21 @@ async function loadTools() {
       option.textContent = tool.title;
       option.dataset.description = tool.description;
       toolSelect.appendChild(option);
+      
+      // Check if current tool is "Narrative Integrity"
+      if (tool.name === 'narrative_integrity' || tool.title === 'Narrative Integrity') {
+        narrativeIntegrityFound = true;
+        
+        // Add a divider option after Narrative Integrity
+        const divider = document.createElement('option');
+        divider.disabled = true; // Make it non-selectable
+        divider.value = ''; // Empty value
+        divider.textContent = '──────────────'; // Divider text
+        divider.style.color = '#888';
+        divider.style.fontWeight = 'normal';
+        
+        toolSelect.appendChild(divider);
+      }
     });
     
     // Select the first tool by default

@@ -25,6 +25,92 @@
 				}
 			]
 		},
+		"narrative_integrity": {
+			"id": "narrative_integrity",
+			"name": "narrative_integrity.js",
+			"title": "Narrative Integrity",
+			"description": "Narrative integrity is about staying consistent with the rules established by the story itself.\nThe tool compares a manuscript against a world document (and optionally an outline).\nIt supports various checks: world, internal, development, and unresolved.\nConfigurable options enable targeted analysis of character, setting, timeline, and thematic consistency, producing detailed reports with examples and recommendations for resolving discrepancies.",
+			"help_text": "Manuscript narrative integrity",
+			"category": "analysis",
+			"options": [
+				{
+					"name": "manuscript_file",
+					"label": "MANUSCRIPT_FILE",
+					"type": "file",
+					"description": "File containing the manuscript/narrative to analyze",
+					"required": true,
+					"default": "manuscript.txt",
+					"group": "Input Files"
+				},
+				{
+					"name": "world_file",
+					"label": "world_file",
+					"type": "file",
+					"description": "File containing the world details (required)",
+					"required": true,
+					"default": "world.txt",
+					"group": "Input Files"
+				},
+				{
+					"name": "outline_file",
+					"label": "outline_file",
+					"type": "file",
+					"description": "File containing the story outline (optional)",
+					"required": false,
+					"default": "outline.txt",
+					"group": "Input Files"
+				},
+				{
+					"name": "skip_thinking",
+					"label": "skip_thinking",
+					"type": "boolean",
+					"description": "Skip saving the AI thinking process",
+					"required": false,
+					"default": false,
+					"group": "Output Configuration"
+				},
+				{
+					"name": "check_type",
+					"label": "Check Type",
+					"type": "select",
+					"description": "Select type of integrity check to perform",
+					"required": false,
+					"default": "all",
+					"group": "Analysis Options",
+					"choices": [
+						{
+							"value": "world",
+							"label": "World Integrity"
+						},
+						{
+							"value": "internal",
+							"label": "Internal Integrity"
+						},
+						{
+							"value": "development",
+							"label": "Development Integrity"
+						},
+						{
+							"value": "unresolved",
+							"label": "Unresolved Elements"
+						},
+						{
+							"value": "all",
+							"label": "All Checks"
+						}
+					]
+				},
+				{
+					"name": "check_description",
+					"label": "check_description",
+					"type": "text",
+					"description": "Optional description to include in output filenames",
+					"required": false,
+					"default": "",
+					"group": "Output Configuration"
+				}
+			]
+		},
 		"brainstorm": {
 			"id": "brainstorm",
 			"name": "brainstorm.js",
@@ -834,92 +920,6 @@
 					"required": false,
 					"default": "all",
 					"group": "Analysis Options"
-				}
-			]
-		},
-		"narrative_integrity": {
-			"id": "narrative_integrity",
-			"name": "narrative_integrity.js",
-			"title": "Narrative Integrity",
-			"description": "Narrative integrity is about staying consistent with the rules established by the story itself.\nThe tool compares a manuscript against a world document (and optionally an outline).\nIt supports various checks: world, internal, development, and unresolved.\nConfigurable options enable targeted analysis of character, setting, timeline, and thematic consistency, producing detailed reports with examples and recommendations for resolving discrepancies.",
-			"help_text": "Manuscript narrative integrity",
-			"category": "analysis",
-			"options": [
-				{
-					"name": "manuscript_file",
-					"label": "MANUSCRIPT_FILE",
-					"type": "file",
-					"description": "File containing the manuscript/narrative to analyze",
-					"required": true,
-					"default": "manuscript.txt",
-					"group": "Input Files"
-				},
-				{
-					"name": "world_file",
-					"label": "world_file",
-					"type": "file",
-					"description": "File containing the world details (required)",
-					"required": true,
-					"default": "world.txt",
-					"group": "Input Files"
-				},
-				{
-					"name": "outline_file",
-					"label": "outline_file",
-					"type": "file",
-					"description": "File containing the story outline (optional)",
-					"required": false,
-					"default": "outline.txt",
-					"group": "Input Files"
-				},
-				{
-					"name": "skip_thinking",
-					"label": "skip_thinking",
-					"type": "boolean",
-					"description": "Skip saving the AI thinking process",
-					"required": false,
-					"default": false,
-					"group": "Output Configuration"
-				},
-				{
-					"name": "check_type",
-					"label": "Check Type",
-					"type": "select",
-					"description": "Select type of integrity check to perform",
-					"required": false,
-					"default": "all",
-					"group": "Analysis Options",
-					"choices": [
-						{
-							"value": "world",
-							"label": "World Integrity"
-						},
-						{
-							"value": "internal",
-							"label": "Internal Integrity"
-						},
-						{
-							"value": "development",
-							"label": "Development Integrity"
-						},
-						{
-							"value": "unresolved",
-							"label": "Unresolved Elements"
-						},
-						{
-							"value": "all",
-							"label": "All Checks"
-						}
-					]
-				},
-				{
-					"name": "check_description",
-					"label": "check_description",
-					"type": "text",
-					"description": "Optional description to include in output filenames",
-					"required": false,
-					"default": "",
-					"group": "Output Configuration"
 				}
 			]
 		},
