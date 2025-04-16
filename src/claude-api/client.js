@@ -10,30 +10,11 @@ class ClaudeAPIService {
    * Constructor
    * @param {Object} config - API configuration
    */
-  // constructor(config = {}) {
-  //   this.config = {
-  //     max_retries: config.max_retries || 1,
-  //     request_timeout: config.request_timeout || 300,
-  //     context_window: config.context_window || 200000,
-  //     thinking_budget_tokens: config.thinking_budget_tokens || 32000,
-  //     betas_max_tokens: config.betas_max_tokens || 128000,
-  //     desired_output_tokens: config.desired_output_tokens || 12000
-  //   };
-    
-  //   // Create Claude API client
-  //   this.client = new anthropic.Anthropic({
-  //     timeout: this.config.request_timeout * 1000, // convert seconds to ms
-  //     maxRetries: this.config.max_retries,
-  //   });
-    
-  //   console.log('Claude API Service initialized');
-  // }
 
   constructor(config = {}) {
     // First, check if required settings are present
     this.validateConfig(config);
     
-    // Then set the config
     this.config = {
       max_retries: config.max_retries,
       request_timeout: config.request_timeout,
