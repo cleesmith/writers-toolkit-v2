@@ -15,7 +15,7 @@ class BaseTool {
   constructor(name, config = {}) {
     this.name = name;
     this.config = config;
-    console.log(`BaseTool initialized: ${name}`);
+    // console.log(`BaseTool initialized: ${name}`);
   }
   
   /**

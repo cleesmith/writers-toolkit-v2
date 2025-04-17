@@ -41,7 +41,6 @@ async function initializeToolSystem(settings, database) {
   
   // Get tools from database
   const dbTools = database.getTools();
-  console.log(`Found ${dbTools.length} tools in database`);
   
   // Register available tool implementations
   dbTools.forEach(toolInfo => {
@@ -61,7 +60,7 @@ async function initializeToolSystem(settings, database) {
             ...settings
           })
         );
-        console.log(`Successfully registered tool: ${toolInfo.name}`);
+        // console.log(`Successfully registered tool: ${toolInfo.name}`);
       }
     }
     else if (toolInfo.name === 'narrative_integrity') {
@@ -77,7 +76,7 @@ async function initializeToolSystem(settings, database) {
             ...settings
           })
         );
-        console.log(`Successfully registered tool: ${toolInfo.name}`);
+        // console.log(`Successfully registered tool: ${toolInfo.name}`);
       }
     }
     else if (toolInfo.name === 'brainstorm') {
@@ -93,7 +92,7 @@ async function initializeToolSystem(settings, database) {
             ...settings
           })
         );
-        console.log(`Successfully registered tool: ${toolInfo.name}`);
+        // console.log(`Successfully registered tool: ${toolInfo.name}`);
       }
     }
     else if (toolInfo.name === 'outline_writer') {
@@ -109,7 +108,7 @@ async function initializeToolSystem(settings, database) {
             ...settings
           })
         );
-        console.log(`Successfully registered tool: ${toolInfo.name}`);
+        // console.log(`Successfully registered tool: ${toolInfo.name}`);
       }
     }
     else if (toolInfo.name === 'world_writer') {
@@ -125,7 +124,7 @@ async function initializeToolSystem(settings, database) {
             ...settings
           })
         );
-        console.log(`Successfully registered tool: ${toolInfo.name}`);
+        // console.log(`Successfully registered tool: ${toolInfo.name}`);
       }
     }
     else if (toolInfo.name === 'chapter_writer') {
@@ -141,7 +140,7 @@ async function initializeToolSystem(settings, database) {
             ...settings
           })
         );
-        console.log(`Successfully registered tool: ${toolInfo.name}`);
+        // console.log(`Successfully registered tool: ${toolInfo.name}`);
       }
     }
     else if (toolInfo.name === 'character_analyzer') {
@@ -157,7 +156,7 @@ async function initializeToolSystem(settings, database) {
             ...settings
           })
         );
-        console.log(`Successfully registered tool: ${toolInfo.name}`);
+        // console.log(`Successfully registered tool: ${toolInfo.name}`);
       }
     }
     else if (toolInfo.name === 'tense_consistency_checker') {
@@ -173,7 +172,7 @@ async function initializeToolSystem(settings, database) {
             ...settings
           })
         );
-        console.log(`Successfully registered tool: ${toolInfo.name}`);
+        // console.log(`Successfully registered tool: ${toolInfo.name}`);
       }
     }
     else if (toolInfo.name === 'adjective_adverb_optimizer') {
@@ -189,7 +188,7 @@ async function initializeToolSystem(settings, database) {
             ...settings
           })
         );
-        console.log(`Successfully registered tool: ${toolInfo.name}`);
+        // console.log(`Successfully registered tool: ${toolInfo.name}`);
       }
     }
     else if (toolInfo.name === 'dangling_modifier_checker') {
@@ -205,7 +204,7 @@ async function initializeToolSystem(settings, database) {
             ...settings
           })
         );
-        console.log(`Successfully registered tool: ${toolInfo.name}`);
+        // console.log(`Successfully registered tool: ${toolInfo.name}`);
       }
     }
     else if (toolInfo.name === 'rhythm_analyzer') {
@@ -221,7 +220,7 @@ async function initializeToolSystem(settings, database) {
             ...settings
           })
         );
-        console.log(`Successfully registered tool: ${toolInfo.name}`);
+        // console.log(`Successfully registered tool: ${toolInfo.name}`);
       }
     }
     else if (toolInfo.name === 'crowding_leaping_evaluator') {
@@ -237,7 +236,7 @@ async function initializeToolSystem(settings, database) {
             ...settings
           })
         );
-        console.log(`Successfully registered tool: ${toolInfo.name}`);
+        // console.log(`Successfully registered tool: ${toolInfo.name}`);
       }
     }
     else if (toolInfo.name === 'punctuation_auditor') {
@@ -253,7 +252,7 @@ async function initializeToolSystem(settings, database) {
             ...settings
           })
         );
-        console.log(`Successfully registered tool: ${toolInfo.name}`);
+        // console.log(`Successfully registered tool: ${toolInfo.name}`);
       }
     }
     else if (toolInfo.name === 'conflict_analyzer') {
@@ -269,7 +268,7 @@ async function initializeToolSystem(settings, database) {
             ...settings
           })
         );
-        console.log(`Successfully registered tool: ${toolInfo.name}`);
+        // console.log(`Successfully registered tool: ${toolInfo.name}`);
       }
     }
     else if (toolInfo.name === 'foreshadowing_tracker') {
@@ -285,7 +284,7 @@ async function initializeToolSystem(settings, database) {
             ...settings
           })
         );
-        console.log(`Successfully registered tool: ${toolInfo.name}`);
+        // console.log(`Successfully registered tool: ${toolInfo.name}`);
       }
     }
     else if (toolInfo.name === 'plot_thread_tracker') {
@@ -301,11 +300,12 @@ async function initializeToolSystem(settings, database) {
             ...settings
           })
         );
-        console.log(`Successfully registered tool: ${toolInfo.name}`);
+        // console.log(`Successfully registered tool: ${toolInfo.name}`);
       }
     }
 
   });
+  console.log(`Found ${dbTools.length} tools in database`);
   
   return {
     claudeService,
