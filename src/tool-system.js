@@ -16,6 +16,7 @@ const AdjectiveAdverbOptimizer = require('./tools/adjective-adverb-optimizer');
 const DanglingModifierChecker = require('./tools/dangling-modifier-checker');
 const RhythmAnalyzer = require('./tools/rhythm-analyzer');
 const CrowdingLeapingEvaluator = require('./tools/crowding-leaping-evaluator');
+const PunctuationAuditor = require('./tools/punctuation-auditor');
 
 /**
  * Initialize the tool system
@@ -229,6 +230,22 @@ async function initializeToolSystem(settings, database) {
         toolRegistry.registerTool(
           toolInfo.name,
           new CrowdingLeapingEvaluator(claudeService, {
+            ...toolConfig,
+            ...settings
+          })
+        );
+        console.log(`Successfully registered tool: ${toolInfo.name}`);
+      }
+    }
+    else if (toolInfo.name === 'punctuation_auditor') {
+      const toolConfig = database.getToolByName(toolInfo.name);
+      // console.log('Punctuation Auditor tool config:', toolConfig);
+      
+      if (toolConfig) {
+        // Register the tool
+        toolRegistry.registerTool(
+          toolInfo.name,
+          new PunctuationAuditor(claudeService, {
             ...toolConfig,
             ...settings
           })
