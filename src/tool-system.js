@@ -3,6 +3,7 @@ const path = require('path');
 const ClaudeAPIService = require('./claude-api/client');
 
 const toolRegistry = require('./tools/registry');
+
 const TokensWordsCounter = require('./tools/tokens-words-counter');
 const NarrativeIntegrity = require('./tools/narrative-integrity');
 const BrainstormTool = require('./tools/brainstorm');
@@ -12,8 +13,9 @@ const ChapterWriter = require('./tools/chapter-writer');
 const CharacterAnalyzer = require('./tools/character-analyzer');
 const TenseConsistencyChecker = require('./tools/tense-consistency-checker');
 const AdjectiveAdverbOptimizer = require('./tools/adjective-adverb-optimizer');
-const DanglingModifierChecker =  require('./tools/dangling-modifier-checker');
-const RhythmAnalyzer =  require('./tools/rhythm-analyzer');
+const DanglingModifierChecker = require('./tools/dangling-modifier-checker');
+const RhythmAnalyzer = require('./tools/rhythm-analyzer');
+const CrowdingLeapingEvaluator = require('./tools/crowding-leaping-evaluator');
 
 /**
  * Initialize the tool system
@@ -211,6 +213,22 @@ async function initializeToolSystem(settings, database) {
         toolRegistry.registerTool(
           toolInfo.name,
           new RhythmAnalyzer(claudeService, {
+            ...toolConfig,
+            ...settings
+          })
+        );
+        console.log(`Successfully registered tool: ${toolInfo.name}`);
+      }
+    }
+    else if (toolInfo.name === 'crowding_leaping_evaluator') {
+      const toolConfig = database.getToolByName(toolInfo.name);
+      // console.log('Crowding Leaping Evaluator tool config:', toolConfig);
+      
+      if (toolConfig) {
+        // Register the tool
+        toolRegistry.registerTool(
+          toolInfo.name,
+          new CrowdingLeapingEvaluator(claudeService, {
             ...toolConfig,
             ...settings
           })
