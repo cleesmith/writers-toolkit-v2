@@ -695,12 +695,30 @@
 				},
 				{
 					"name": "analysis_level",
-					"label": "analysis_level",
-					"type": "text",
-					"description": "Level of analysis detail (default: standard)\nChoices: basic, standard, detailed",
-					"required": false,
+					"label": "Select Analysis Level",
+					"type": "select",
+					"description": "Level of analysis detail (default: all)",
+					"required": true,
 					"default": "all",
-					"group": "Analysis Options"
+					"group": "Analysis Options",
+					"choices": [
+						{
+							"value": "basic",
+							"label": "basic"
+						},
+						{
+							"value": "standard",
+							"label": "standard"
+						},
+						{
+							"value": "detailed",
+							"label": "detailed"
+						},
+						{
+							"value": "all",
+							"label": "all"
+						}
+					]
 				},
 				{
 					"name": "modifier_types",
