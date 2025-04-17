@@ -1,39 +1,62 @@
-// src/tools/template-tool.js
+// src/tools/generic-tool-template.js
 const BaseTool = require('./base-tool');
 const path = require('path');
 const fileCache = require('../cache/file-cache');
 const appState = require('../state.js');
 const fs = require('fs/promises');
 const promptLoader = require('../utils/prompt-loader');
+const database = require('../database');
 
 /**
- * TemplateTool
- * A template class that can be used as a starting point for any tool in the system.
- * This demonstrates standard patterns and best practices for implementing a Writer's Toolkit tool.
+ * GenericToolTemplate
+ * Base template for creating any tool in the Writer's Toolkit system.
+ * This template integrates with the database to access tool configuration.
  */
-class TemplateTool extends BaseTool {
+class GenericToolTemplate extends BaseTool {
   /**
    * Constructor
    * @param {Object} claudeService - Claude API service
    * @param {Object} config - Tool configuration
    */
-  constructor(claudeService, config = {}) {
-    // The first parameter should be the tool's unique identifier
-    super('template_tool', config);
+  constructor(claudeService, config) {
+    // Replace 'generic_tool' with your tool's unique identifier
+    super('generic_tool', config);
     this.claudeService = claudeService;
+    this.config = config;
     
-    // Tool-specific settings with defaults that can be overridden by config
-    this.toolSettings = {
-      // Common settings
-      requiresOutline: config.requiresOutline || false,
-      requiresWorld: config.requiresWorld || false,
-      requiresManuscript: config.requiresManuscript || true,
+    // Try to get tool configuration from database
+    this.initializeFromDatabase();
+  }
+  
+  /**
+   * Initialize tool configuration from database
+   */
+  initializeFromDatabase() {
+    try {
+      // Get tool configuration from database
+      const dbConfig = database.getToolByName(this.name);
       
-      // Tool-specific settings
-      analysisLevel: config.analysisLevel || 'standard',
-      customOption1: config.customOption1 || 'default value',
-      customOption2: config.customOption2 || false
-    };
+      if (dbConfig) {
+        console.log(`Loaded configuration for ${this.name} from database`);
+        
+        // Store tool options and schema
+        this.options = dbConfig.options || {};
+        this.optionsSchema = dbConfig.optionsSchema || {};
+        this.title = dbConfig.title || this.name;
+        this.description = dbConfig.description || '';
+        
+        // You might want to merge with the provided config in some cases
+        this.mergedConfig = { ...dbConfig, ...this.config };
+      } else {
+        console.warn(`No database configuration found for tool: ${this.name}`);
+        this.options = {};
+        this.optionsSchema = {};
+      }
+    } catch (error) {
+      console.error(`Error loading database configuration for ${this.name}:`, error);
+      this.options = {};
+      this.optionsSchema = {};
+    }
   }
   
   /**
@@ -45,126 +68,42 @@ class TemplateTool extends BaseTool {
     console.log(`Executing ${this.name} with options:`, options);
     
     try {
+      // Validate options against schema from database
+      this.validateOptions(options);
+      
       // Clear the file cache for this tool
       fileCache.clear(this.name);
       
-      // Extract options with defaults
-      const {
-        manuscript_file: manuscriptFile,
-        outline_file: outlineFile = null,
-        world_file: worldFile = null,
-        analysis_level: analysisLevel = this.toolSettings.analysisLevel,
-        skip_thinking: skipThinking = false,
-        analysis_description: analysisDescription = '',
-        save_dir: saveDir = appState.CURRENT_PROJECT_PATH,
-        
-        // Add any tool-specific options here
-        custom_option: customOption = ''
-      } = options;
-      
-      // Validate save directory
+      // Get save directory
+      const saveDir = options.save_dir || appState.CURRENT_PROJECT_PATH;
       if (!saveDir) {
         throw new Error('No save directory specified and no current project selected');
       }
       
-      // Ensure file paths are absolute
-      const absolutePaths = {
-        manuscript: this.ensureAbsolutePath(manuscriptFile, saveDir),
-        outline: outlineFile ? this.ensureAbsolutePath(outlineFile, saveDir) : null,
-        world: worldFile ? this.ensureAbsolutePath(worldFile, saveDir) : null
-      };
-      
-      // Validate required files
-      if (this.toolSettings.requiresManuscript && !absolutePaths.manuscript) {
-        throw new Error('This tool requires a manuscript file');
-      }
-      
-      if (this.toolSettings.requiresOutline && !absolutePaths.outline) {
-        throw new Error('This tool requires an outline file');
-      }
-      
-      if (this.toolSettings.requiresWorld && !absolutePaths.world) {
-        throw new Error('This tool requires a world file');
-      }
-      
-      // Log file paths for debugging
-      this.logFilePaths(absolutePaths);
-      
       // Read input files
-      this.emitOutput(`Reading files...\n`);
+      const inputFiles = await this.readInputFiles(options, saveDir);
       
-      // Read manuscript file if required
-      let manuscriptContent = '';
-      if (absolutePaths.manuscript) {
-        this.emitOutput(`Reading manuscript file: ${absolutePaths.manuscript}\n`);
-        manuscriptContent = await this.readInputFile(absolutePaths.manuscript);
-      }
-      
-      // Read outline file if provided
-      let outlineContent = '';
-      if (absolutePaths.outline) {
-        this.emitOutput(`Reading outline file: ${absolutePaths.outline}\n`);
-        outlineContent = await this.readInputFile(absolutePaths.outline);
-      }
-      
-      // Read world file if provided
-      let worldContent = '';
-      if (absolutePaths.world) {
-        this.emitOutput(`Reading world file: ${absolutePaths.world}\n`);
-        worldContent = await this.readInputFile(absolutePaths.world);
-      }
-      
-      // Load prompt template
-      // The promptType parameter would vary by tool and could be determined by options
+      // Get prompt template
       const promptType = options.prompt_type || 'main';
       const promptTemplate = await promptLoader.getPrompt(this.name, promptType);
       
-      if (!promptTemplate) {
-        throw new Error(`No prompt template found for ${this.name}/${promptType}`);
-      }
-      
       // Create prompt by replacing placeholders
-      const prompt = this.createPrompt({
-        template: promptTemplate,
-        manuscriptContent,
-        outlineContent,
-        worldContent,
-        analysisLevel,
-        customOption,
-        // Add any other variables needed by the prompt
-      });
+      const prompt = this.createPrompt(promptTemplate, inputFiles, options);
       
       // Process with Claude API
-      const result = await this.processWithClaude({
-        prompt,
-        skipThinking,
-        saveDir
-      });
+      const result = await this.callClaudeAPI(prompt, options);
       
-      // Save the results
-      const outputFiles = await this.saveResults({
-        content: result.content,
-        thinking: result.thinking,
-        stats: result.stats,
-        promptType,
-        analysisLevel,
-        saveDir,
-        skipThinking,
-        description: analysisDescription
-      });
+      // Save results to files
+      const outputFiles = await this.saveResults(result, options, saveDir);
       
       // Register files with cache
       this.registerFilesWithCache(outputFiles);
       
-      // Return success result
+      // Return success result with relevant stats
       return {
         success: true,
         outputFiles,
-        stats: {
-          ...result.stats,
-          analysisLevel,
-          customOption
-        }
+        stats: this.collectStats(result, options)
       };
       
     } catch (error) {
@@ -175,61 +114,188 @@ class TemplateTool extends BaseTool {
   }
   
   /**
-   * Log file paths for debugging
-   * @param {Object} paths - File paths object
+   * Validate options against the schema
+   * @param {Object} options - The options to validate
+   * @throws {Error} If validation fails
    */
-  logFilePaths(paths) {
-    console.log('Using full paths:');
-    if (paths.manuscript) console.log(`Manuscript: ${paths.manuscript}`);
-    if (paths.outline) console.log(`Outline: ${paths.outline}`);
-    if (paths.world) console.log(`World: ${paths.world}`);
+  validateOptions(options) {
+    // Skip validation if no schema is available
+    if (!this.optionsSchema || Object.keys(this.optionsSchema).length === 0) {
+      return;
+    }
+    
+    const validationErrors = [];
+    
+    // Check each required option according to the schema
+    for (const [name, schema] of Object.entries(this.optionsSchema)) {
+      // Skip options that aren't required
+      if (!schema.required) continue;
+      
+      // Check if the required option is present
+      if (options[name] === undefined) {
+        validationErrors.push(`Missing required option: ${name}`);
+      }
+    }
+    
+    // Throw validation error if any required options are missing
+    if (validationErrors.length > 0) {
+      throw new Error(`Option validation failed: ${validationErrors.join(', ')}`);
+    }
   }
   
   /**
-   * Register files with the file cache
-   * @param {Array} files - Array of file paths
+   * Read all required input files based on options
+   * @param {Object} options - Tool options
+   * @param {string} saveDir - Save directory path
+   * @returns {Promise<Object>} - Object containing file contents
    */
-  registerFilesWithCache(files) {
-    files.forEach(file => {
-      fileCache.addFile(this.name, file);
-    });
+  async readInputFiles(options, saveDir) {
+    const files = {};
+    const inputFilesToRead = this.getInputFilePaths(options, saveDir);
+    
+    for (const [key, filePath] of Object.entries(inputFilesToRead)) {
+      if (filePath) {
+        this.emitOutput(`Reading ${key} file: ${filePath}\n`);
+        try {
+          files[key] = await this.readInputFile(filePath);
+        } catch (error) {
+          // Use schema to determine if file is required
+          if (this.isRequiredFile(key)) {
+            throw error;
+          } else {
+            this.emitOutput(`Note: Optional file ${key} not found or couldn't be read.\n`);
+            files[key] = '';
+          }
+        }
+      } else {
+        files[key] = '';
+      }
+    }
+    
+    return files;
+  }
+  
+  /**
+   * Get paths to input files
+   * @param {Object} options - Tool options
+   * @param {string} saveDir - Save directory path
+   * @returns {Object} - Map of file keys to absolute paths
+   */
+  getInputFilePaths(options, saveDir) {
+    const paths = {};
+    
+    // Look at option schema to determine what file options to handle
+    if (this.optionsSchema) {
+      for (const [name, schema] of Object.entries(this.optionsSchema)) {
+        // Check for file-type options based on naming convention or schema metadata
+        if (name.endsWith('_file') && options[name]) {
+          const key = name.replace('_file', '');
+          paths[key] = this.ensureAbsolutePath(options[name], saveDir);
+        }
+      }
+    } else {
+      // Fallback for common file types if no schema is available
+      if (options.input_file) {
+        paths.input = this.ensureAbsolutePath(options.input_file, saveDir);
+      }
+      
+      if (options.manuscript_file) {
+        paths.manuscript = this.ensureAbsolutePath(options.manuscript_file, saveDir);
+      }
+      
+      if (options.outline_file) {
+        paths.outline = this.ensureAbsolutePath(options.outline_file, saveDir);
+      }
+      
+      if (options.world_file) {
+        paths.world = this.ensureAbsolutePath(options.world_file, saveDir);
+      }
+    }
+    
+    return paths;
+  }
+  
+  /**
+   * Determine if a file is required for this tool
+   * @param {string} fileKey - The key identifying the file
+   * @returns {boolean} - True if the file is required
+   */
+  isRequiredFile(fileKey) {
+    // Check schema to see if this file is required
+    const optionName = `${fileKey}_file`;
+    
+    if (this.optionsSchema && this.optionsSchema[optionName]) {
+      return this.optionsSchema[optionName].required === true;
+    }
+    
+    // By default, assume files are optional
+    return false;
   }
   
   /**
    * Create prompt by replacing placeholders in template
-   * @param {Object} params - Parameters containing content and variables
+   * @param {string} template - Prompt template
+   * @param {Object} files - File contents
+   * @param {Object} options - Tool options
    * @returns {string} - Complete prompt for Claude API
    */
-  createPrompt({ 
-    template, 
-    manuscriptContent = '', 
-    outlineContent = '', 
-    worldContent = '',
-    analysisLevel = 'standard',
-    customOption = '',
-    // Add other variables as needed
-  }) {
-    // No markdown instruction that's common to many prompts
-    const noMarkdown = "IMPORTANT: - NO Markdown formatting";
+  createPrompt(template, files, options) {
+    if (!template) {
+      // If no template was found, create a default one
+      // This is a fallback that should rarely be used
+      return this.createDefaultPrompt(files, options);
+    }
     
-    // Replace placeholders with actual content
-    return template
-      .replace(/<manuscript><\/manuscript>/g, manuscriptContent)
-      .replace(/<outline><\/outline>/g, outlineContent)
-      .replace(/<world><\/world>/g, worldContent)
-      .replace(/<no-markdown><\/no-markdown>/g, noMarkdown)
-      .replace(/<analysis-level><\/analysis-level>/g, analysisLevel)
-      .replace(/<custom-option><\/custom-option>/g, customOption);
+    // Replace file content placeholders
+    let prompt = template;
+    for (const [key, content] of Object.entries(files)) {
+      prompt = prompt.replace(new RegExp(`<${key}></${key}>`, 'g'), content);
+    }
     
-    // Add any other replacements specific to this tool
+    // Replace option placeholders
+    for (const [key, value] of Object.entries(options)) {
+      if (typeof value === 'string') {
+        prompt = prompt.replace(new RegExp(`<option:${key}><\/option:${key}>`, 'g'), value);
+      }
+    }
+    
+    // Replace common special placeholders
+    prompt = prompt.replace(/<no-markdown><\/no-markdown>/g, "IMPORTANT: - NO Markdown formatting");
+    
+    return prompt;
   }
   
   /**
-   * Process the prompt with Claude API
-   * @param {Object} params - Processing parameters
-   * @returns {Promise<Object>} - Processing result
+   * Create a default prompt if no template is found
+   * @param {Object} files - File contents
+   * @param {Object} options - Tool options
+   * @returns {string} - Default prompt
    */
-  async processWithClaude({ prompt, skipThinking = false, saveDir }) {
+  createDefaultPrompt(files, options) {
+    // Create a sensible default based on tool description from database
+    let prompt = "IMPORTANT: - NO Markdown formatting\n\n";
+    prompt += `You are an expert AI assistant helping with ${this.description || 'document analysis'}.\n\n`;
+    
+    // Add file contents
+    for (const [key, content] of Object.entries(files)) {
+      if (content) {
+        prompt += `=== ${key.toUpperCase()} ===\n${content}\n=== END ${key.toUpperCase()} ===\n\n`;
+      }
+    }
+    
+    // Add task description
+    prompt += `Please analyze the provided content${options.task ? ' for ' + options.task : ''}.\n`;
+    
+    return prompt;
+  }
+  
+  /**
+   * Call Claude API with the prompt
+   * @param {string} prompt - Complete prompt
+   * @param {Object} options - Tool options
+   * @returns {Promise<Object>} - API response and stats
+   */
+  async callClaudeAPI(prompt, options) {
     // Count tokens in the prompt
     this.emitOutput(`Counting tokens in prompt...\n`);
     const promptTokens = await this.claudeService.countTokens(prompt);
@@ -349,74 +415,44 @@ class TemplateTool extends BaseTool {
   
   /**
    * Save results to files
-   * @param {Object} params - Save parameters
+   * @param {Object} result - API result with content and thinking
+   * @param {Object} options - Tool options
+   * @param {string} saveDir - Directory to save files to
    * @returns {Promise<string[]>} - Array of saved file paths
    */
-  async saveResults({
-    content,
-    thinking,
-    stats,
-    promptType,
-    analysisLevel,
-    saveDir,
-    skipThinking = false,
-    description = ''
-  }) {
+  async saveResults(result, options, saveDir) {
     try {
-      const formatter = new Intl.DateTimeFormat('en-US', {
-        weekday: 'long',
-        month: 'long',
-        day: 'numeric',
-        year: 'numeric',
-        hour: 'numeric',
-        minute: '2-digit',
-        hour12: true
-      });
-      const dateTimeStr = formatter.format(new Date());
-      
-      // Create timestamp for filename
       const timestamp = new Date().toISOString().replace(/[-:.]/g, '').substring(0, 15);
-      
-      // Create descriptive filename
+      const description = options.description || '';
       const desc = description ? `_${description}` : '';
-      const level = analysisLevel !== 'standard' ? `_${analysisLevel}` : '';
-      const type = promptType !== 'main' ? `_${promptType}` : '';
-      const baseFilename = `${this.name}${type}${level}${desc}_${timestamp}`;
+      
+      // Filename components to be overridden by specific tools as needed
+      const filePrefix = this.getFilePrefix(options);
+      const baseFilename = `${filePrefix}${desc}_${timestamp}`;
       
       // Array to collect all saved file paths
       const savedFilePaths = [];
       
-      // Create stats for thinking file
-      const statsBlock = `
-Details:  ${dateTimeStr}
-Tool: ${this.name}
-Prompt type: ${promptType}
-Analysis level: ${analysisLevel}
-${this.toolSettings.customOption1 ? `Custom option: ${this.toolSettings.customOption1}\n` : ''}
-Max request timeout: ${this.config.request_timeout || 300} seconds
-Max AI model context window: ${this.config.context_window || 200000} tokens
-AI model thinking budget: ${this.config.thinking_budget_tokens || 32000} tokens
-Desired output tokens: ${this.config.desired_output_tokens || 12000} tokens
-
-Input tokens: ${stats.promptTokens}
-Output tokens: ${stats.responseTokens}
-`;
-      
-      // Save full response
-      const reportFilename = `${baseFilename}.txt`;
-      const reportPath = path.join(saveDir, reportFilename);
-      await this.writeOutputFile(content, saveDir, reportFilename);
-      savedFilePaths.push(reportPath);
+      // Save main output
+      const outputFilename = `${baseFilename}.txt`;
+      const outputPath = path.join(saveDir, outputFilename);
+      await this.writeOutputFile(result.content, saveDir, outputFilename);
+      this.emitOutput(`Output saved to: ${outputPath}\n`);
+      savedFilePaths.push(outputPath);
       
       // Save thinking content if available and not skipped
-      if (thinking && !skipThinking) {
+      if (result.thinking && !options.skip_thinking) {
         const thinkingFilename = `${baseFilename}_thinking.txt`;
         const thinkingPath = path.join(saveDir, thinkingFilename);
-        const thinkingContent = `=== ${this.name.toUpperCase()} ANALYSIS ===
+        
+        // Create stats block
+        const statsBlock = this.createStatsBlock(result.stats, options);
+        
+        const thinkingContent = `=== ${this.title || this.name.toUpperCase()} ===
 
 === AI'S THINKING PROCESS ===
 
-${thinking}
+${result.thinking}
 
 === END AI'S THINKING PROCESS ===
 ${statsBlock}`;
@@ -426,14 +462,106 @@ ${statsBlock}`;
         savedFilePaths.push(thinkingPath);
       }
       
-      this.emitOutput(`Report saved to: ${reportPath}\n`);
       return savedFilePaths;
     } catch (error) {
-      console.error(`Error saving report:`, error);
-      this.emitOutput(`Error saving report: ${error.message}\n`);
+      console.error(`Error saving results:`, error);
+      this.emitOutput(`Error saving results: ${error.message}\n`);
       throw error;
     }
   }
+  
+  /**
+   * Get file prefix for output files
+   * @param {Object} options - Tool options
+   * @returns {string} - File prefix
+   */
+  getFilePrefix(options) {
+    // Use database config to determine a sensible file prefix
+    // This could be based on analysis type or other options
+    return this.name;
+  }
+  
+  /**
+   * Create stats block for thinking file
+   * @param {Object} stats - Statistics from API call
+   * @param {Object} options - Tool options
+   * @returns {string} - Formatted stats block
+   */
+  createStatsBlock(stats, options) {
+    const formatter = new Intl.DateTimeFormat('en-US', {
+      weekday: 'long',
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
+    const dateTimeStr = formatter.format(new Date());
+    
+    // Basic stats that apply to all tools
+    let statsBlock = `
+Details:  ${dateTimeStr}
+Tool: ${this.title || this.name}
+Max request timeout: ${this.config.request_timeout || 300} seconds
+Max AI model context window: ${this.config.context_window || 200000} tokens
+AI model thinking budget: ${this.config.thinking_budget_tokens || 32000} tokens
+Desired output tokens: ${this.config.desired_output_tokens || 12000} tokens
+
+Input tokens: ${stats.promptTokens}
+Output tokens: ${stats.responseTokens}
+Elapsed time: ${stats.minutes}m ${stats.seconds.toFixed(2)}s
+`;
+    
+    // Add option-specific stats
+    if (this.optionsSchema) {
+      for (const [name, schema] of Object.entries(this.optionsSchema)) {
+        // Only include options that have values and aren't file paths
+        if (options[name] !== undefined && !name.endsWith('_file') && !name.endsWith('_dir')) {
+          statsBlock += `${schema.label || name}: ${options[name]}\n`;
+        }
+      }
+    }
+    
+    return statsBlock;
+  }
+  
+  /**
+   * Register files with the file cache
+   * @param {Array} files - Array of file paths
+   */
+  registerFilesWithCache(files) {
+    files.forEach(file => {
+      fileCache.addFile(this.name, file);
+    });
+  }
+  
+  /**
+   * Collect stats for the result
+   * @param {Object} result - API result
+   * @param {Object} options - Tool options
+   * @returns {Object} - Stats object
+   */
+  collectStats(result, options) {
+    // Basic stats that apply to all tools
+    const stats = {
+      wordCount: result.stats.wordCount,
+      tokenCount: result.stats.responseTokens,
+      elapsedTime: `${result.stats.minutes}m ${result.stats.seconds.toFixed(2)}s`
+    };
+    
+    // Add key option values from the schema
+    if (this.optionsSchema) {
+      for (const [name, schema] of Object.entries(this.optionsSchema)) {
+        // Only include non-file options
+        if (options[name] !== undefined && !name.endsWith('_file') && !name.endsWith('_dir')) {
+          stats[name] = options[name];
+        }
+      }
+    }
+    
+    return stats;
+  }
 }
 
-module.exports = TemplateTool;
+module.exports = GenericToolTemplate;
