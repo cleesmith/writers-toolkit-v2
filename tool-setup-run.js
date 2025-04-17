@@ -98,7 +98,6 @@ forceQuitBtn.addEventListener('click', () => {
 
 // Setup button handler - now opens the setup dialog
 setupBtn.addEventListener('click', () => {
-  console.log('Setup button clicked');
   // Generate form controls for options
   generateOptionsForm(currentToolOptions);
   // Show the dialog
@@ -117,16 +116,13 @@ setupDialogCancel.addEventListener('click', () => {
 
 // Setup dialog apply button
 setupDialogApply.addEventListener('click', () => {
-  console.log('Apply settings clicked');
   // Validate the form
   if (!validateOptionsForm()) {
-    console.log('Form validation failed');
     return; // Don't close dialog if validation fails
   }
   
   // Gather all options from form
   currentOptionValues = gatherOptionValues();
-  console.log('Gathered option values:', currentOptionValues);
   
   // Display setup information in output area
   outputElement.textContent = `Tool: ${toolData.title || toolData.name}\n\nOptions:\n`;
@@ -293,8 +289,6 @@ runBtn.addEventListener('click', async () => {
           editButton.addEventListener('click', () => {
             const selectedFile = select.value;
             if (selectedFile) {
-              console.log('Opening file in editor:', selectedFile);
-              
               // Show a notification that we're opening the file
               const tempOutput = outputElement.textContent;
               // stop showing message about opening file in editor:
@@ -552,8 +546,6 @@ function generateOptionsForm(options) {
           event.preventDefault();
           event.stopPropagation();
           
-          console.log('Browse button clicked for', option.name);
-          
           try {
             const filters = option.filters || [{ name: 'All Files', extensions: ['*'] }];
             console.log('Using filters:', filters);
@@ -608,8 +600,6 @@ function generateOptionsForm(options) {
         browseDirBtn.addEventListener('click', async (event) => {
           event.preventDefault();
           event.stopPropagation();
-          
-          console.log('Browse directory button clicked for', option.name);
           
           try {
             const dirPath = await window.electronAPI.selectDirectory({
@@ -670,7 +660,7 @@ function generateOptionsForm(options) {
           if (info && info.current_project_path) {
             // Set the input value to the project path
             input.value = info.current_project_path;
-            console.log('Set save_dir default to:', info.current_project_path);
+            console.log('*** Set save_dir default to:', info.current_project_path);
             
             // Also update our stored options
             if (currentOptionValues) {

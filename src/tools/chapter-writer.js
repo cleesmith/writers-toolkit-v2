@@ -18,7 +18,7 @@ class ChapterWriter extends BaseTool {
   constructor(claudeService, config = {}) {
     super('chapter_writer', config);
     this.claudeService = claudeService;
-    console.log('ChapterWriter Tool initialized with config:', config);
+    // console.log('ChapterWriter Tool initialized with config:', config);
   }
   
   /**

@@ -20,8 +20,8 @@ class CharacterAnalyzer extends BaseTool {
   constructor(claudeService, config = {}) {
     super('character_analyzer', config);
     this.claudeService = claudeService;
-    console.log('CharacterAnalyzer initialized with config:', 
-      util.inspect(config, { depth: 1, colors: true }));
+    // console.log('CharacterAnalyzer initialized with config:', 
+    //   util.inspect(config, { depth: 1, colors: true }));
   }
   
   /**

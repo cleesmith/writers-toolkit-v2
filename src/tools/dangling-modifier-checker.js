@@ -22,8 +22,8 @@ class DanglingModifierChecker extends BaseTool {
   constructor(claudeService, config = {}) {
     super('dangling_modifier_checker', config);
     this.claudeService = claudeService;
-    console.log('DanglingModifierChecker initialized with config:', 
-      util.inspect(config, { depth: 1, colors: true }));
+    // console.log('DanglingModifierChecker initialized with config:', 
+    //   util.inspect(config, { depth: 1, colors: true }));
   }
   
   /**
@@ -32,7 +32,7 @@ class DanglingModifierChecker extends BaseTool {
    * @returns {Promise<Object>} - Execution result
    */
   async execute(options) {
-    console.log('Executing DanglingModifierChecker with options:', options);
+    console.log('Executing Dangling Modifier Checker with options:', options);
     
     // Extract options
     let manuscriptFile = options.manuscript_file;
@@ -41,7 +41,7 @@ class DanglingModifierChecker extends BaseTool {
     const sensitivity = options.sensitivity;
     const skipThinking = options.skip_thinking;
     const analysisDescription = options.analysis_description;
-    const saveDir = options.save_dir;
+    const saveDir = options.save_dir || appState.CURRENT_PROJECT_PATH;
     
     if (!saveDir) {
       const errorMsg = 'Error: No save directory specified and no current project selected.\n' +

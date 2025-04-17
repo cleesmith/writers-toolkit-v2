@@ -22,10 +22,10 @@ class RhythmAnalyzer extends BaseTool {
   constructor(claudeService, config = {}) {
     super('rhythm_analyzer', config);
     this.claudeService = claudeService;
-    console.log('RhythmAnalyzer initialized with config:', 
-      util.inspect(config, { depth: 1, colors: true }));
+    // console.log('RhythmAnalyzer initialized with config:', 
+    //   util.inspect(config, { depth: 1, colors: true }));
   }
-  
+
   /**
    * Execute the tool
    * @param {Object} options - Tool options
@@ -41,7 +41,7 @@ class RhythmAnalyzer extends BaseTool {
     const rhythmSensitivity = options.rhythm_sensitivity;
     const skipThinking = options.skip_thinking;
     const analysisDescription = options.analysis_description;
-    const saveDir = options.save_dir;
+    const saveDir = options.save_dir || appState.CURRENT_PROJECT_PATH;
     
     if (!saveDir) {
       const errorMsg = 'Error: No save directory specified and no current project selected.\n' +
@@ -121,7 +121,7 @@ class RhythmAnalyzer extends BaseTool {
       // Create system prompt to avoid markdown
       const systemPrompt = "CRITICAL INSTRUCTION: NO Markdown formatting of ANY kind. Never use headers, bullets, or any formatting symbols. Plain text only with standard punctuation.";
 
-      // Use the calculated values in the API call
+      // Use the calculated values in the API call - FIXED to match dangling-modifier-checker.js exactly
       try {
         await this.claudeService.streamWithThinking(
           prompt,

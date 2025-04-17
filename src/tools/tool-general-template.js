@@ -25,7 +25,7 @@ class GenericTool extends BaseTool {
     // TODO: Change 'generic_tool' to your tool's ID
     super('generic_tool', config);
     this.claudeService = claudeService;
-    console.log('Generic Tool initialized with config:', config);
+    // console.log('Generic Tool initialized with config:', config);
   }
   
   /**

@@ -423,7 +423,7 @@ function setupToolHandlers() {
         };
       });
       
-      console.log('Registered tools:', registeredTools);
+      // console.log('Registered tools:', registeredTools);
       
       // If no tools are registered yet, fallback to database
       if (registeredTools.length === 0) {
@@ -462,8 +462,6 @@ function setupToolHandlers() {
   
   // Handle tool dialog closing
   ipcMain.on('close-tool-dialog', (event, action, data) => {
-    console.log('Tool dialog close action:', action);
-    
     if (toolSetupRunWindow && !toolSetupRunWindow.isDestroyed()) {
       toolSetupRunWindow.destroy();
       toolSetupRunWindow = null;
@@ -614,7 +612,6 @@ function createApiSettingsDialog() {
       mainWindow.webContents.executeJavaScript('document.body.classList.contains("light-mode")')
         .then(isLightMode => {
           if (apiSettingsWindow && !apiSettingsWindow.isDestroyed()) {
-            console.log('Sending theme to API settings window:', isLightMode ? 'light' : 'dark');
             apiSettingsWindow.webContents.send('set-theme', isLightMode ? 'light' : 'dark');
           }
         })
@@ -642,7 +639,6 @@ function showApiSettingsDialog() {
       mainWindow.webContents.executeJavaScript('document.body.classList.contains("light-mode")')
         .then(isLightMode => {
           if (apiSettingsWindow && !apiSettingsWindow.isDestroyed()) {
-            console.log('Re-sending theme to API settings window:', isLightMode ? 'light' : 'dark');
             apiSettingsWindow.webContents.send('set-theme', isLightMode ? 'light' : 'dark');
           }
         })
@@ -756,8 +752,6 @@ function setupApiSettingsHandlers() {
   
   // Handle API settings dialog closing
   ipcMain.on('close-api-settings-dialog', (event, action, data) => {
-    console.log('API settings dialog close action:', action);
-    
     if (apiSettingsWindow && !apiSettingsWindow.isDestroyed()) {
       apiSettingsWindow.hide();
       
@@ -969,7 +963,6 @@ function setupIPCHandlers() {
       const fileCache = require('./src/cache/file-cache');
       const files = fileCache.getFiles(toolName);
       
-      console.log(`Retrieved ${files.length} output files for tool: ${toolName}`);
       return files;
     } catch (error) {
       console.error('Error getting tool output files:', error);
@@ -987,8 +980,6 @@ function setupIPCHandlers() {
           error: 'File not found: ' + filePath 
         };
       }
-      
-      console.log(`Opening file in editor: ${filePath}`);
       
       // Launch the editor with the file path as an argument
       const editorProcess = spawn(

@@ -31,7 +31,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   
   // Default to dark mode until we receive theme from main process
   document.body.classList.add('dark-mode');
-  console.log('Initial theme set to dark mode');
 });
 
 // Render the settings form based on the schema
@@ -286,8 +285,6 @@ function showError(message) {
 
 // Listen for theme messages from the main process
 window.electronAPI.onSetTheme((theme) => {
-  console.log('Received theme message:', theme);
-  
   // Remove all theme classes first
   document.body.classList.remove('light-mode', 'dark-mode');
   
@@ -304,5 +301,4 @@ window.electronAPI.onSetTheme((theme) => {
     desc.style.color = theme === 'light' ? '#666666' : '#888888';
   });
   
-  console.log('Theme applied:', theme, 'Body classes:', document.body.className);
 });

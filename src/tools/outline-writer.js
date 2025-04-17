@@ -19,7 +19,7 @@ class OutlineWriter extends BaseTool {
   constructor(claudeService, config = {}) {
     super('outline_writer', config);
     this.claudeService = claudeService;
-    console.log('OutlineWriter Tool initialized with config:', config);
+    // console.log('OutlineWriter Tool initialized with config:', config);
   }
   
   /**

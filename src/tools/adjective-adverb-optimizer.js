@@ -21,8 +21,8 @@ class AdjectiveAdverbOptimizer extends BaseTool {
   constructor(claudeService, config = {}) {
     super('adjective_adverb_optimizer', config);
     this.claudeService = claudeService;
-    console.log('AdjectiveAdverbOptimizer initialized with config:', 
-      util.inspect(config, { depth: 1, colors: true }));
+    // console.log('AdjectiveAdverbOptimizer initialized with config:', 
+    //   util.inspect(config, { depth: 1, colors: true }));
   }
   
   /**

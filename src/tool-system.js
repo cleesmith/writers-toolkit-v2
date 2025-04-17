@@ -39,12 +39,12 @@ async function initializeToolSystem(settings, database) {
   
   // Register available tool implementations
   dbTools.forEach(toolInfo => {
-    console.log(`Checking tool: ${toolInfo.name}`);
+    // console.log(`Checking tool: ${toolInfo.name}`);
     
     // For tokens_words_counter.js
     if (toolInfo.name === 'tokens_words_counter') {
       const toolConfig = database.getToolByName(toolInfo.name);
-      console.log('Tool config:', toolConfig);
+      // console.log('Tool config:', toolConfig);
       
       if (toolConfig) {
         // Register the tool
@@ -60,7 +60,7 @@ async function initializeToolSystem(settings, database) {
     }
     else if (toolInfo.name === 'narrative_integrity') {
       const toolConfig = database.getToolByName(toolInfo.name);
-      console.log('Narrative Integrity tool config:', toolConfig);
+      // console.log('Narrative Integrity tool config:', toolConfig);
       
       if (toolConfig) {
         // Register the tool
@@ -76,7 +76,7 @@ async function initializeToolSystem(settings, database) {
     }
     else if (toolInfo.name === 'brainstorm') {
       const toolConfig = database.getToolByName(toolInfo.name);
-      console.log('Brainstorm tool config:', toolConfig);
+      // console.log('Brainstorm tool config:', toolConfig);
       
       if (toolConfig) {
         // Register the tool
@@ -92,7 +92,7 @@ async function initializeToolSystem(settings, database) {
     }
     else if (toolInfo.name === 'outline_writer') {
       const toolConfig = database.getToolByName(toolInfo.name);
-      console.log('Outline Writer tool config:', toolConfig);
+      // console.log('Outline Writer tool config:', toolConfig);
       
       if (toolConfig) {
         // Register the tool
@@ -108,7 +108,7 @@ async function initializeToolSystem(settings, database) {
     }
     else if (toolInfo.name === 'world_writer') {
       const toolConfig = database.getToolByName(toolInfo.name);
-      console.log('World Writer tool config:', toolConfig);
+      // console.log('World Writer tool config:', toolConfig);
       
       if (toolConfig) {
         // Register the tool
@@ -124,7 +124,7 @@ async function initializeToolSystem(settings, database) {
     }
     else if (toolInfo.name === 'chapter_writer') {
       const toolConfig = database.getToolByName(toolInfo.name);
-      console.log('Chapter Writer tool config:', toolConfig);
+      // console.log('Chapter Writer tool config:', toolConfig);
       
       if (toolConfig) {
         // Register the tool
@@ -140,7 +140,7 @@ async function initializeToolSystem(settings, database) {
     }
     else if (toolInfo.name === 'character_analyzer') {
       const toolConfig = database.getToolByName(toolInfo.name);
-      console.log('Chapter Analyzer tool config:', toolConfig);
+      // console.log('Chapter Analyzer tool config:', toolConfig);
       
       if (toolConfig) {
         // Register the tool
@@ -156,7 +156,7 @@ async function initializeToolSystem(settings, database) {
     }
     else if (toolInfo.name === 'tense_consistency_checker') {
       const toolConfig = database.getToolByName(toolInfo.name);
-      console.log('Tense Consistency Checker tool config:', toolConfig);
+      // console.log('Tense Consistency Checker tool config:', toolConfig);
       
       if (toolConfig) {
         // Register the tool
@@ -172,7 +172,7 @@ async function initializeToolSystem(settings, database) {
     }
     else if (toolInfo.name === 'adjective_adverb_optimizer') {
       const toolConfig = database.getToolByName(toolInfo.name);
-      console.log('Adjective Adverb Optimizer tool config:', toolConfig);
+      // console.log('Adjective Adverb Optimizer tool config:', toolConfig);
       
       if (toolConfig) {
         // Register the tool
@@ -188,7 +188,7 @@ async function initializeToolSystem(settings, database) {
     }
     else if (toolInfo.name === 'dangling_modifier_checker') {
       const toolConfig = database.getToolByName(toolInfo.name);
-      console.log('Dangling Modifier Checker tool config:', toolConfig);
+      // console.log('Dangling Modifier Checker tool config:', toolConfig);
       
       if (toolConfig) {
         // Register the tool
@@ -204,7 +204,7 @@ async function initializeToolSystem(settings, database) {
     }
     else if (toolInfo.name === 'rhythm_analyzer') {
       const toolConfig = database.getToolByName(toolInfo.name);
-      console.log('Dangling Modifier Checker tool config:', toolConfig);
+      // console.log('Rhythm Analyzer tool config:', toolConfig);
       
       if (toolConfig) {
         // Register the tool

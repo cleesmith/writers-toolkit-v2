@@ -208,7 +208,6 @@ function setupIPC() {
 
   // Add this handler for quitting the application
   ipcMain.on('app-quit', () => {
-    console.log('Quit requested from editor');
     app.quit();
   });
 }

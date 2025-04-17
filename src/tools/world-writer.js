@@ -19,7 +19,7 @@ class WorldWriter extends BaseTool {
   constructor(claudeService, config = {}) {
     super('world_writer', config);
     this.claudeService = claudeService;
-    console.log('WorldWriter Tool initialized with config:', config);
+    // console.log('WorldWriter Tool initialized with config:', config);
   }
   
   /**

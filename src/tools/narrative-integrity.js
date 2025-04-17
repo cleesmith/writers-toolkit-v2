@@ -22,8 +22,8 @@ class NarrativeIntegrity extends BaseTool {
   constructor(claudeService, config = {}) {
     super('narrative_integrity', config);
     this.claudeService = claudeService;
-    console.log('NarrativeIntegrity initialized with config:', 
-      util.inspect(config, { depth: 1, colors: true }));
+    // console.log('NarrativeIntegrity initialized with config:', 
+    //   util.inspect(config, { depth: 1, colors: true }));
   }
   
   /**
@@ -41,12 +41,7 @@ class NarrativeIntegrity extends BaseTool {
     const checkType = options.check_type;
     const skipThinking = options.skip_thinking;
     const checkDescription = options.check_description;
-    let saveDir = options.save_dir;
-    
-    // If saveDir is not provided, use the default save directory from appState
-    if (!saveDir) {
-      saveDir = appState.DEFAULT_SAVE_DIR;
-    }
+    let saveDir = options.save_dir || appState.CURRENT_PROJECT_PATH;
     
     // Check if we have a valid save directory
     if (!saveDir) {

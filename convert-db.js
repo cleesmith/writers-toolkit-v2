@@ -17,7 +17,6 @@ const OLD_FILE = path.join(__dirname, 'old_writers-toolkit-db.json');
 const NEW_FILE = path.join(__dirname, 'writers-toolkit-db.json');
 
 // Read the old database
-console.log(`Reading old database from ${OLD_FILE}...`);
 const jsonData = fs.readFileSync(OLD_FILE, 'utf8');
 const oldDb = JSON.parse(jsonData);
 
@@ -124,7 +123,6 @@ function getOptionType(option) {
 }
 
 // Extract tools from the old database
-console.log('Converting tools...');
 Object.entries(oldDb.tools).forEach(([id, tool]) => {
   // Extract the base name without extension
   let toolName = tool.name;
@@ -155,7 +153,6 @@ Object.entries(oldDb.tools).forEach(([id, tool]) => {
 });
 
 // Extract settings from the old database
-console.log('Converting settings...');
 if (oldDb.settings && oldDb.settings["1"]) {
   const oldSettings = oldDb.settings["1"];
   
@@ -202,7 +199,6 @@ function getToolCategory(tool) {
 }
 
 // Write the new JSON file
-console.log(`Writing new database to ${NEW_FILE}...`);
 fs.writeFileSync(
   NEW_FILE, 
   JSON.stringify(newDb, null, 2),

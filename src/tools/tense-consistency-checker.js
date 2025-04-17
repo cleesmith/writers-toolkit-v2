@@ -21,8 +21,8 @@ class TenseConsistencyChecker extends BaseTool {
   constructor(claudeService, config = {}) {
     super('tense_consistency_checker', config);
     this.claudeService = claudeService;
-    console.log('TenseConsistencyChecker initialized with config:', 
-      util.inspect(config, { depth: 1, colors: true }));
+    // console.log('TenseConsistencyChecker initialized with config:', 
+    //   util.inspect(config, { depth: 1, colors: true }));
   }
   
   /**

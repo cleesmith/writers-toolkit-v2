@@ -119,7 +119,6 @@ createProjectBtn.addEventListener('click', async () => {
 
 // Handle cancel button
 cancelBtn.addEventListener('click', () => {
-  console.log('Cancel button clicked');
   window.electronAPI.closeDialog('cancelled');
 });
 

@@ -19,7 +19,7 @@ class BrainstormTool extends BaseTool {
   constructor(claudeService, config = {}) {
     super('brainstorm', config);
     this.claudeService = claudeService;
-    console.log('Brainstorm Tool initialized with config:', config);
+    // console.log('Brainstorm Tool initialized with config:', config);
   }
   
   /**

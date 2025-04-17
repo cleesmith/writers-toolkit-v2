@@ -34,8 +34,8 @@ class TokensWordsCounter extends BaseTool {
   constructor(claudeService, config = {}) {
     super('tokens_words_counter', config);
     this.claudeService = claudeService;
-    console.log('TokensWordsCounter initialized with config:', 
-      util.inspect(config, { depth: 1, colors: true }));
+    // console.log('TokensWordsCounter initialized with config:', 
+    //   util.inspect(config, { depth: 1, colors: true }));
   }
   
   /**
