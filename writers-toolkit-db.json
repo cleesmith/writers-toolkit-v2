@@ -731,12 +731,26 @@
 				},
 				{
 					"name": "sensitivity",
-					"label": "sensitivity",
-					"type": "text",
-					"description": "Sensitivity level for modifier detection (default: medium)\nChoices: low, medium, high",
-					"required": false,
+					"label": "Select Sensitivity Level",
+					"type": "select",
+					"description": "Sensitivity level for modifier detection (default: medium)",
+					"required": true,
 					"default": "medium",
-					"group": "Analysis Options"
+					"group": "Analysis Options",
+					"choices": [
+						{
+							"value": "low",
+							"label": "low"
+						},
+						{
+							"value": "medium",
+							"label": "medium"
+						},
+						{
+							"value": "high",
+							"label": "high"
+						}
+					]
 				}
 			]
 		},
