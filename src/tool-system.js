@@ -17,6 +17,7 @@ const DanglingModifierChecker = require('./tools/dangling-modifier-checker');
 const RhythmAnalyzer = require('./tools/rhythm-analyzer');
 const CrowdingLeapingEvaluator = require('./tools/crowding-leaping-evaluator');
 const PunctuationAuditor = require('./tools/punctuation-auditor');
+const ConflictAnalyzer = require('./tools/conflict-analyzer');
 
 /**
  * Initialize the tool system
@@ -246,6 +247,22 @@ async function initializeToolSystem(settings, database) {
         toolRegistry.registerTool(
           toolInfo.name,
           new PunctuationAuditor(claudeService, {
+            ...toolConfig,
+            ...settings
+          })
+        );
+        console.log(`Successfully registered tool: ${toolInfo.name}`);
+      }
+    }
+    else if (toolInfo.name === 'conflict_analyzer') {
+      const toolConfig = database.getToolByName(toolInfo.name);
+      // console.log('Conflict Analyzer tool config:', toolConfig);
+      
+      if (toolConfig) {
+        // Register the tool
+        toolRegistry.registerTool(
+          toolInfo.name,
+          new ConflictAnalyzer(claudeService, {
             ...toolConfig,
             ...settings
           })
