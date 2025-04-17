@@ -19,6 +19,7 @@ const CrowdingLeapingEvaluator = require('./tools/crowding-leaping-evaluator');
 const PunctuationAuditor = require('./tools/punctuation-auditor');
 const ConflictAnalyzer = require('./tools/conflict-analyzer');
 const ForeshadowingTracker = require('./tools/foreshadowing-tracker');
+const PlotThreadTracker = require('./tools/plot-thread-tracker');
 
 /**
  * Initialize the tool system
@@ -280,6 +281,22 @@ async function initializeToolSystem(settings, database) {
         toolRegistry.registerTool(
           toolInfo.name,
           new ForeshadowingTracker(claudeService, {
+            ...toolConfig,
+            ...settings
+          })
+        );
+        console.log(`Successfully registered tool: ${toolInfo.name}`);
+      }
+    }
+    else if (toolInfo.name === 'plot_thread_tracker') {
+      const toolConfig = database.getToolByName(toolInfo.name);
+      // console.log('Plot Thread Tracker tool config:', toolConfig);
+      
+      if (toolConfig) {
+        // Register the tool
+        toolRegistry.registerTool(
+          toolInfo.name,
+          new PlotThreadTracker(claudeService, {
             ...toolConfig,
             ...settings
           })
