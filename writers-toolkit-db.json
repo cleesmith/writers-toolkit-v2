@@ -668,30 +668,12 @@
 			"options": [
 				{
 					"name": "manuscript_file",
-					"label": "MANUSCRIPT_FILE",
+					"label": "Select Manuscript file",
 					"type": "file",
 					"description": "File containing the manuscript to analyze",
 					"required": true,
 					"default": "manuscript.txt",
 					"group": "Input Files"
-				},
-				{
-					"name": "skip_thinking",
-					"label": "skip_thinking",
-					"type": "boolean",
-					"description": "Skip saving the AI thinking process",
-					"required": false,
-					"default": false,
-					"group": "Output Configuration"
-				},
-				{
-					"name": "analysis_description",
-					"label": "ANALYSIS_DESCRIPTION",
-					"type": "text",
-					"description": "Optional description to include in output filenames",
-					"required": false,
-					"default": "",
-					"group": "Output Configuration"
 				},
 				{
 					"name": "analysis_level",
@@ -722,12 +704,34 @@
 				},
 				{
 					"name": "modifier_types",
-					"label": "modifier_types",
-					"type": "text",
-					"description": "Specific modifier types to focus on (default: all types)\nChoices: dangling, misplaced, squinting, limiting",
-					"required": false,
+					"label": "Select Modifier Types",
+					"type": "select",
+					"description": "Specific modifier types to focus on (default: all types)",
+					"required": true,
 					"default": "all",
-					"group": "Analysis Options"
+					"group": "Analysis Options",
+					"choices": [
+						{
+							"value": "dangling",
+							"label": "dangling"
+						},
+						{
+							"value": "misplaced",
+							"label": "misplaced"
+						},
+						{
+							"value": "squinting",
+							"label": "squinting"
+						},
+						{
+							"value": "limiting",
+							"label": "limiting"
+						},
+						{
+							"value": "all",
+							"label": "all"
+						}
+					]
 				},
 				{
 					"name": "sensitivity",
@@ -751,6 +755,15 @@
 							"label": "high"
 						}
 					]
+				},
+				{
+					"name": "skip_thinking",
+					"label": "Don't save a thinking file",
+					"type": "boolean",
+					"description": "Skip saving the AI thinking process",
+					"required": false,
+					"default": false,
+					"group": "Output Configuration"
 				}
 			]
 		},

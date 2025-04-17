@@ -474,7 +474,8 @@ function generateOptionsForm(options) {
         // Create the label that will appear next to the checkbox
         const checkboxLabel = document.createElement('label');
         checkboxLabel.setAttribute('for', `option-${option.name}`);
-        checkboxLabel.textContent = option.name.toUpperCase();
+        // checkboxLabel.textContent = option.name.toUpperCase();
+        checkboxLabel.textContent = option.label;
         checkboxLabel.className = 'checkbox-label';
         
         // Add the checkbox and label to the wrapper

@@ -13,6 +13,7 @@ const CharacterAnalyzer = require('./tools/character-analyzer');
 const TenseConsistencyChecker = require('./tools/tense-consistency-checker');
 const AdjectiveAdverbOptimizer = require('./tools/adjective-adverb-optimizer');
 const DanglingModifierChecker =  require('./tools/dangling-modifier-checker');
+const RhythmAnalyzer =  require('./tools/rhythm-analyzer');
 
 /**
  * Initialize the tool system
@@ -201,7 +202,22 @@ async function initializeToolSystem(settings, database) {
         console.log(`Successfully registered tool: ${toolInfo.name}`);
       }
     }
-
+    else if (toolInfo.name === 'rhythm_analyzer') {
+      const toolConfig = database.getToolByName(toolInfo.name);
+      console.log('Dangling Modifier Checker tool config:', toolConfig);
+      
+      if (toolConfig) {
+        // Register the tool
+        toolRegistry.registerTool(
+          toolInfo.name,
+          new RhythmAnalyzer(claudeService, {
+            ...toolConfig,
+            ...settings
+          })
+        );
+        console.log(`Successfully registered tool: ${toolInfo.name}`);
+      }
+    }
 
   });
   
