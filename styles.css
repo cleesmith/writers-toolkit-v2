@@ -165,6 +165,14 @@ body.dark-mode .icon-button {
   background-color: #4a89dc;
 }
 
+#import-docx-btn {
+  background-color: #7e57c2; /* Purple color to distinguish it */
+}
+
+#import-docx-btn:hover {
+  background-color: #6a43b5;
+}
+
 .center-button {
   margin: 20px auto;
   display: block;

@@ -51,4 +51,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
   onApiSettingsUpdated: (callback) => ipcRenderer.on('api-settings-updated', (_, data) => callback(data)),
   
   onSetTheme: (callback) => ipcRenderer.on('set-theme', (_, theme) => callback(theme)),
+
+  convertDocxToTxt: (docxPath, outputFilename) => ipcRenderer.invoke('convert-docx-to-txt', docxPath, outputFilename),
 });

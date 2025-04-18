@@ -952,6 +952,138 @@ function setupIPCHandlers() {
     }
   });
 
+  // Convert DOCX to TXT
+  ipcMain.handle('convert-docx-to-txt', async (event, docxPath, outputFilename) => {
+    try {
+      // Ensure we have a current project
+      if (!appState.CURRENT_PROJECT_PATH) {
+        return {
+          success: false,
+          message: 'No active project selected'
+        };
+      }
+      
+      // Validate output filename
+      if (!outputFilename) {
+        outputFilename = 'manuscript.txt';
+      }
+      
+      // Ensure it has a .txt extension
+      if (!outputFilename.toLowerCase().endsWith('.txt')) {
+        outputFilename += '.txt';
+      }
+      
+      // Construct output path
+      const outputPath = path.join(appState.CURRENT_PROJECT_PATH, outputFilename);
+      
+      // Use your existing DOCX to TXT conversion code
+      const mammoth = require('mammoth');
+      const jsdom = require('jsdom');
+      const { JSDOM } = jsdom;
+      
+      // Load the docx file
+      const result = await mammoth.convertToHtml({ path: docxPath });
+      const htmlContent = result.value;
+      
+      // Parse the HTML
+      const dom = new JSDOM(htmlContent);
+      const document = dom.window.document;
+      
+      // Get all block elements
+      const blocks = document.querySelectorAll("p, h1, h2, h3, h4, h5, h6");
+      
+      // Process blocks to extract chapters
+      let chapters = [];
+      let currentChapter = null;
+      let ignoreFrontMatter = true;
+      let ignoreRest = false;
+      
+      // Stop headings
+      const STOP_TITLES = ["about the author", "website", "acknowledgments", "appendix"];
+      
+      // Convert NodeList to Array for iteration
+      Array.from(blocks).forEach(block => {
+        if (ignoreRest) return;
+        
+        const tagName = block.tagName.toLowerCase();
+        const textRaw = block.textContent.trim();
+        const textLower = textRaw.toLowerCase();
+        
+        // Skip everything until first <h1>
+        if (ignoreFrontMatter) {
+          if (tagName === "h1") {
+            ignoreFrontMatter = false;
+          } else {
+            return;
+          }
+        }
+        
+        // If this heading is a "stop" heading, ignore the rest
+        if (tagName.startsWith("h") && STOP_TITLES.some(title => textLower.startsWith(title))) {
+          ignoreRest = true;
+          return;
+        }
+        
+        // If we see a new <h1>, that means a new chapter
+        if (tagName === "h1") {
+          currentChapter = {
+            title: textRaw,
+            textBlocks: []
+          };
+          chapters.push(currentChapter);
+        }
+        else {
+          // If there's no current chapter yet, create one
+          if (!currentChapter) {
+            currentChapter = { title: "Untitled Chapter", textBlocks: [] };
+            chapters.push(currentChapter);
+          }
+          // Add the block text if not empty
+          if (textRaw) {
+            currentChapter.textBlocks.push(textRaw);
+          }
+        }
+      });
+      
+      // Build the manuscript text with proper spacing
+      let manuscriptText = "";
+      
+      chapters.forEach((ch, idx) => {
+        // Two newlines before each chapter title
+        if (idx === 0) {
+          manuscriptText += "\n\n";
+        } else {
+          manuscriptText += "\n\n\n";
+        }
+        
+        // Add chapter title
+        manuscriptText += ch.title;
+        
+        // One newline after chapter title
+        manuscriptText += "\n\n";
+        
+        // Add paragraphs with one blank line between them
+        manuscriptText += ch.textBlocks.join("\n\n");
+      });
+      
+      // Write to output file
+      await fs.promises.writeFile(outputPath, manuscriptText);
+      
+      return {
+        success: true,
+        outputPath: outputPath,
+        outputFilename: outputFilename,
+        chapterCount: chapters.length
+      };
+    } catch (error) {
+      console.error('Error converting DOCX to TXT:', error);
+      return {
+        success: false,
+        message: error.message || 'Failed to convert DOCX file'
+      };
+    }
+  });
+
   // Get output files for a tool run
   ipcMain.handle('get-tool-output-files', (event, toolId) => {
     try {
