@@ -1068,6 +1068,14 @@ function setupIPCHandlers() {
       
       // Write to output file
       await fs.promises.writeFile(outputPath, manuscriptText);
+
+      // cls: not working:
+      // dialog.showMessageBox({
+      //   type: 'info',
+      //   title: 'Conversion Complete',
+      //   message: 'Output saved as ' + outputFilename,
+      //   detail: 'Found ' + chapters.length + ' chapters.'
+      // });
       
       return {
         success: true,

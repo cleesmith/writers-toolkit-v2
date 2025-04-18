@@ -418,13 +418,17 @@ if (importDocxBtn) {
             const result = await window.electronAPI.convertDocxToTxt(docxPath, outputFilename);
             
             // Remove loading indicator
-            document.body.removeChild(loadingDiv);
-            
-            if (result.success) {
+            if (document.body.contains(loadingDiv)) {
+              document.body.removeChild(loadingDiv);
+            }
+
+            // Only show alert if a dialog wasn't already shown in the main process
+            if (result.success && !result.dialogShown) {
               alert(`Conversion complete! Output saved as ${result.outputFilename}\nFound ${result.chapterCount} chapters.`);
-            } else {
+            } else if (!result.success) {
               alert(`Failed to convert file: ${result.message || 'Unknown error'}`);
             }
+
           } catch (error) {
             // Remove loading indicator on error
             if (document.body.contains(loadingDiv)) {

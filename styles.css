@@ -143,6 +143,8 @@ body.dark-mode .icon-button {
   color: white;
   background-color: var(--primary-color);
   transition: background-color 0.2s ease;
+  min-width: 150px;
+  text-align: center;
 }
 
 .action-button:hover:not(:disabled) {
@@ -151,8 +153,10 @@ body.dark-mode .icon-button {
 
 .button-container {
   display: flex;
-  gap: 10px;
-  justify-content: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0 15%;
+  box-sizing: border-box;
   margin-top: 20px;
 }
 
@@ -163,14 +167,6 @@ body.dark-mode .icon-button {
 
 #open-editor-btn:hover {
   background-color: #4a89dc;
-}
-
-#import-docx-btn {
-  background-color: #7e57c2; /* Purple color to distinguish it */
-}
-
-#import-docx-btn:hover {
-  background-color: #6a43b5;
 }
 
 .center-button {
@@ -349,4 +345,45 @@ label {
   transform: translateY(-50%);
   pointer-events: none;
   color: #888;
+}
+
+.action-button, #setup-run-btn, #open-editor-btn {
+  width: 210px; /* Fixed width for all buttons */
+  text-align: center;
+  padding: 10px 0; /* Vertical padding only */
+  margin: 0; /* Remove any existing margins */
+  flex: 0 0 auto; /* Prevent flex growth/shrinking */
+}
+
+/* Add styling for the project actions container */
+.project-actions {
+  margin-top: 15px;
+  display: flex;
+  justify-content: flex-start;
+}
+
+/* Style the import button in its new location */
+.project-actions .action-button {
+  background-color: #7e57c2;
+  margin-top: 5px;
+}
+
+.project-actions .action-button:hover {
+  background-color: #6a43b5;
+}
+
+/* Style the header buttons container */
+.header-buttons {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+/* Make import button purple to distinguish it */
+#import-docx-btn {
+  background-color: #7e57c2;
+}
+
+#import-docx-btn:hover {
+  background-color: #6a43b5;
 }
