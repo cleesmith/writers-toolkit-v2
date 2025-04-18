@@ -1,4 +1,4 @@
-// src/tools/manuscript-extractor.js
+// src/tools/manuscript-to-outline-characters-world.js
 const BaseTool = require('./base-tool');
 const path = require('path');
 const fileCache = require('../cache/file-cache');
@@ -6,20 +6,20 @@ const appState = require('../../src/state.js');
 const fs = require('fs/promises');
 
 /**
- * ManuscriptExtractor Tool
+ * ManuscriptToOutlineCharactersWorld Tool
  * Analyzes a manuscript file and generates three output files:
  * 1. outline.txt - Structured outline of the manuscript
  * 2. characters.txt - List of characters from the manuscript
  * 3. world.txt - Description of the world/setting in the manuscript
  */
-class ManuscriptExtractor extends BaseTool {
+class ManuscriptToOutlineCharactersWorld extends BaseTool {
   /**
    * Constructor
    * @param {Object} claudeService - Claude API service
    * @param {Object} config - Tool configuration
    */
   constructor(claudeService, config = {}) {
-    super('manuscript_extractor', config);
+    super('manuscript_to_outline_characters_world', config);
     this.claudeService = claudeService;
   }
   
@@ -29,20 +29,19 @@ class ManuscriptExtractor extends BaseTool {
    * @returns {Promise<Object>} - Execution result
    */
   async execute(options) {
-    console.log('Executing ManuscriptExtractor with options:', options);
+    console.log('Executing ManuscriptToOutlineCharactersWorld with options:', options);
     
     // Extract options
     let manuscriptFile = options.manuscript_file;
+    const description = options.description;
+
+    // the only logical OR allowed:
     const saveDir = options.save_dir || appState.CURRENT_PROJECT_PATH;
-    const skipThinking = options.skip_thinking || false;
-    const description = options.description || '';
-    const generateOutlineOption = options.generate_outline !== false;
-    const generateCharactersOption = options.generate_characters !== false;
-    const generateWorldOption = options.generate_world !== false;
+    console.log('execute: saveDir', saveDir);
     
     if (!saveDir) {
       const errorMsg = 'Error: No save directory specified and no current project selected.\n' +
-                      'Please select a project or specify a save directory.';
+                       'Please select a project or specify a save directory.';
       this.emitOutput(errorMsg);
       throw new Error('No save directory available');
     }
@@ -50,7 +49,7 @@ class ManuscriptExtractor extends BaseTool {
     // Ensure manuscript file is provided
     if (!manuscriptFile) {
       const errorMsg = 'Error: No manuscript file specified.\n' +
-                      'Please specify a manuscript file with the manuscript_file parameter.';
+                       'Please specify a manuscript file with the manuscript_file parameter.';
       this.emitOutput(errorMsg);
       throw new Error('No manuscript file specified');
     }
@@ -68,26 +67,17 @@ class ManuscriptExtractor extends BaseTool {
       this.emitOutput(`Reading manuscript file: ${manuscriptFile}\n`);
       const manuscriptContent = await this.readInputFile(manuscriptFile);
       
-      // Generate outline if option is enabled
-      if (generateOutlineOption) {
-        const outlineFile = await this.generateOutline(manuscriptContent, saveDir, skipThinking, description);
-        outputFiles.push(outlineFile);
-      }
-      
-      // Generate characters if option is enabled
-      if (generateCharactersOption) {
-        const charactersFile = await this.generateCharacters(manuscriptContent, saveDir, skipThinking, description);
-        outputFiles.push(charactersFile);
-      }
-      
-      // Generate world if option is enabled
-      if (generateWorldOption) {
-        const worldFile = await this.generateWorld(manuscriptContent, saveDir, skipThinking, description);
-        outputFiles.push(worldFile);
-      }
+      const outlineFile = await this.generateOutline(manuscriptContent, saveDir, description);
+      outputFiles.push(outlineFile);
+    
+      const charactersFile = await this.generateCharacters(manuscriptContent, saveDir, description);
+      outputFiles.push(charactersFile);
+    
+      const worldFile = await this.generateWorld(manuscriptContent, saveDir, description);
+      outputFiles.push(worldFile);
       
       // Add files to the cache
-      const toolName = 'manuscript_extractor';
+      const toolName = 'manuscript_to_outline_characters_world';
       outputFiles.forEach(file => {
         fileCache.addFile(toolName, file);
       });
@@ -98,7 +88,7 @@ class ManuscriptExtractor extends BaseTool {
         outputFiles
       };
     } catch (error) {
-      console.error('Error in ManuscriptExtractor:', error);
+      console.error('Error in ManuscriptToOutlineCharactersWorld:', error);
       this.emitOutput(`\nError: ${error.message}\n`);
       throw error;
     }
@@ -108,33 +98,32 @@ class ManuscriptExtractor extends BaseTool {
    * Generate outline from manuscript
    * @param {string} manuscriptContent - Manuscript content
    * @param {string} saveDir - Directory to save to
-   * @param {boolean} skipThinking - Whether to skip saving thinking content
    * @param {string} description - Optional description
    * @returns {Promise<string>} - Path to the saved outline file
    */
-  async generateOutline(manuscriptContent, saveDir, skipThinking, description) {
+  async generateOutline(manuscriptContent, saveDir, description) {
     this.emitOutput(`Generating outline...\n`);
     
-    // Create the prompt for outline extraction
+    // Create the prompt for outline
     const prompt = this.createOutlinePrompt(manuscriptContent);
     
     // Call Claude API
     const { content, thinking, promptTokens, responseTokens } = await this.callClaudeAPI(prompt, 'Outline');
     
     // Save the outline to a file
-    const timestamp = new Date().toISOString().replace(/[-:.]/g, '').substring(0, 15);
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
     const desc = description ? `_${description}` : '';
-    const outlineFilename = `outline${desc}.txt`;
+    const outlineFilename = `outline${desc}_${timestamp}.txt`;
     const outlinePath = path.join(saveDir, outlineFilename);
     
     await this.writeOutputFile(content, saveDir, outlineFilename);
     this.emitOutput(`Outline saved to: ${outlinePath}\n`);
     
     // Save thinking if available and not skipped
-    if (thinking && !skipThinking) {
-      const thinkingFilename = `outline_thinking${desc}_${timestamp}.txt`;
-      await this.saveThinking(thinking, saveDir, thinkingFilename, promptTokens, responseTokens, 'Outline');
-    }
+    // if (thinking) {
+    //   const thinkingFilename = `outline_thinking${desc}_${timestamp}.txt`;
+    //   await this.saveThinking(thinking, saveDir, thinkingFilename, promptTokens, responseTokens, 'Outline');
+    // }
     
     return outlinePath;
   }
@@ -143,33 +132,32 @@ class ManuscriptExtractor extends BaseTool {
    * Generate characters list from manuscript
    * @param {string} manuscriptContent - Manuscript content
    * @param {string} saveDir - Directory to save to
-   * @param {boolean} skipThinking - Whether to skip saving thinking content
    * @param {string} description - Optional description
    * @returns {Promise<string>} - Path to the saved characters file
    */
-  async generateCharacters(manuscriptContent, saveDir, skipThinking, description) {
+  async generateCharacters(manuscriptContent, saveDir, description) {
     this.emitOutput(`Generating characters list...\n`);
     
-    // Create the prompt for character extraction
+    // Create the prompt for character
     const prompt = this.createCharactersPrompt(manuscriptContent);
     
     // Call Claude API
     const { content, thinking, promptTokens, responseTokens } = await this.callClaudeAPI(prompt, 'Characters');
     
     // Save the characters to a file
-    const timestamp = new Date().toISOString().replace(/[-:.]/g, '').substring(0, 15);
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
     const desc = description ? `_${description}` : '';
-    const charactersFilename = `characters${desc}.txt`;
+    const charactersFilename = `characters${desc}_${timestamp}.txt`;
     const charactersPath = path.join(saveDir, charactersFilename);
     
     await this.writeOutputFile(content, saveDir, charactersFilename);
     this.emitOutput(`Characters saved to: ${charactersPath}\n`);
     
     // Save thinking if available and not skipped
-    if (thinking && !skipThinking) {
-      const thinkingFilename = `characters_thinking${desc}_${timestamp}.txt`;
-      await this.saveThinking(thinking, saveDir, thinkingFilename, promptTokens, responseTokens, 'Characters');
-    }
+    // if (thinking) {
+    //   const thinkingFilename = `characters_thinking${desc}_${timestamp}.txt`;
+    //   await this.saveThinking(thinking, saveDir, thinkingFilename, promptTokens, responseTokens, 'Characters');
+    // }
     
     return charactersPath;
   }
@@ -178,33 +166,32 @@ class ManuscriptExtractor extends BaseTool {
    * Generate world description from manuscript
    * @param {string} manuscriptContent - Manuscript content
    * @param {string} saveDir - Directory to save to
-   * @param {boolean} skipThinking - Whether to skip saving thinking content
    * @param {string} description - Optional description
    * @returns {Promise<string>} - Path to the saved world file
    */
-  async generateWorld(manuscriptContent, saveDir, skipThinking, description) {
+  async generateWorld(manuscriptContent, saveDir, description) {
     this.emitOutput(`Generating world description...\n`);
     
-    // Create the prompt for world extraction
+    // Create the prompt for world
     const prompt = this.createWorldPrompt(manuscriptContent);
     
     // Call Claude API
     const { content, thinking, promptTokens, responseTokens } = await this.callClaudeAPI(prompt, 'World');
     
     // Save the world description to a file
-    const timestamp = new Date().toISOString().replace(/[-:.]/g, '').substring(0, 15);
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
     const desc = description ? `_${description}` : '';
-    const worldFilename = `world${desc}.txt`;
+    const worldFilename = `world${desc}_${timestamp}.txt`;
     const worldPath = path.join(saveDir, worldFilename);
     
     await this.writeOutputFile(content, saveDir, worldFilename);
     this.emitOutput(`World description saved to: ${worldPath}\n`);
     
     // Save thinking if available and not skipped
-    if (thinking && !skipThinking) {
-      const thinkingFilename = `world_thinking${desc}_${timestamp}.txt`;
-      await this.saveThinking(thinking, saveDir, thinkingFilename, promptTokens, responseTokens, 'World');
-    }
+    // if (thinking) {
+    //   const thinkingFilename = `world_thinking${desc}_${timestamp}.txt`;
+    //   await this.saveThinking(thinking, saveDir, thinkingFilename, promptTokens, responseTokens, 'World');
+    // }
     
     return worldPath;
   }
@@ -217,7 +204,7 @@ class ManuscriptExtractor extends BaseTool {
    */
   async callClaudeAPI(prompt, label) {
     // Count tokens in the prompt
-    this.emitOutput(`Counting tokens in ${label} prompt...\n`);
+    this.emitOutput(`Counting tokens for: ${label} prompt...\n`);
     const promptTokens = await this.claudeService.countTokens(prompt);
 
     // Call the shared token budget calculator
@@ -245,7 +232,7 @@ class ManuscriptExtractor extends BaseTool {
     }
     
     // Call Claude API with streaming
-    this.emitOutput(`Sending request to Claude API (streaming) for ${label}...\n`);
+    this.emitOutput(`\nSending request to Claude API (streaming) for ${label}...\n`);
     
     // Add a message about waiting
     this.emitOutput(`****************************************************************************\n`);
@@ -343,7 +330,7 @@ class ManuscriptExtractor extends BaseTool {
     // Create stats for thinking file
     const stats = `
 Details:  ${dateTimeStr}
-Analysis type: ${label} extraction from manuscript
+Analysis type: ${label} from manuscript
 Max request timeout: ${this.config.request_timeout} seconds
 Max AI model context window: ${this.config.context_window} tokens
 AI model thinking budget: ${this.config.thinking_budget_tokens} tokens
@@ -509,4 +496,4 @@ Format the world document with clear sections and consistent structure. Use dash
   }
 }
 
-module.exports = ManuscriptExtractor;
+module.exports = ManuscriptToOutlineCharactersWorld;

@@ -5,6 +5,7 @@ const ClaudeAPIService = require('./claude-api/client');
 const toolRegistry = require('./tools/registry');
 
 const TokensWordsCounter = require('./tools/tokens-words-counter');
+const ManuscriptToOutlineCharactersWorld = require('./tools/manuscript-to-outline-characters-world');
 const NarrativeIntegrity = require('./tools/narrative-integrity');
 const BrainstormTool = require('./tools/brainstorm');
 const OutlineWriter = require('./tools/outline-writer');
@@ -61,6 +62,22 @@ async function initializeToolSystem(settings, database) {
           })
         );
         // console.log(`Successfully registered tool: ${toolInfo.name}`);
+      }
+    }
+    else if (toolInfo.name === 'manuscript_to_outline_characters_world') {
+      const toolConfig = database.getToolByName(toolInfo.name);
+      console.log('Manuscript To Outline Characters World tool config:', toolConfig);
+      
+      if (toolConfig) {
+        // Register the tool
+        toolRegistry.registerTool(
+          toolInfo.name,
+          new ManuscriptToOutlineCharactersWorld(claudeService, {
+            ...toolConfig,
+            ...settings
+          })
+        );
+        console.log(`>>> Successfully registered tool: ${toolInfo.name}`);
       }
     }
     else if (toolInfo.name === 'narrative_integrity') {
@@ -305,6 +322,7 @@ async function initializeToolSystem(settings, database) {
     }
 
   });
+
   console.log(`Found ${dbTools.length} tools in database`);
   
   return {

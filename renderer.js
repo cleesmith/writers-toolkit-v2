@@ -9,6 +9,43 @@ const body = document.body;
 // Track theme state (initially dark)
 let isDarkMode = true;
 
+// Function to get a human-readable timestamp
+function getReadableTimestamp() {
+  const date = new Date();
+  
+  // Get day of week (abbreviated)
+  const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const dayOfWeek = daysOfWeek[date.getDay()];
+  
+  // Get month (abbreviated)
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const month = months[date.getMonth()];
+  
+  // Get day and year
+  const day = date.getDate();
+  const year = date.getFullYear();
+  
+  // Get hours in 12-hour format
+  let hours = date.getHours();
+  const ampm = hours >= 12 ? 'pm' : 'am';
+  hours = hours % 12;
+  hours = hours ? hours : 12; // Convert 0 to 12
+  
+  // Get minutes
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  
+  // Construct the readable timestamp
+  return `${dayOfWeek} ${month} ${day}, ${year} ${hours}:${minutes}${ampm}`;
+}
+
+// Function to update the timestamp display
+function updateTimestamp() {
+  const timestampElement = document.getElementById('timestamp');
+  if (timestampElement) {
+    timestampElement.textContent = getReadableTimestamp();
+  }
+}
+
 // Update icon visibility based on the current theme
 function updateThemeIcons() {
   if (isDarkMode) {
@@ -110,7 +147,7 @@ async function loadTools() {
     toolSelect.innerHTML = '';
     
     // Define tool categories
-    const topTools = ["tokens_words_counter", "narrative_integrity", "brainstorm"];
+    const topTools = ["tokens_words_counter", "narrative_integrity", "manuscript_to_outline_characters_world", "brainstorm"];
     const roughDraftTools = ["brainstorm", "outline_writer", "world_writer", "chapter_writer"];
     
     // Track which tools have been added to avoid duplicates
@@ -235,8 +272,37 @@ window.electronAPI.onApiSettingsUpdated((settings) => {
   // Could refresh any UI that depends on these settings
 });
 
-// Initialize when the page loads
+// Add this to your DOMContentLoaded event listener in renderer.js:
 document.addEventListener('DOMContentLoaded', () => {
+  // Create timestamp element
+  const timestampElement = document.createElement('div');
+  timestampElement.id = 'timestamp';
+  timestampElement.className = 'timestamp';
+  timestampElement.textContent = getReadableTimestamp();
+  
+  // Find the header-center div and add the timestamp alongside the h1
+  const headerCenter = document.querySelector('.header-center');
+  if (headerCenter) {
+    // Add timestamp after the h1
+    headerCenter.appendChild(timestampElement);
+  }
+
+  // Update the timestamp once per minute
+  setInterval(updateTimestamp, 60000);  
+
+  // Rest of your existing initialization code
   loadProjectInfo();
   loadTools();
 });
+
+// Add this to listen for when a tool run finishes and the window gains focus again
+// This updates the timestamp when returning to the main window
+window.addEventListener('focus', updateTimestamp);
+
+// Also listen for tool dialog closing events from the main process
+// Add this where you have other electronAPI event listeners:
+if (window.electronAPI && window.electronAPI.onToolDialogClosed) {
+  window.electronAPI.onToolDialogClosed(() => {
+    updateTimestamp();
+  });
+}

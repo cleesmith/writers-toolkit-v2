@@ -47,11 +47,6 @@ header {
   flex: 1;
 }
 
-.header-center {
-  flex: 2;
-  text-align: center;
-}
-
 .header-right {
   display: flex;
   justify-content: flex-end;
@@ -61,6 +56,36 @@ header {
 h1 {
   font-size: 32px;
   font-weight: 500;
+}
+
+.header-center {
+  flex: 2;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+}
+
+.header-center h1 {
+  font-size: 32px;
+  font-weight: 500;
+  margin: 0;
+}
+
+.timestamp {
+  font-size: 14px;
+  color: #888;
+  white-space: nowrap;
+  margin-top: 10px;
+}
+
+body.dark-mode .timestamp {
+  color: #aaa;
+}
+
+body.light-mode .timestamp {
+  color: #666;
 }
 
 /* Button styles */

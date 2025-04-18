@@ -25,6 +25,25 @@
 				}
 			]
 		},
+		"manuscript_to_outline_characters_world": {
+			"id": "manuscript_to_outline_characters_world",
+			"name": "manuscript_to_outline_characters_world.js",
+			"title": "Use manuscript.txt  to create: outline, characters, and world files",
+			"description": "Creates three essential files from your manuscript: outline.txt, characters.txt, and world.txt for use with other Writer's Toolkit tools.",
+			"help_text": "Generates outline, characters, and world files from your manuscript",
+			"category": "analysis",
+			"options": [
+				{
+					"name": "manuscript_file",
+					"label": "MANUSCRIPT_FILE",
+					"type": "file",
+					"description": "File containing the manuscript/narrative to use",
+					"required": true,
+					"default": "manuscript.txt",
+					"group": "Input Files"
+				}
+			]
+		},
 		"narrative_integrity": {
 			"id": "narrative_integrity",
 			"name": "narrative_integrity.js",
