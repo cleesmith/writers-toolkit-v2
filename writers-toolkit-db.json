@@ -1202,11 +1202,11 @@
 			"max_thinking_budget": 32000
 		},
 		"projects": {
-			"current": "Ezra Patel",
+			"current": "Liz",
 			"paths": {
-				"Ezra Patel": "/Users/cleesmith/writing/Ezra Patel"
+				"Liz": "/Users/cleesmith/writing/Liz"
 			}
 		},
-		"default_save_dir": "/Users/cleesmith/writing/Ezra Patel"
+		"default_save_dir": "/Users/cleesmith/writing/Liz"
 	}
 }
