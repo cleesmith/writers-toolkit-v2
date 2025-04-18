@@ -30,7 +30,8 @@ class ManuscriptToOutlineCharactersWorld extends BaseTool {
    */
   async execute(options) {
     console.log('Executing ManuscriptToOutlineCharactersWorld with options:', options);
-    
+    console.log('appState.CURRENT_PROJECT=', appState.CURRENT_PROJECT);
+
     // Extract options
     let manuscriptFile = options.manuscript_file;
     const description = options.description;
@@ -102,7 +103,7 @@ class ManuscriptToOutlineCharactersWorld extends BaseTool {
    * @returns {Promise<string>} - Path to the saved outline file
    */
   async generateOutline(manuscriptContent, saveDir, description) {
-    this.emitOutput(`Generating outline...\n`);
+    this.emitOutput(`\n\nGenerating outline...\n`);
     
     // Create the prompt for outline
     const prompt = this.createOutlinePrompt(manuscriptContent);
@@ -136,7 +137,7 @@ class ManuscriptToOutlineCharactersWorld extends BaseTool {
    * @returns {Promise<string>} - Path to the saved characters file
    */
   async generateCharacters(manuscriptContent, saveDir, description) {
-    this.emitOutput(`Generating characters list...\n`);
+    this.emitOutput(`\n\nGenerating characters list...\n`);
     
     // Create the prompt for character
     const prompt = this.createCharactersPrompt(manuscriptContent);
@@ -170,7 +171,7 @@ class ManuscriptToOutlineCharactersWorld extends BaseTool {
    * @returns {Promise<string>} - Path to the saved world file
    */
   async generateWorld(manuscriptContent, saveDir, description) {
-    this.emitOutput(`Generating world description...\n`);
+    this.emitOutput(`\n\nGenerating world description...\n`);
     
     // Create the prompt for world
     const prompt = this.createWorldPrompt(manuscriptContent);
@@ -232,7 +233,7 @@ class ManuscriptToOutlineCharactersWorld extends BaseTool {
     }
     
     // Call Claude API with streaming
-    this.emitOutput(`\nSending request to Claude API (streaming) for ${label}...\n`);
+    this.emitOutput(`\n\nSending request to Claude API (streaming) for ${label}...\n`);
     
     // Add a message about waiting
     this.emitOutput(`****************************************************************************\n`);
@@ -363,6 +364,12 @@ ${stats}`;
 ${manuscriptContent}
 === END MANUSCRIPT ===
 
+=== PROJECT TITLE ===
+${appState.CURRENT_PROJECT}
+=== END PROJECT TITLE ===
+
+CRITICAL INSTRUCTION: This project is titled "${appState.CURRENT_PROJECT}". Do NOT create or suggest a new title. Always refer to this work by its existing title shown above.
+
 IMPORTANT: NO Markdown formatting
 
 You are an expert fiction editor and story analyst. Your task is to extract a detailed outline from the provided manuscript. Create an outline that includes chapter divisions, key plot points, and story structure.
@@ -398,6 +405,12 @@ Format the outline consistently, with clear chapter/section designations. Use nu
     return `=== MANUSCRIPT ===
 ${manuscriptContent}
 === END MANUSCRIPT ===
+
+=== PROJECT TITLE ===
+${appState.CURRENT_PROJECT}
+=== END PROJECT TITLE ===
+
+CRITICAL INSTRUCTION: This project is titled "${appState.CURRENT_PROJECT}". Do NOT create or suggest a new title. Always refer to this work by its existing title shown above.
 
 IMPORTANT: NO Markdown formatting
 
@@ -439,6 +452,12 @@ Format each character profile consistently, starting with the character's name f
     return `=== MANUSCRIPT ===
 ${manuscriptContent}
 === END MANUSCRIPT ===
+
+=== PROJECT TITLE ===
+${appState.CURRENT_PROJECT}
+=== END PROJECT TITLE ===
+
+CRITICAL INSTRUCTION: This project is titled "${appState.CURRENT_PROJECT}". Do NOT create or suggest a new title. Always refer to this work by its existing title shown above.
 
 IMPORTANT: NO Markdown formatting
 
