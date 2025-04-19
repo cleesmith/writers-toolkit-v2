@@ -67,7 +67,7 @@ async function initializeToolSystem(settings, database) {
     }
     else if (toolInfo.name === 'manuscript_to_outline_characters_world') {
       const toolConfig = database.getToolByName(toolInfo.name);
-      console.log('Manuscript To Outline Characters World tool config:', toolConfig);
+      // console.log('Manuscript To Outline Characters World tool config:', toolConfig);
       
       if (toolConfig) {
         // Register the tool
@@ -78,7 +78,7 @@ async function initializeToolSystem(settings, database) {
             ...settings
           })
         );
-        console.log(`>>> Successfully registered tool: ${toolInfo.name}`);
+        // console.log(`>>> Successfully registered tool: ${toolInfo.name}`);
       }
     }
     else if (toolInfo.name === 'narrative_integrity') {

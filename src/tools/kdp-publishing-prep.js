@@ -107,6 +107,9 @@ class KDPPublishingPrep extends BaseTool {
       const startTime = Date.now();
       let fullResponse = "";
       let thinkingContent = "";
+        
+      // Create system prompt to avoid markdown
+      // const systemPrompt = "CRITICAL INSTRUCTION: NO Markdown formatting of ANY kind. Never use headers, bullets, or any formatting symbols. Plain text only with standard punctuation.";
       
       // Use the calculated values in the API call
       try {
@@ -134,7 +137,8 @@ class KDPPublishingPrep extends BaseTool {
       }
 
       // Remove any markdown formatting
-      fullResponse = this.removeMarkdown(fullResponse);
+      // cls: also removes HTML so skip this:
+      // fullResponse = this.removeMarkdown(fullResponse);
 
       const elapsed = (Date.now() - startTime) / 1000;
       const minutes = Math.floor(elapsed / 60);
