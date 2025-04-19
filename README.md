@@ -44,7 +44,11 @@ So even though the beta allows for 128K output tokens, you can only use what's l
 - You have 62K tokens left for visible output (though you only used 4,183)
 - As your manuscript size increases, you'll eventually have to reduce thinking
 
-The tipping point comes when:
-Input tokens > (200K - 32K - minimum visible tokens)
+--- 
+
+> The **tipping point** comes when:
+> **Input tokens > (200K - 32K - minimum visible tokens)**
 
 For example, if you need at least 3K tokens for visible output, you'd start losing thinking capacity when your input exceeds 165K tokens.
+
+---
