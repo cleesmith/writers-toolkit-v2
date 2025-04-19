@@ -49,6 +49,7 @@ So even though the beta allows for 128K output tokens, you can only use what's l
 > The **tipping point** comes when:
 > **Input tokens > (200K - 32K - minimum visible tokens)**
 
-For example, if you need at least 3K tokens for visible output, you'd start losing thinking capacity when your input exceeds 165K tokens.
+For example, if you need at least 3K tokens for visible output, you'd 
+# start losing thinking capacity when your input exceeds 165K tokens.
 
 ---
