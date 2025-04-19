@@ -1187,6 +1187,76 @@
 					"group": "Output Configuration"
 				}
 			]
+		},
+		"kdp_publishing_prep": {
+			"id": "kdp_publishing_prep",
+			"name": "kdp_publishing_prep.js",
+			"title": "KDP Publishing Prep - Generate Amazon KDP Elements",
+			"description": "Analyzes your manuscript and generates essential Amazon KDP publishing elements including title suggestions, book description, category recommendations, keywords, synopsis, and more.",
+			"help_text": "Creates all the elements needed for your KDP submission form",
+			"category": "publishing",
+			"options": [
+				{
+					"name": "manuscript_file",
+					"label": "Manuscript File",
+					"type": "file",
+					"description": "Your completed manuscript text file (.txt)",
+					"required": true,
+					"default": "manuscript.txt",
+					"group": "Input Files"
+				},
+				{
+					"name": "book_type",
+					"label": "Book Type",
+					"type": "select",
+					"description": "Select the type of book",
+					"required": true,
+					"default": "fiction",
+					"choices": [
+						{
+							"value": "fiction",
+							"label": "Fiction"
+						},
+						{
+							"value": "nonfiction",
+							"label": "Non-Fiction"
+						}
+					],
+					"group": "Book Information"
+				},
+				{
+					"name": "existing_title",
+					"label": "Existing Title (Optional)",
+					"type": "text",
+					"description": "If you already have a title, enter it here for evaluation",
+					"required": false,
+					"group": "Book Information"
+				},
+				{
+					"name": "title_ideas",
+					"label": "Title Ideas/Concepts (Optional)",
+					"type": "text",
+					"description": "Any title themes or concepts you want incorporated",
+					"required": false,
+					"group": "Book Information"
+				},
+				{
+					"name": "target_audience",
+					"label": "Target Audience (Optional)",
+					"type": "text",
+					"description": "Describe your intended audience (age group, interests, etc.)",
+					"required": false,
+					"group": "Book Information"
+				},
+				{
+					"name": "include_html",
+					"label": "Include HTML Description",
+					"type": "boolean",
+					"description": "Generate an HTML-formatted description for KDP",
+					"default": true,
+					"group": "Output Options"
+				}
+			]
 		}
 	},
 	"settings": {
