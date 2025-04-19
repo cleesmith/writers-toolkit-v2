@@ -54,3 +54,35 @@ For example, if you need at least 3K tokens for visible output, you'd
 # when your input exceeds 165K tokens.
 
 ---
+
+## Token Budget Management
+
+### Quality Guarantee and Manuscript Size Limits
+
+The Writer's Toolkit prioritizes analysis quality above all else. To ensure professional-grade insights, we require Claude's full 32K token thinking capacity for all analyses.
+
+**Why does this matter?** 
+The difference between full and reduced thinking capacity is significant - similar to the difference between a quick skim and a deep read of your manuscript. Our tools guarantee the thoroughness that professional writers deserve.
+
+**Manuscript Size Limits:**
+- Maximum manuscript size: ~164,000 tokens (~123,000 words)
+- If your manuscript exceeds this size, the analysis will abort rather than produce lower-quality results
+
+**What to do with larger manuscripts:**
+1. Split your manuscript into logical sections and analyze each separately
+2. Focus analysis on specific chapters or sections that need the most attention
+3. Remove any unnecessary content before analysis (e.g., notes, formatting marks)
+4. Wait for upcoming context window improvements (Claude's context window is expected to increase to 500K in future releases)
+
+**Technical Details:**
+The system automatically calculates token budgets to maximize thinking capacity while ensuring sufficient space for thorough visible output. It will adjust visible output size when needed but will never compromise on thinking capacity.
+
+For developer reference, the Token Budget Calculator prioritizes:
+1. Full thinking budget (32K tokens)
+2. Desired output (12K tokens when space allows)
+3. Minimum output (4K tokens at minimum)
+
+Manuscripts exceeding the size limit receive a clear error message rather than proceeding with reduced thinking capacity, as this would compromise our quality standards.
+
+---
+
