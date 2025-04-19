@@ -157,6 +157,8 @@ class ClaudeAPIService {
       betas: this._getBetasArray()
     };
     
+    console.log("streamWithThinking: modelOptions:\n", modelOptions);
+
     // Only allow system prompt to be overridden
     if (options.system) {
       modelOptions.system = options.system;

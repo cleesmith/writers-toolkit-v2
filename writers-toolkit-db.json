@@ -1272,11 +1272,11 @@
 			"max_thinking_budget": 32000
 		},
 		"projects": {
-			"current": "HattieGetsAGun",
+			"current": "Tsu_Liz",
 			"paths": {
-				"HattieGetsAGun": "/Users/cleesmith/writing/HattieGetsAGun"
+				"Tsu_Liz": "/Users/cleesmith/writing/Tsu_Liz"
 			}
 		},
-		"default_save_dir": "/Users/cleesmith/writing/HattieGetsAGun"
+		"default_save_dir": "/Users/cleesmith/writing/Tsu_Liz"
 	}
 }
