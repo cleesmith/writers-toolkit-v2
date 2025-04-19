@@ -83,9 +83,9 @@ function updatePositionAndStats() {
   
   // Show search results count if there are matches, otherwise just show character/word count
   if (findMatches.length > 0 && currentFindIndex >= 0) {
-    statsDisplay.textContent = `Found: ${currentFindIndex + 1}/${findMatches.length} - Characters: ${text.length.toLocaleString()} & Words: ${countWords(text).toLocaleString()}`;
+    statsDisplay.textContent = `Found: ${currentFindIndex + 1}/${findMatches.length} - Words: ${countWords(text).toLocaleString()} & Characters: ${text.length.toLocaleString()}`;
   } else {
-    statsDisplay.textContent = `Characters: ${text.length.toLocaleString()} & Words: ${countWords(text).toLocaleString()}`;
+    statsDisplay.textContent = `Words: ${countWords(text).toLocaleString()} & Characters: ${text.length.toLocaleString()}`;
   }
 }
 

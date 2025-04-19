@@ -1195,18 +1195,18 @@
 			"request_timeout": 300,
 			"context_window": 200000,
 			"thinking_budget_tokens": 32000,
-			"betas_max_tokens": 128000,
+			"betas_max_tokens": 64000,
 			"desired_output_tokens": 12000,
 			"model_name": "claude-3-7-sonnet-20250219",
 			"betas": "output-128k-2025-02-19",
 			"max_thinking_budget": 32000
 		},
 		"projects": {
-			"current": "Liz",
+			"current": "HattieGetsAGun",
 			"paths": {
-				"Liz": "/Users/cleesmith/writing/Liz"
+				"HattieGetsAGun": "/Users/cleesmith/writing/HattieGetsAGun"
 			}
 		},
-		"default_save_dir": "/Users/cleesmith/writing/Liz"
+		"default_save_dir": "/Users/cleesmith/writing/HattieGetsAGun"
 	}
 }

@@ -1,4 +1,4 @@
-/* Editor-specific styles that supplement the main styles.css */
+/* editor-styles.css - Specific styles for Writer's Toolkit Editor */
 
 /* Basic layout */
 body {
@@ -8,15 +8,20 @@ body {
   flex-direction: column;
   height: 100vh;
   overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
 
-/* Toolbar styling - matching the screenshots */
+/* Toolbar sizing and layout - prevent stretching */
 .toolbar {
   display: flex;
   align-items: center;
-  padding: 10px;
+  padding: 8px 10px;
   background-color: #1a1a1a;
   border-bottom: 1px solid #333;
+  gap: 8px;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  min-height: 42px;
 }
 
 body.light-mode .toolbar {
@@ -24,8 +29,11 @@ body.light-mode .toolbar {
   border-bottom: 1px solid #ddd;
 }
 
+/* Ensure toolbar sections have proper sizing */
 .toolbar-left {
-  width: 40px;
+  width: auto;
+  min-width: 40px;
+  flex: 0 0 auto;
 }
 
 .toolbar-center {
@@ -33,15 +41,32 @@ body.light-mode .toolbar {
   align-items: center;
   gap: 8px;
   flex-grow: 1;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  padding-right: 10px;
+}
+
+.toolbar-center::-webkit-scrollbar {
+  height: 4px;
+}
+
+.toolbar-center::-webkit-scrollbar-thumb {
+  background-color: #555;
+  border-radius: 2px;
+}
+
+.toolbar-center::-webkit-scrollbar-track {
+  background-color: transparent;
 }
 
 .toolbar-right {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 10px;
+  flex: 0 0 auto;
 }
 
-/* Button styling to match screenshots */
+/* Button sizing - prevent overly wide buttons */
 .action-button {
   background-color: #4a89dc;
   color: white;
@@ -50,40 +75,49 @@ body.light-mode .toolbar {
   border-radius: 4px;
   font-size: 14px;
   cursor: pointer;
+  min-width: 60px;
+  max-width: 80px;
+  white-space: nowrap;
+  text-align: center;
+  flex: 0 0 auto;
 }
 
 .action-button:hover {
   background-color: #5c9ce6;
 }
 
-/* Clear button styling */
+/* Clear button sizing */
 #clear-search-btn {
-  background-color: #666; /* Different color to distinguish from search */
+  background-color: #666;
+  min-width: 50px;
+  max-width: 60px;
 }
 
 #clear-search-btn:hover {
   background-color: #777;
 }
 
-/* Icon button (theme toggle) */
+/* Theme toggle button */
 .icon-button {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 34px;
   height: 34px;
+  min-width: 34px;
   border-radius: 50%;
   background-color: transparent;
   color: #4a89dc;
   border: none;
   cursor: pointer;
+  flex: 0 0 auto;
 }
 
 .icon-button:hover {
   background-color: rgba(74, 137, 220, 0.1);
 }
 
-/* Text button (Quit) */
+/* Quit button */
 .text-button {
   background: none;
   border: none;
@@ -91,16 +125,20 @@ body.light-mode .toolbar {
   padding: 6px 10px;
   font-size: 14px;
   cursor: pointer;
+  white-space: nowrap;
+  flex: 0 0 auto;
 }
 
 .text-button:hover {
   color: #5c9ce6;
 }
 
-/* Select dropdowns */
+/* Select dropdown sizing */
 .select-wrapper {
   position: relative;
-  min-width: 80px;
+  min-width: 60px;
+  max-width: 100px;
+  flex: 0 0 auto;
 }
 
 select {
@@ -113,6 +151,7 @@ select {
   appearance: none;
   padding-right: 20px;
   font-size: 14px;
+  width: 100%;
 }
 
 body.light-mode select {
@@ -132,11 +171,13 @@ body.light-mode select {
   color: #888;
 }
 
-/* Find input and button */
+/* Find input and button - prevent excessive stretching */
 .find-container {
   display: flex;
   align-items: center;
   gap: 4px;
+  flex: 0 0 auto;
+  max-width: 300px;
 }
 
 .find-input {
@@ -146,7 +187,9 @@ body.light-mode select {
   background-color: #2a2a2a;
   color: white;
   font-size: 14px;
-  min-width: 150px;
+  min-width: 120px;
+  max-width: 180px;
+  width: 100%;
 }
 
 body.light-mode .find-input {
@@ -155,24 +198,7 @@ body.light-mode .find-input {
   border: 1px solid #ccc;
 }
 
-/* Current file display - in the status bar */
-.current-file-display {
-  font-size: 12px;
-  color: #888;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 40%;
-  text-align: center;
-  flex: 1; /* Take available space */
-  margin: 0 15px; /* Add some margin on both sides */
-}
-
-body.light-mode .current-file-display {
-  color: #666;
-}
-
-/* Main content area */
+/* Editor area */
 main {
   flex-grow: 1;
   display: flex;
@@ -181,7 +207,6 @@ main {
   padding: 10px;
 }
 
-/* Editor container */
 .editor-container {
   flex-grow: 1;
   display: flex;
@@ -189,7 +214,6 @@ main {
   overflow: hidden;
 }
 
-/* Text editor */
 #editor {
   width: 100%;
   flex-grow: 1;
@@ -210,16 +234,18 @@ body.light-mode #editor {
   color: #333;
 }
 
-/* Status bar - with file name in the middle */
+/* Status bar - use flexbox properly */
 .status-bar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 10px;
+  padding: 8px 12px;
   font-size: 12px;
   font-family: monospace;
   background-color: #1a1a1a;
   color: #aaa;
+  min-height: 20px;
+  gap: 5px; /* Add gap between flex items */
 }
 
 body.light-mode .status-bar {
@@ -227,18 +253,43 @@ body.light-mode .status-bar {
   color: #666;
 }
 
-/* Adjust position and statistics elements */
+/* Status elements sizing */
 #position, #statistics {
-  flex-shrink: 0; /* Prevent shrinking */
-  min-width: 150px; /* Ensure minimum width */
+  flex: 0 0 auto;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 #position {
   text-align: left;
+  min-width: 100px;
+  max-width: 180px;
 }
 
 #statistics {
   text-align: right;
+  min-width: 200px;
+  max-width: 260px;
+  padding-left: 10px;
+}
+
+/* Current file display in status bar */
+.current-file-display {
+  font-size: 12px;
+  color: #888;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1 1 auto;
+  text-align: center;
+  margin: 0 10px;
+  min-width: 0;
+  max-width: calc(100% - 480px); /* Ensure there's space for position and statistics */
+}
+
+body.light-mode .current-file-display {
+  color: #666;
 }
 
 /* Theme-specific icon visibility */
@@ -258,7 +309,7 @@ body.light-mode #moon-icon {
   display: block;
 }
 
-/* Notification */
+/* Notification popup */
 .notification {
   position: fixed;
   bottom: 20px;
@@ -270,4 +321,76 @@ body.light-mode #moon-icon {
   opacity: 0;
   transition: opacity 0.3s;
   z-index: 1000;
+}
+
+/* Media query for narrow screens */
+@media (max-width: 900px) {
+  .toolbar {
+    flex-wrap: wrap;
+    gap: 5px;
+    padding: 5px;
+  }
+  
+  .toolbar-center {
+    order: 3;
+    width: 100%;
+    margin-top: 5px;
+    justify-content: space-between;
+  }
+  
+  .action-button {
+    min-width: 50px;
+    padding: 5px 10px;
+    font-size: 13px;
+  }
+  
+  .find-input {
+    min-width: 80px;
+  }
+  
+  /* Status bar adjustments for smaller screens */
+  #statistics {
+    min-width: 180px; /* Ensure we have enough room for character/word counts */
+  }
+  
+  .current-file-display {
+    max-width: calc(100% - 380px);
+  }
+}
+
+/* Specific fix for extra small screens */
+@media (max-width: 600px) {
+  .toolbar-center {
+    justify-content: flex-start;
+    overflow-x: auto;
+  }
+  
+  .find-container {
+    max-width: 200px;
+  }
+  
+  .find-input {
+    max-width: 100px;
+  }
+  
+  /* Adjust status bar for very small screens */
+  .status-bar {
+    flex-wrap: nowrap;
+    overflow-x: hidden;
+  }
+  
+  #position {
+    min-width: 90px;
+    max-width: 120px;
+  }
+  
+  #statistics {
+    min-width: 160px;
+    max-width: 180px;
+  }
+  
+  .current-file-display {
+    max-width: calc(100% - 300px);
+    margin: 0 5px;
+  }
 }
