@@ -27,9 +27,18 @@ class ClaudeAPIService {
       betas: config.betas,
       max_thinking_budget: config.max_thinking_budget
     };
-    
+
+    const apiKey = process.env.ANTHROPIC_API_KEY;
+    if (!apiKey) {
+      console.error('ANTHROPIC_API_KEY environment variable not found');
+      throw new Error(
+        "Claude API key not found. Please set the ANTHROPIC_API_KEY environment variable."
+      );
+    }
+
     // Create Claude API client
     this.client = new anthropic.Anthropic({
+      apiKey: apiKey,
       timeout: this.config.request_timeout * 1000, // convert seconds to ms
       maxRetries: this.config.max_retries,
     });

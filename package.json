@@ -1,6 +1,6 @@
 {
   "name": "writers-toolkit",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "A toolkit for writers with AI assistance and a text editor",
   "main": "main.js",
   "scripts": {
@@ -9,7 +9,7 @@
     "build": "electron-builder",
     "tokens-counter": "node tools/tokens_words_counter.js"
   },
-  "author": "",
+  "author": "Chris Smith",
   "license": "ISC",
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
@@ -24,7 +24,7 @@
     "electron-builder": "^24.6.3"
   },
   "build": {
-    "appId": "com.yourdomain.writerstoolkit",
+    "appId": "com.slipthetrap.writerstoolkit",
     "productName": "Writer's Toolkit",
     "files": [
       "**/*",
@@ -41,14 +41,28 @@
     "directories": {
       "buildResources": "resources"
     },
-    "win": {
-      "target": "nsis"
-    },
+    "asar": false,
     "mac": {
-      "target": "dmg"
+      "target": "dmg",
+      "artifactName": "${productName}-${version}-mac.${ext}"
     },
-    "linux": {
-      "target": "AppImage"
+    "dmg": {
+      "contents": [
+        {
+          "x": 130,
+          "y": 220
+        },
+        {
+          "x": 410,
+          "y": 220,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ],
+      "window": {
+        "width": 540,
+        "height": 380
+      }
     }
   }
 }
