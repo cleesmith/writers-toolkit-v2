@@ -1,27 +1,150 @@
 // src/tool-system.js
 const path = require('path');
+const { app } = require('electron');
 const ClaudeAPIService = require('./claude-api/client');
 
 const toolRegistry = require('./tools/registry');
 
-const TokensWordsCounter = require('./tools/tokens-words-counter');
-const ManuscriptToOutlineCharactersWorld = require('./tools/manuscript-to-outline-characters-world');
-const NarrativeIntegrity = require('./tools/narrative-integrity');
-const BrainstormTool = require('./tools/brainstorm');
-const OutlineWriter = require('./tools/outline-writer');
-const WorldWriter = require('./tools/world-writer');
-const ChapterWriter = require('./tools/chapter-writer');
-const CharacterAnalyzer = require('./tools/character-analyzer');
-const TenseConsistencyChecker = require('./tools/tense-consistency-checker');
-const AdjectiveAdverbOptimizer = require('./tools/adjective-adverb-optimizer');
-const DanglingModifierChecker = require('./tools/dangling-modifier-checker');
-const RhythmAnalyzer = require('./tools/rhythm-analyzer');
-const CrowdingLeapingEvaluator = require('./tools/crowding-leaping-evaluator');
-const PunctuationAuditor = require('./tools/punctuation-auditor');
-const ConflictAnalyzer = require('./tools/conflict-analyzer');
-const ForeshadowingTracker = require('./tools/foreshadowing-tracker');
-const PlotThreadTracker = require('./tools/plot-thread-tracker');
-const KDPPublishingPrep = require('./tools/kdp-publishing-prep');
+function requireTool(toolName) {
+  try {
+    // Get all possible paths for this tool
+    const possiblePaths = getAbsoluteToolPath(toolName);
+    
+    // Try each path until one works
+    let loadError = null;
+    
+    for (const toolPath of possiblePaths) {
+      try {
+        console.log(`Attempting to require tool from: ${toolPath}`);
+        const Tool = require(toolPath);
+        console.log(`Successfully loaded tool from: ${toolPath}`);
+        return Tool;
+      } catch (error) {
+        console.log(`Failed to load from ${toolPath}: ${error.message}`);
+        loadError = error; // Save the last error
+      }
+    }
+    
+    // If we get here, none of the paths worked
+    throw loadError || new Error(`Could not load tool ${toolName} from any path`);
+  } catch (error) {
+    console.error(`All attempts to load tool ${toolName} failed:`, error);
+    throw error;
+  }
+}
+
+// Dynamically load all tools
+let TokensWordsCounter, ManuscriptToOutlineCharactersWorld, NarrativeIntegrity,
+    BrainstormTool, OutlineWriter, WorldWriter, ChapterWriter, CharacterAnalyzer,
+    TenseConsistencyChecker, AdjectiveAdverbOptimizer, DanglingModifierChecker,
+    RhythmAnalyzer, CrowdingLeapingEvaluator, PunctuationAuditor,
+    ConflictAnalyzer, ForeshadowingTracker, PlotThreadTracker, KDPPublishingPrep;
+
+try {
+  TokensWordsCounter = requireTool('tokens-words-counter');
+  ManuscriptToOutlineCharactersWorld = requireTool('manuscript-to-outline-characters-world');
+  NarrativeIntegrity = requireTool('narrative-integrity');
+  BrainstormTool = requireTool('brainstorm');
+  OutlineWriter = requireTool('outline-writer');
+  WorldWriter = requireTool('world-writer');
+  ChapterWriter = requireTool('chapter-writer');
+  CharacterAnalyzer = requireTool('character-analyzer');
+  TenseConsistencyChecker = requireTool('tense-consistency-checker');
+  AdjectiveAdverbOptimizer = requireTool('adjective-adverb-optimizer');
+  DanglingModifierChecker = requireTool('dangling-modifier-checker');
+  RhythmAnalyzer = requireTool('rhythm-analyzer');
+  CrowdingLeapingEvaluator = requireTool('crowding-leaping-evaluator');
+  PunctuationAuditor = requireTool('punctuation-auditor');
+  ConflictAnalyzer = requireTool('conflict-analyzer');
+  ForeshadowingTracker = requireTool('foreshadowing-tracker');
+  PlotThreadTracker = requireTool('plot-thread-tracker');
+  KDPPublishingPrep = requireTool('kdp-publishing-prep');
+} catch (error) {
+  console.error('Error loading tools:', error);
+}
+
+// const TokensWordsCounter = require('./tools/tokens-words-counter');
+// const ManuscriptToOutlineCharactersWorld = require('./tools/manuscript-to-outline-characters-world');
+// const NarrativeIntegrity = require('./tools/narrative-integrity');
+// const BrainstormTool = require('./tools/brainstorm');
+// const OutlineWriter = require('./tools/outline-writer');
+// const WorldWriter = require('./tools/world-writer');
+// const ChapterWriter = require('./tools/chapter-writer');
+// const CharacterAnalyzer = require('./tools/character-analyzer');
+// const TenseConsistencyChecker = require('./tools/tense-consistency-checker');
+// const AdjectiveAdverbOptimizer = require('./tools/adjective-adverb-optimizer');
+// const DanglingModifierChecker = require('./tools/dangling-modifier-checker');
+// const RhythmAnalyzer = require('./tools/rhythm-analyzer');
+// const CrowdingLeapingEvaluator = require('./tools/crowding-leaping-evaluator');
+// const PunctuationAuditor = require('./tools/punctuation-auditor');
+// const ConflictAnalyzer = require('./tools/conflict-analyzer');
+// const ForeshadowingTracker = require('./tools/foreshadowing-tracker');
+// const PlotThreadTracker = require('./tools/plot-thread-tracker');
+// const KDPPublishingPrep = require('./tools/kdp-publishing-prep');
+
+function getAbsoluteToolPath(toolName) {
+  const { app } = require('electron');
+  const path = require('path');
+  
+  // Get app's base directory (always works regardless of launch method)
+  const appDir = path.dirname(app.getAppPath());
+  
+  // Build possible paths
+  const possiblePaths = [
+    // First try the path inside app.asar
+    path.join(app.getAppPath(), 'src', 'tools', `${toolName}.js`),
+    // Then try the path inside app.asar.unpacked if it exists
+    path.join(app.getAppPath().replace('.asar', '.asar.unpacked'), 'src', 'tools', `${toolName}.js`),
+    // Try with hyphens instead of underscores
+    path.join(app.getAppPath(), 'src', 'tools', `${toolName.replace(/_/g, '-')}.js`),
+    path.join(app.getAppPath().replace('.asar', '.asar.unpacked'), 'src', 'tools', `${toolName.replace(/_/g, '-')}.js`)
+  ];
+  
+  // Log paths for debugging
+  console.log(`Possible paths for tool ${toolName}:`);
+  possiblePaths.forEach(p => console.log(` - ${p}`));
+  
+  // Return all possible paths to try
+  return possiblePaths;
+}
+
+function getToolPath(toolName) {
+  try {
+    // Get the app path
+    const appPath = app.getAppPath();
+    console.log(`App path: ${appPath}`);
+    
+    // Check if running from asar archive
+    if (appPath.includes('.asar')) {
+      // For unpacked files, we need to use .asar.unpacked path
+      const unpackedPath = appPath.replace('.asar', '.asar.unpacked');
+      const toolUnpackedPath = path.join(unpackedPath, 'src', 'tools', `${toolName}.js`);
+      
+      const fs = require('fs');
+      if (fs.existsSync(toolUnpackedPath)) {
+        console.log(`Found tool at: ${toolUnpackedPath}`);
+        return toolUnpackedPath;
+      }
+      
+      // Try with hyphens instead of underscores (tokens-words-counter vs tokens_words_counter)
+      const hyphenatedName = toolName.replace(/_/g, '-');
+      const hyphenatedPath = path.join(unpackedPath, 'src', 'tools', `${hyphenatedName}.js`);
+      
+      if (fs.existsSync(hyphenatedPath)) {
+        console.log(`Found tool with hyphenated name at: ${hyphenatedPath}`);
+        return hyphenatedPath;
+      }
+      
+      console.warn(`Tool not found at unpacked path: ${toolUnpackedPath}`);
+    }
+    
+    // Development fallback
+    return `./tools/${toolName}`;
+  } catch (error) {
+    console.error(`Error resolving path for tool ${toolName}:`, error);
+    return `./tools/${toolName}`;
+  }
+}
 
 /**
  * Initialize the tool system

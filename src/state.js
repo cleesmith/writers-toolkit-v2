@@ -46,9 +46,11 @@ class AppState {
     
     try {
       if (!Store) {
-        // Dynamically import electron-store
-        const storeModule = await import('electron-store');
-        Store = storeModule.default;
+        // // Dynamically import electron-store
+        // const storeModule = await import('electron-store');
+        // Store = storeModule.default;
+        // CommonJS
+        Store = require('electron-store');
       }
       
       // Initialize persistent storage

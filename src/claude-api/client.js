@@ -60,12 +60,13 @@ class ClaudeAPIService {
       .filter(beta => beta.length > 0);
   }
 
-  /**
-   * Validates that all required configuration values are present
-   * @param {Object} config - API configuration
-   * @throws {Error} If any required settings are missing
-   */
   validateConfig(config) {
+    // Check if config exists at all
+    if (!config || Object.keys(config).length === 0) {
+      throw new Error("No Claude API configuration provided. Please check database settings.");
+    }
+    
+    // List required settings
     const requiredSettings = [
       'max_retries',
       'request_timeout',
@@ -78,10 +79,11 @@ class ClaudeAPIService {
       'max_thinking_budget'
     ];
     
+    // Log warnings but don't crash
     const missingSettings = requiredSettings.filter(setting => config[setting] === undefined);
-    
     if (missingSettings.length > 0) {
-      throw new Error(`Missing required Claude API settings: ${missingSettings.join(', ')}. Check API Settings configuration.`);
+      console.warn(`Warning: Some Claude API settings missing: ${missingSettings.join(', ')}`);
+      console.warn("Please update API settings from the application.");
     }
   }
   

@@ -15,14 +15,16 @@ class Database {
     if (!this.isInitialized) {
       // If not already imported, do a dynamic import of electron-store.
       if (!Store) {
-        // Dynamic import returns a module namespace, so we need to reference .default
-        const storeModule = await import('electron-store');
-        Store = storeModule.default;
+        // // Dynamic import returns a module namespace, so we need to reference .default
+        // const storeModule = await import('electron-store');
+        // Store = storeModule.default;
+        // CommonJS
+        Store = require('electron-store');
       }
 
       this.store = new Store({
         name: 'writers-toolkit-db',
-        cwd: path.join(__dirname, '..'),
+        // cwd: path.join(__dirname, '..'),
         defaults: {
           tools: {},
           settings: {
@@ -205,21 +207,27 @@ class Database {
       throw new Error('Store not initialized. Call init() first.');
     }
     
-    // Get current project
-    const currentProject = this.store.get('settings.projects.current', null);
-    const projectPaths = this.store.get('settings.projects.paths', {});
-    const currentProjectPath = currentProject ? (projectPaths[currentProject] || null) : null;
-    
-    if (currentProject && currentProjectPath) {
-      // Reset paths to contain only the current project
-      const newPaths = {};
-      newPaths[currentProject] = currentProjectPath;
-      this.store.set('settings.projects.paths', newPaths);
-      console.log('Project history cleaned successfully');
-      return true;
+    try {
+      // Get current project
+      const currentProject = this.store.get('settings.projects.current', null);
+      const projectPaths = this.store.get('settings.projects.paths', {});
+      const currentProjectPath = currentProject ? (projectPaths[currentProject] || null) : null;
+      
+      if (currentProject && currentProjectPath) {
+        // Reset paths to contain only the current project
+        const newPaths = {};
+        newPaths[currentProject] = currentProjectPath;
+        this.store.set('settings.projects.paths', newPaths);
+        console.log('Project history cleaned successfully');
+        return true;
+      }
+      
+      return false;
+    } catch (error) {
+      console.error('Error cleaning project history:', error);
+      // Don't crash the app if this fails
+      return false;
     }
-    
-    return false;
   }
 
   // Get Claude API settings

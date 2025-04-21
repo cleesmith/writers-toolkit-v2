@@ -1,5 +1,5 @@
 // main.js - Writer's Toolkit main process
-const { spawn } = require('child_process');
+// const { spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
@@ -8,6 +8,23 @@ const { v4: uuidv4 } = require('uuid');
 const appState = require('./src/state.js');
 const database = require('./src/database.js');
 const toolSystem = require('./src/tool-system');
+
+// Set fixed working directory regardless of launch method
+app.whenReady().then(() => {
+  try {
+    // Get the Resources directory path
+    const resourcesPath = path.join(path.dirname(app.getPath('exe')), '..', 'Resources');
+    console.log(`Setting working directory to: ${resourcesPath}`);
+    process.chdir(resourcesPath);
+    console.log(`New working directory: ${process.cwd()}`);
+    
+    // Create global path to unpacked tools
+    global.TOOLS_DIR = path.join(app.getAppPath(), '..', 'app.asar.unpacked', 'src', 'tools');
+    console.log(`Tools directory: ${global.TOOLS_DIR}`);
+  } catch (error) {
+    console.error('Error setting working directory:', error);
+  }
+});
 
 // Store references to windows
 let mainWindow = null;
@@ -77,6 +94,17 @@ const menuTemplate = [
 // Set the application menu
 const menu = Menu.buildFromTemplate(menuTemplate);
 Menu.setApplicationMenu(menu);
+
+// Add global shortcut for DevTools
+app.whenReady().then(() => {
+  const { globalShortcut } = require('electron');
+  globalShortcut.register('CommandOrControl+Shift+I', () => {
+    const focusedWindow = BrowserWindow.getFocusedWindow();
+    if (focusedWindow) {
+      focusedWindow.webContents.openDevTools();
+    }
+  });
+});
 
 // Function to create project selection dialog
 function createProjectDialog() {
@@ -1146,9 +1174,76 @@ function setupIPCHandlers() {
   });
 }
 
+async function validateCriticalResources() {
+  try {
+    // Get the database location
+    const userDataPath = app.getPath('userData');
+    const dbPath = path.join(userDataPath, 'writers-toolkit-db.json');
+    
+    console.log(`Checking for database at: ${dbPath}`);
+    
+    // Check if database exists
+    if (!fs.existsSync(dbPath)) {
+      await dialog.showMessageBox({
+        type: 'error',
+        title: 'Critical Error',
+        message: 'Application database not found',
+        detail: `The database file is missing: ${dbPath}\n\nThe application cannot continue without this file.`,
+        buttons: ['Exit']
+      });
+      
+      app.exit(1);
+      return false;
+    }
+    
+    // Try to read the database to verify its contents
+    try {
+      const dbContent = JSON.parse(fs.readFileSync(dbPath, 'utf8'));
+      console.log('Database loaded, checking for tools...');
+      
+      if (!dbContent.tools || Object.keys(dbContent.tools).length === 0) {
+        console.error('No tools found in database');
+        await dialog.showMessageBox({
+          type: 'error',
+          title: 'Critical Error',
+          message: 'No tools found in database',
+          detail: 'The application requires tool definitions in the database to function.',
+          buttons: ['Exit']
+        });
+        
+        app.exit(1);
+        return false;
+      }
+      
+      console.log(`Found ${Object.keys(dbContent.tools).length} tools in database`);
+    } catch (error) {
+      console.error('Error reading database:', error);
+      await dialog.showMessageBox({
+        type: 'error',
+        title: 'Critical Error',
+        message: 'Database is corrupted',
+        detail: `Error reading database: ${error.message}`,
+        buttons: ['Exit']
+      });
+      
+      app.exit(1);
+      return false;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Error in validateCriticalResources:', error);
+    return false;
+  }
+}
+
 // Initialize the app state and then create the window
 async function main() {
   try {
+    // Validate critical resources first
+    const resourcesValid = await validateCriticalResources();
+    if (!resourcesValid) return; // Exit if validation failed
+
     // Initialize AppState before using it
     await appState.initialize();
     
@@ -1159,10 +1254,25 @@ async function main() {
     await database.cleanProjectHistory();
     
     // Initialize tool system with Claude API settings
-    await toolSystem.initializeToolSystem(
-      database.getClaudeApiSettings(),
-      database
-    );
+    // await toolSystem.initializeToolSystem(
+    //   database.getClaudeApiSettings(),
+    //   database
+    // );
+    // Initialize tool system with Claude API settings
+    try {
+      await toolSystem.initializeToolSystem(
+        database.getClaudeApiSettings(),
+        database
+      );
+    } catch (toolError) {
+      console.error('Warning: Tool system initialization failed:', toolError.message);
+      // Show error to user but don't crash the app
+      dialog.showErrorBox(
+        'API Configuration Warning', 
+        'Some Claude API settings may be missing. You can update them in Edit → API Settings.'
+      );
+      // Continue without crashing
+    }
     
     // Set up IPC handlers
     setupIPCHandlers();

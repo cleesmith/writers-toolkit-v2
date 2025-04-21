@@ -1272,11 +1272,11 @@
 			"max_thinking_budget": 32000
 		},
 		"projects": {
-			"current": "Tsu_Liz",
+			"current": "Liz",
 			"paths": {
-				"Tsu_Liz": "/Users/cleesmith/writing/Tsu_Liz"
+				"Liz": "/Users/cleesmith/writing/Liz"
 			}
 		},
-		"default_save_dir": "/Users/cleesmith/writing/Tsu_Liz"
+		"default_save_dir": "/Users/cleesmith/writing/Liz"
 	}
 }
