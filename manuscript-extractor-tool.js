@@ -1,8 +1,8 @@
-// src/tools/manuscript-extractor.js
+// manuscript-extractor.js
 const BaseTool = require('./base-tool');
 const path = require('path');
-const fileCache = require('../cache/file-cache');
-const appState = require('../../src/state.js');
+const fileCache = require('./file-cache');
+const appState = require('./state.js');
 const fs = require('fs/promises');
 
 /**

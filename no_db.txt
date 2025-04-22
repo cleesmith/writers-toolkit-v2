@@ -1,0 +1,127 @@
+Writer’s Toolkit — Option C
+
+Eliminate the external JSON database; keep only a tiny Electron‑Store for user settings.
+
+1  Delete the database layer
+
+| File                           | Action                 |
+|--------------------------------|------------------------|
+| database.js (root)             | Delete this file.      |
+| Every require('./database.js') | Remove or comment out. |
+
+2  tool‑system.js → static registry
+
+2.1  Replace dynamic loader with plain require() calls
+
+// tool-system.js  (top of file)
+const TokensWordsCounter                 = require('./tokens-words-counter');
+const ManuscriptToOutlineCharactersWorld = require('./manuscript-to-outline-characters-world');
+const NarrativeIntegrity                 = require('./narrative-integrity');
+const BrainstormTool                     = require('./brainstorm');
+const OutlineWriter                      = require('./outline-writer');
+const WorldWriter                        = require('./world-writer');
+const ChapterWriter                      = require('./chapter-writer');
+const CharacterAnalyzer                  = require('./character-analyzer');
+const TenseConsistencyChecker            = require('./tense-consistency-checker');
+const AdjectiveAdverbOptimizer           = require('./adjective-adverb-optimizer');
+const DanglingModifierChecker            = require('./dangling-modifier-checker');
+const RhythmAnalyzer                     = require('./rhythm-analyzer');
+const CrowdingLeapingEvaluator           = require('./crowding-leaping-evaluator');
+const PunctuationAuditor                 = require('./punctuation-auditor');
+const ConflictAnalyzer                   = require('./conflict-analyzer');
+const ForeshadowingTracker               = require('./foreshadowing-tracker');
+const PlotThreadTracker                  = require('./plot-thread-tracker');
+const KDPPublishingPrep                  = require('./kdp-publishing-prep');
+
+2.2  Describe every tool once
+
+const TOOL_DEFS = [
+  { id: 'tokenswordscounter',                   title: 'Tokens & Words Counter', Class: TokensWordsCounter, options: [] },
+  { id: 'manuscripttooutlinecharactersworld', title: 'Manuscript → Outline/Characters/World', Class: ManuscriptToOutlineCharactersWorld, options: [] },
+  { id: 'narrative_integrity',                    title: 'Narrative Integrity',        Class: NarrativeIntegrity, options: [] },
+  // …add the rest…
+];
+
+2.3  Rewrite initializeToolSystem
+
+async function initializeToolSystem(settings) {
+  console.log('Initializing tool system (no external DB)…');
+  const ClaudeAPIService = require('./client');
+  const claudeService = new ClaudeAPIService(settings);
+
+  TOOL_DEFS.forEach(def => {
+    const instance = new def.Class(claudeService, {
+      title: def.title,
+      description: def.title,
+      options: def.options,
+      ...settings
+    });
+    toolRegistry.registerTool(def.id, instance);
+  });
+
+  console.log('Registered', toolRegistry.getAllToolIds().length, 'built‑in tools');
+  return { claudeService, toolRegistry };
+}
+
+Leave executeToolById and reinitializeClaudeService as they are.
+
+3  main.js cleanup
+
+Remove const database = require('./database.js');
+Delete any call to database.* or validateCriticalResources().
+Initialise tool system with code only:
+
+await toolSystem.initializeToolSystem(appState.settingsclaudeapiconfiguration);
+
+Inside IPC handlers that once used the DB, keep the appState.store updates and drop the database writes.
+
+4  IPC handler edits
+
+get-tools
+
+ipcMain.handle('get-tools', () => {
+  return toolSystem.toolRegistry.getAllToolIds().map(id => {
+    const t = toolSystem.toolRegistry.getTool(id);
+    return { name: id, title: t.config.title, description: t.config.description };
+  });
+});
+
+get-tool-options
+ipcMain.handle('get-tool-options', (e, toolName) => {
+  const t = toolSystem.toolRegistry.getTool(toolName);
+  return t ? (t.config.options || []) : [];
+});
+
+Remove any remaining database.* references.
+
+5  appState.store persists user data
+
+Claude API settings (model, context window, etc.) via the existing API Settings dialog.
+currentproject, currentprojectpath, defaultsave_dir.
+Optional last‑used options per tool.
+
+appState.store writes to:
+~/Library/Application Support/WritersToolkit/writers-toolkit-config.json
+
+Only ANTHROPICAPIKEY is taken from the user’s environment; all other settings live in this store.
+
+6  Remove writers‑toolkit-db.json from your repo and build list
+
+Delete the file and any entry in package.json → build.files that included it.
+
+7  Rebuild & verify
+bash
+rm -rf out make dist
+npm run make
+
+Install DMG or unzip → launch → open DevTools.
+You should see:
+ToolRegistry initialized
+Registered 18 built‑in tools
+
+Run Tokens & Words Counter → tool completes without “Tool not found”.
+
+Adding a new tool later
+Copy my-tool.js to project root.
+Add one entry to TOOL_DEFS with id, title, Class.
+Re‑make.  No migrations needed.

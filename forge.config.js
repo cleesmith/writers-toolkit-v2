@@ -9,26 +9,9 @@ module.exports = {
     icon: './resources/icon',
     osxSign: false, // Explicitly disable signing
     osxNotarize: false, // Explicitly disable notarization
-    // Include all src directories as extra resources
-    extraResources: [
-      './src/cache',
-      './src/claude-api',
-      './src/tools',
-      './src/utils'
-    ]
   },
-  asarUnpack: [
-    'src/**'
-  ],
   rebuildConfig: {},
   makers: [
-    {
-      name: '@electron-forge/maker-squirrel',
-      config: {
-        // Windows specific settings
-        setupIcon: './resources/icon.ico',
-      },
-    },
     {
       name: '@electron-forge/maker-zip',
       platforms: ['darwin'],
@@ -37,15 +20,6 @@ module.exports = {
       name: '@electron-forge/maker-dmg',
       icon: './resources/WritersToolkit.icns',
     },
-    // Comment out these Linux makers since you're focusing on Mac/Windows
-    // {
-    //   name: '@electron-forge/maker-deb',
-    //   config: {},
-    // },
-    // {
-    //   name: '@electron-forge/maker-rpm',
-    //   config: {},
-    // },
   ],
   plugins: [
     {

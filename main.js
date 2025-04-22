@@ -1,13 +1,13 @@
 // main.js - Writer's Toolkit main process
-// const { spawn } = require('child_process');
+const { spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
 const { app, BrowserWindow, Menu, ipcMain, dialog, screen } = require('electron');
 const { v4: uuidv4 } = require('uuid');
-const appState = require('./src/state.js');
-const database = require('./src/database.js');
-const toolSystem = require('./src/tool-system');
+const appState = require('./state.js');
+// const database = require('./database.js');
+const toolSystem = require('./tool-system');
 
 // Set fixed working directory regardless of launch method
 app.whenReady().then(() => {
@@ -253,20 +253,15 @@ function setupProjectHandlers() {
       // await database.updateGlobalSettings({
       //   current_project: projectName,
       //   current_project_path: projectPath,
-      //   default_save_dir: projectPath
+      //   default_save_dir: projectPath,
+      //   // Add this to only store the current project in paths
+      //   projects: {
+      //     current: projectName,
+      //     paths: {
+      //       [projectName]: projectPath  // This syntax creates an object with just the current project
+      //     }
+      //   }
       // });
-      await database.updateGlobalSettings({
-        current_project: projectName,
-        current_project_path: projectPath,
-        default_save_dir: projectPath,
-        // Add this to only store the current project in paths
-        projects: {
-          current: projectName,
-          paths: {
-            [projectName]: projectPath  // This syntax creates an object with just the current project
-          }
-        }
-      });
       
       return {
         success: true,
@@ -317,18 +312,18 @@ function setupProjectHandlers() {
       //   current_project_path: projectPath,
       //   default_save_dir: projectPath
       // });
-      await database.updateGlobalSettings({
-        current_project: projectName,
-        current_project_path: projectPath,
-        default_save_dir: projectPath,
-        // Add this to only store the current project in paths
-        projects: {
-          current: projectName,
-          paths: {
-            [projectName]: projectPath  // This overwrites the entire paths object
-          }
-        }
-      });      
+      // await database.updateGlobalSettings({
+      //   current_project: projectName,
+      //   current_project_path: projectPath,
+      //   default_save_dir: projectPath,
+      //   // Add this to only store the current project in paths
+      //   projects: {
+      //     current: projectName,
+      //     paths: {
+      //       [projectName]: projectPath  // This overwrites the entire paths object
+      //     }
+      //   }
+      // });      
 
       return {
         success: true,
@@ -439,48 +434,58 @@ function launchEditor() {
 // Setup handlers for tool operations
 function setupToolHandlers() {
   // Get list of tools
-  ipcMain.handle('get-tools', async () => {
-    try {
-      // Get registered tools from tool system
-      const registeredTools = toolSystem.toolRegistry.getAllToolIds().map(id => {
-        const tool = toolSystem.toolRegistry.getTool(id);
-        return {
-          name: id,
-          title: tool.config.title || id,
-          description: tool.config.description || ''
-        };
-      });
+  // ipcMain.handle('get-tools', async () => {
+  //   try {
+  //     // Get registered tools from tool system
+  //     const registeredTools = toolSystem.toolRegistry.getAllToolIds().map(id => {
+  //       const tool = toolSystem.toolRegistry.getTool(id);
+  //       return {
+  //         name: id,
+  //         title: tool.config.title || id,
+  //         description: tool.config.description || ''
+  //       };
+  //     });
       
-      // console.log('Registered tools:', registeredTools);
+  //     // console.log('Registered tools:', registeredTools);
       
-      // If no tools are registered yet, fallback to database
-      if (registeredTools.length === 0) {
-        return database.getTools();
-      }
+  //     // If no tools are registered yet, fallback to database
+  //     // if (registeredTools.length === 0) {
+  //     //   return database.getTools();
+  //     // }
       
-      return registeredTools;
-    } catch (error) {
-      console.error('Error getting tools:', error);
-      return database.getTools(); // Fallback to database
-    }
+  //     return registeredTools;
+  //   } catch (error) {
+  //     console.error('Error getting tools:', error);
+  //     // return database.getTools(); // Fallback to database
+  //   }
+  // });
+  ipcMain.handle('get-tools', () => {
+    return toolSystem.toolRegistry.getAllToolIds().map(id => {
+      const t = toolSystem.toolRegistry.getTool(id);
+      return { name: id, title: t.config.title, description: t.config.description };
+    });
   });
 
   // Get tool options
-  ipcMain.handle('get-tool-options', async (event, toolName) => {
-    try {
-      // Try to get options from registered tool
-      const tool = toolSystem.toolRegistry.getTool(toolName);
-      if (tool && tool.config.options) {
-        return tool.config.options;
-      }
+  // ipcMain.handle('get-tool-options', async (event, toolName) => {
+  //   try {
+  //     // Try to get options from registered tool
+  //     const tool = toolSystem.toolRegistry.getTool(toolName);
+  //     if (tool && tool.config.options) {
+  //       return tool.config.options;
+  //     }
       
-      // Fallback to database
-      const toolConfig = database.getToolByName(toolName);
-      return toolConfig ? toolConfig.options || [] : [];
-    } catch (error) {
-      console.error('Error getting tool options:', error);
-      return [];
-    }
+  //     // Fallback to database
+  //     // const toolConfig = database.getToolByName(toolName);
+  //     return toolConfig ? toolConfig.options || [] : [];
+  //   } catch (error) {
+  //     console.error('Error getting tool options:', error);
+  //     return [];
+  //   }
+  // });
+  ipcMain.handle('get-tool-options', (e, toolName) => {
+    const t = toolSystem.toolRegistry.getTool(toolName);
+    return t ? (t.config.options || []) : [];
   });
   
   // Show tool setup dialog
@@ -511,14 +516,14 @@ function setupToolHandlers() {
         }
         
         // Fallback to database
-        const toolConfig = database.getToolByName(currentTool);
-        if (toolConfig) {
-          return {
-            name: currentTool,
-            title: toolConfig.title || currentTool,
-            description: toolConfig.description || ''
-          };
-        }
+        // const toolConfig = database.getToolByName(currentTool);
+        // if (toolConfig) {
+        //   return {
+        //     name: currentTool,
+        //     title: toolConfig.title || currentTool,
+        //     description: toolConfig.description || ''
+        //   };
+        // }
       }
       return null;
     } catch (error) {
@@ -563,7 +568,7 @@ function setupToolHandlers() {
           const result = await toolSystem.executeToolById(toolName, optionValues, runId);
           
           // Get files from cache
-          const fileCache = require('./src/cache/file-cache');
+          const fileCache = require('./file-cache');
           const cachedFiles = fileCache.getFiles(toolName);
           
           // Combine cached files with any files returned by the tool
@@ -676,120 +681,186 @@ function showApiSettingsDialog() {
 }
 
 // Set up API settings handlers
+// function setupApiSettingsHandlers() {
+//   // Get Claude API settings
+//   ipcMain.handle('get-claude-api-settings', async () => {
+//     try {
+//       // Return the schema and current values
+//       return {
+//         schema: database.getClaudeApiSettingsSchema(),
+//         values: database.getClaudeApiSettings()
+//       };
+//     } catch (error) {
+//       console.error('Error getting Claude API settings:', error);
+//       return {
+//         success: false,
+//         message: error.message
+//       };
+//     }
+//   });
+//   ipcMain.handle('save-claude-api-settings', async (event, settings) => {
+//     try {
+//       console.log('Saving Claude API settings:', settings);
+      
+//       // Update app state with new settings
+//       appState.settings_claude_api_configuration = {
+//         ...appState.settings_claude_api_configuration,
+//         ...settings
+//       };
+      
+//       // Save to database
+//       // await database.updateGlobalSettings({
+//       //   claude_api_configuration: appState.settings_claude_api_configuration
+//       // });
+      
+//       // Reinitialize the Claude service with new settings
+//       const claudeService = toolSystem.reinitializeClaudeService(appState.settings_claude_api_configuration);
+      
+//       // Force each tool to update its internal config copy
+//       const toolIds = toolSystem.toolRegistry.getAllToolIds();
+//       for (const toolId of toolIds) {
+//         const tool = toolSystem.toolRegistry.getTool(toolId);
+//         // Update the tool's config with the new settings
+//         tool.config = {
+//           ...tool.config,
+//           ...appState.settings_claude_api_configuration
+//         };
+//       }
+      
+//       // Show a confirmation message to the user
+//       if (apiSettingsWindow && !apiSettingsWindow.isDestroyed()) {
+//         apiSettingsWindow.webContents.send('settings-saved-notification', {
+//           message: 'Settings updated and applied to all tools',
+//           requiresRestart: false
+//         });
+//       }
+      
+//       // Notify main window that settings were updated
+//       if (mainWindow && !mainWindow.isDestroyed()) {
+//         mainWindow.webContents.send('api-settings-updated', appState.settings_claude_api_configuration);
+//       }
+      
+//       console.log('Claude API settings saved and applied successfully');
+      
+//       return {
+//         success: true
+//       };
+//     } catch (error) {
+//       console.error('Error saving Claude API settings:', error);
+//       return {
+//         success: false,
+//         message: error.message
+//       };
+//     }
+//   });
+  //   // Handle API settings dialog closing
+//   // ipcMain.on('close-api-settings-dialog', (event, action, data) => {
+//   //   if (apiSettingsWindow && !apiSettingsWindow.isDestroyed()) {
+//   //     apiSettingsWindow.hide();
+      
+//   //     // If settings were saved, could notify the main window if needed
+//   //     if (action === 'saved' && mainWindow && !mainWindow.isDestroyed()) {
+//   //       mainWindow.webContents.send('api-settings-updated', data);
+//   //     }
+//   //   }
+//   // });
+// }
+// -----------------------------------------------------------------------------
+// Set up API settings handlers – database‑free
+// -----------------------------------------------------------------------------
 function setupApiSettingsHandlers() {
-  // Get Claude API settings
+  // Local copy of the schema that used to live in database.getClaudeApiSettingsSchema()
+  // (kept here so the renderer can still build the form).
+  const CLAUDE_API_SCHEMA = [
+    { name: 'max_retries',            label: 'Max Retries',                       type: 'number', default: 1,       required: true,  description: 'Maximum retry attempts if an API call fails.' },
+    { name: 'request_timeout',        label: 'Request Timeout (seconds)',         type: 'number', default: 300,     required: true,  description: 'Seconds to wait for the API to respond.' },
+    { name: 'desired_output_tokens',  label: 'Desired Output Tokens',             type: 'number', default: 12000,   required: true,  description: 'Approximate size of the visible reply.' },
+    { name: 'context_window',         label: 'Context Window (tokens)',           type: 'number', default: 200000,  required: true,  description: 'Maximum tokens the model can see at once.' },
+    { name: 'thinking_budget_tokens', label: 'Thinking Budget (tokens)',          type: 'number', default: 32000,   required: true,  description: 'Private “thinking” tokens before the reply.' },
+    { name: 'betas_max_tokens',       label: 'Beta Max Tokens',                   type: 'number', default: 128000,  required: true,  description: 'Upper limit when enabling beta features.' },
+    { name: 'model_name',             label: 'Model Name',                        type: 'text',   default: 'claude-3-7-sonnet-20250219', required: true, description: 'Exact model identifier.' },
+    { name: 'betas',                  label: 'Beta Features (comma‑separated)',   type: 'text',   default: 'output-128k-2025-02-19',     required: true, description: 'List of beta flags.' },
+    { name: 'max_thinking_budget',    label: 'Max Thinking Budget (tokens)',      type: 'number', default: 32000,   required: true,  description: 'Absolute cap for thinking tokens.' }
+  ];
+
+  // -------------------------------------------------------------------------
+  // Handlers
+  // -------------------------------------------------------------------------
   ipcMain.handle('get-claude-api-settings', async () => {
     try {
-      // Return the schema and current values
       return {
-        schema: database.getClaudeApiSettingsSchema(),
-        values: database.getClaudeApiSettings()
+        schema: CLAUDE_API_SCHEMA,
+        values: appState.settings_claude_api_configuration   // already in memory
       };
     } catch (error) {
       console.error('Error getting Claude API settings:', error);
-      return {
-        success: false,
-        message: error.message
-      };
+      return { success: false, message: error.message };
     }
   });
-  
-  // Save Claude API settings
-  // ipcMain.handle('save-claude-api-settings', async (event, settings) => {
-  //   try {
-  //     // Update app state with new settings
-  //     appState.settings_claude_api_configuration = {
-  //       ...appState.settings_claude_api_configuration,
-  //       ...settings
-  //     };
-      
-  //     // Save to database
-  //     await database.updateGlobalSettings({
-  //       claude_api_configuration: appState.settings_claude_api_configuration
-  //     });
-      
-  //     // Reinitialize the Claude service with new settings
-  //     const claudeService = toolSystem.reinitializeClaudeService(appState.settings_claude_api_configuration);
-      
-  //     return {
-  //       success: true
-  //     };
-  //   } catch (error) {
-  //     console.error('Error saving Claude API settings:', error);
-  //     return {
-  //       success: false,
-  //       message: error.message
-  //     };
-  //   }
-  // });
-  ipcMain.handle('save-claude-api-settings', async (event, settings) => {
+
+  ipcMain.handle('save-claude-api-settings', async (_event, settings) => {
     try {
       console.log('Saving Claude API settings:', settings);
-      
-      // Update app state with new settings
+
+      // Merge and persist to electron‑store (via appState)
       appState.settings_claude_api_configuration = {
         ...appState.settings_claude_api_configuration,
         ...settings
       };
-      
-      // Save to database
-      await database.updateGlobalSettings({
-        claude_api_configuration: appState.settings_claude_api_configuration
-      });
-      
-      // Reinitialize the Claude service with new settings
-      const claudeService = toolSystem.reinitializeClaudeService(appState.settings_claude_api_configuration);
-      
-      // Force each tool to update its internal config copy
-      const toolIds = toolSystem.toolRegistry.getAllToolIds();
-      for (const toolId of toolIds) {
+      if (appState.store) {
+        appState.store.set(
+          'claude_api_configuration',
+          appState.settings_claude_api_configuration
+        );
+      }
+
+      // Re‑instantiate the Claude service with the new config
+      toolSystem.reinitializeClaudeService(appState.settings_claude_api_configuration);
+
+      // Push fresh settings into every registered tool
+      for (const toolId of toolSystem.toolRegistry.getAllToolIds()) {
         const tool = toolSystem.toolRegistry.getTool(toolId);
-        // Update the tool's config with the new settings
         tool.config = {
           ...tool.config,
           ...appState.settings_claude_api_configuration
         };
       }
-      
-      // Show a confirmation message to the user
+
+      // Notify UI
       if (apiSettingsWindow && !apiSettingsWindow.isDestroyed()) {
         apiSettingsWindow.webContents.send('settings-saved-notification', {
           message: 'Settings updated and applied to all tools',
           requiresRestart: false
         });
       }
-      
-      // Notify main window that settings were updated
       if (mainWindow && !mainWindow.isDestroyed()) {
-        mainWindow.webContents.send('api-settings-updated', appState.settings_claude_api_configuration);
+        mainWindow.webContents.send(
+          'api-settings-updated',
+          appState.settings_claude_api_configuration
+        );
       }
-      
+
       console.log('Claude API settings saved and applied successfully');
-      
-      return {
-        success: true
-      };
+      return { success: true };
     } catch (error) {
       console.error('Error saving Claude API settings:', error);
-      return {
-        success: false,
-        message: error.message
-      };
+      return { success: false, message: error.message };
     }
   });
-  
-  // Handle API settings dialog closing
-  ipcMain.on('close-api-settings-dialog', (event, action, data) => {
+
+  // Close dialog without touching a database
+  ipcMain.on('close-api-settings-dialog', (_event, action, data) => {
     if (apiSettingsWindow && !apiSettingsWindow.isDestroyed()) {
       apiSettingsWindow.hide();
-      
-      // If settings were saved, could notify the main window if needed
+
       if (action === 'saved' && mainWindow && !mainWindow.isDestroyed()) {
         mainWindow.webContents.send('api-settings-updated', data);
       }
     }
   });
 }
+
+
 
 // Set up all IPC handlers
 function setupIPCHandlers() {
@@ -1128,7 +1199,7 @@ function setupIPCHandlers() {
       const toolName = toolId.includes('-') ? toolId.split('-')[0] : toolId;
       
       // Get files from the cache
-      const fileCache = require('./src/cache/file-cache');
+      const fileCache = require('cache/file-cache');
       const files = fileCache.getFiles(toolName);
       
       return files;
@@ -1174,84 +1245,84 @@ function setupIPCHandlers() {
   });
 }
 
-async function validateCriticalResources() {
-  try {
-    // Get the database location
-    const userDataPath = app.getPath('userData');
-    const dbPath = path.join(userDataPath, 'writers-toolkit-db.json');
+// async function validateCriticalResources() {
+//   try {
+//     // Get the database location
+//     const userDataPath = app.getPath('userData');
+//     const dbPath = path.join(userDataPath, 'writers-toolkit-db.json');
     
-    console.log(`Checking for database at: ${dbPath}`);
+//     console.log(`Checking for database at: ${dbPath}`);
     
-    // Check if database exists
-    if (!fs.existsSync(dbPath)) {
-      await dialog.showMessageBox({
-        type: 'error',
-        title: 'Critical Error',
-        message: 'Application database not found',
-        detail: `The database file is missing: ${dbPath}\n\nThe application cannot continue without this file.`,
-        buttons: ['Exit']
-      });
+//     // Check if database exists
+//     if (!fs.existsSync(dbPath)) {
+//       await dialog.showMessageBox({
+//         type: 'error',
+//         title: 'Critical Error',
+//         message: 'Application database not found',
+//         detail: `The database file is missing: ${dbPath}\n\nThe application cannot continue without this file.`,
+//         buttons: ['Exit']
+//       });
       
-      app.exit(1);
-      return false;
-    }
+//       app.exit(1);
+//       return false;
+//     }
     
-    // Try to read the database to verify its contents
-    try {
-      const dbContent = JSON.parse(fs.readFileSync(dbPath, 'utf8'));
-      console.log('Database loaded, checking for tools...');
+//     // Try to read the database to verify its contents
+//     try {
+//       const dbContent = JSON.parse(fs.readFileSync(dbPath, 'utf8'));
+//       console.log('Database loaded, checking for tools...');
       
-      if (!dbContent.tools || Object.keys(dbContent.tools).length === 0) {
-        console.error('No tools found in database');
-        await dialog.showMessageBox({
-          type: 'error',
-          title: 'Critical Error',
-          message: 'No tools found in database',
-          detail: 'The application requires tool definitions in the database to function.',
-          buttons: ['Exit']
-        });
+//       if (!dbContent.tools || Object.keys(dbContent.tools).length === 0) {
+//         console.error('No tools found in database');
+//         await dialog.showMessageBox({
+//           type: 'error',
+//           title: 'Critical Error',
+//           message: 'No tools found in database',
+//           detail: 'The application requires tool definitions in the database to function.',
+//           buttons: ['Exit']
+//         });
         
-        app.exit(1);
-        return false;
-      }
+//         app.exit(1);
+//         return false;
+//       }
       
-      console.log(`Found ${Object.keys(dbContent.tools).length} tools in database`);
-    } catch (error) {
-      console.error('Error reading database:', error);
-      await dialog.showMessageBox({
-        type: 'error',
-        title: 'Critical Error',
-        message: 'Database is corrupted',
-        detail: `Error reading database: ${error.message}`,
-        buttons: ['Exit']
-      });
+//       console.log(`Found ${Object.keys(dbContent.tools).length} tools in database`);
+//     } catch (error) {
+//       console.error('Error reading database:', error);
+//       await dialog.showMessageBox({
+//         type: 'error',
+//         title: 'Critical Error',
+//         message: 'Database is corrupted',
+//         detail: `Error reading database: ${error.message}`,
+//         buttons: ['Exit']
+//       });
       
-      app.exit(1);
-      return false;
-    }
+//       app.exit(1);
+//       return false;
+//     }
     
-    return true;
-  } catch (error) {
-    console.error('Error in validateCriticalResources:', error);
-    return false;
-  }
-}
+//     return true;
+//   } catch (error) {
+//     console.error('Error in validateCriticalResources:', error);
+//     return false;
+//   }
+// }
 
 // Initialize the app state and then create the window
 async function main() {
   try {
     // Validate critical resources first
-    const resourcesValid = await validateCriticalResources();
-    if (!resourcesValid) return; // Exit if validation failed
+    // const resourcesValid = await validateCriticalResources();
+    // if (!resourcesValid) return; // Exit if validation failed
 
     // Initialize AppState before using it
     await appState.initialize();
     
     // Initialize database
-    await database.init();
+    // await database.init();
 
     // clean up project history on startup
-    await database.cleanProjectHistory();
+    // await database.cleanProjectHistory();
     
     // Initialize tool system with Claude API settings
     // await toolSystem.initializeToolSystem(
@@ -1260,10 +1331,12 @@ async function main() {
     // );
     // Initialize tool system with Claude API settings
     try {
-      await toolSystem.initializeToolSystem(
-        database.getClaudeApiSettings(),
-        database
-      );
+      // await toolSystem.initializeToolSystem(
+      //   database.getClaudeApiSettings(),
+      //   database
+      // );
+      // await toolSystem.initializeToolSystem(appState.settingsclaudeapiconfiguration);
+      await toolSystem.initializeToolSystem(appState.settings_claude_api_configuration);
     } catch (toolError) {
       console.error('Warning: Tool system initialization failed:', toolError.message);
       // Show error to user but don't crash the app

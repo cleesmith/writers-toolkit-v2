@@ -4,21 +4,16 @@
   "description": "A toolkit for writers with AI assistance and a text editor",
   "main": "main.js",
   "files": [
-      "src/**/*",
-      "resources/**/*",
-      "*.js",
-      "*.html",
-      "*.css",
-      "preload.js"
-  ],
-  "asarUnpack": [
-    "src/tools/**"
+    "resources/**/*",
+    "*.js",
+    "*.html",
+    "*.css",
+    "preload.js"
   ],
   "scripts": {
     "start": "electron-forge start",
     "start-editor": "electron editor-main.js",
     "build": "electron-builder",
-    "tokens-counter": "node tools/tokens_words_counter.js",
     "package": "electron-forge package",
     "make": "electron-forge make"
   },
@@ -27,7 +22,6 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
     "argparse": "^2.0.1",
-    "electron-squirrel-startup": "^1.0.1",
     "electron-store": "^8.1.0",
     "jsdom": "^26.1.0",
     "mammoth": "^1.9.0",
@@ -35,10 +29,7 @@
   },
   "devDependencies": {
     "@electron-forge/cli": "^7.8.0",
-    "@electron-forge/maker-deb": "^7.8.0",
     "@electron-forge/maker-dmg": "^7.8.0",
-    "@electron-forge/maker-rpm": "^7.8.0",
-    "@electron-forge/maker-squirrel": "^7.8.0",
     "@electron-forge/maker-zip": "^7.8.0",
     "@electron-forge/plugin-auto-unpack-natives": "^7.8.0",
     "@electron-forge/plugin-fuses": "^7.8.0",
@@ -63,7 +54,7 @@
     "directories": {
       "buildResources": "resources"
     },
-    "asar": false,
+    "asar": true,
     "mac": {
       "target": "dmg",
       "artifactName": "${productName}-${version}-mac.${ext}"
